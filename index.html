@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!-- index.html — the checklist form. Markup only: texts come from js/lang/*.ui.js via
+     data-i18n* attributes, logic from js/form/*.js (loaded by js/boot.js). -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="app.title">Чек-лист практик</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=573">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand-row">
+      <span class="brand"><span class="lock">🔒</span><span data-i18n="app.title"></span></span>
+      <button class="help-q" type="button" data-help="start" data-i18n-title="help.open">?</button>
+      <span class="progress-inline" id="progress"></span>
+      <div class="lang-sw" id="langSw" role="group"></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost icon-btn" id="themeBtn" data-i18n-title="hdr.theme">◑</button>
+      <a class="btn primary" id="compareBtn" href="compare.html" data-i18n="hdr.compare" data-i18n-title="hdr.compareTitle"></a>
+      <button class="btn ghost" id="savedBtn" data-i18n="hdr.saved" data-i18n-title="hdr.savedTitle"></button>
+      <button class="btn ghost" id="mineBtn" data-i18n="hdr.mine" data-i18n-title="hdr.mineTitle"></button>
+      <button class="btn ghost" id="shareBtn" data-i18n="hdr.share" data-i18n-title="hdr.shareTitle"></button>
+      <button class="btn ghost" id="pdfBtn" data-i18n="hdr.pdf"></button>
+      <button class="btn ghost" id="resetBtn" data-i18n="hdr.reset" data-i18n-title="hdr.resetTitle"></button>
+    </div>
+  </div>
+  <div class="subbar">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="search" data-i18n-ph="search.ph" autocomplete="off">
+    </div>
+    <select class="jump" id="jump" data-i18n-title="jump.aria"></select>
+    <select class="jump tpl-sel" id="tplSel" data-i18n-title="filt.tpl"></select>
+    <select class="jump view-sel" id="view" data-i18n-title="view.label">
+      <option value="all" data-i18n="view.all"></option>
+      <option value="unanswered" data-i18n="view.unanswered"></option>
+      <option value="new" data-i18n="view.new"></option>
+      <option value="answered" data-i18n="view.answered"></option>
+      <option value="positive" data-i18n="view.positive"></option>
+    </select>
+    <label class="fav-toggle" data-i18n-title="filt.onlyFav"><input type="checkbox" id="onlyFav"><span aria-hidden="true">♥</span></label>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="notice-bar migrate-bar" id="migrateBar" hidden>
+    <span data-i18n-html="migrate.bar_html"></span>
+    <div class="row">
+      <button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go"></button>
+      <button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later"></button>
+    </div>
+  </div>
+
+  <div class="banner" id="sharedBanner">
+    <span id="bannerText"></span>
+    <div class="row">
+      <button class="btn" id="bannerCmp" data-i18n="banner.cmp"></button>
+      <button class="btn ghost" id="bannerOwn" data-i18n="banner.own"></button>
+      <button class="btn ghost" id="bannerKeep" data-i18n="banner.keep"></button>
+      <button class="btn ghost" id="bannerSaveAs" data-i18n="banner.saveAs"></button>
+      <button class="btn ghost" id="bannerTpl" data-i18n="banner.tpl" data-i18n-title="banner.tplTitle"></button>
+    </div>
+  </div>
+
+  <div class="notice-bar" id="noticeBar" hidden>
+    <span id="noticeText"></span>
+    <div class="row">
+      <button class="btn ghost" id="noticeOpen" type="button" data-i18n="notice.open"></button>
+      <button class="btn ghost" id="noticeOk" type="button" data-i18n="notice.ok"></button>
+    </div>
+  </div>
+  <section class="intro">
+    <h1 data-i18n="intro.h1"></h1>
+    <p data-i18n-html="intro.p1_html"></p>
+    <p data-i18n="intro.p2"></p>
+    <div class="idfields">
+      <label><span data-i18n="name.label"></span> <span class="hint" data-i18n="name.hint"></span><input type="text" id="metaName" autocomplete="off" data-i18n-ph="name.ph"></label>
+    </div>
+  </section>
+
+  <section class="role-top">
+    <div class="role-explain" data-i18n-html="role.explain_html"></div>
+    <div class="role-pick" id="roleTop"></div>
+  </section>
+
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--limit)"></span><span data-i18n-html="legend.limit_html"></span></span>
+    <span><span class="swatch" style="background:var(--maybe)"></span><span data-i18n-html="legend.maybe_html"></span></span>
+    <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legend.yes_html"></span></span>
+    <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"></span></span>
+    <span><span class="new-dot"></span> <span data-i18n="legend.new"></span></span>
+  </div>
+
+  <details class="about" id="aboutSection">
+    <summary data-i18n="about.summary"></summary>
+    <div class="about-body" id="aboutBody"></div>
+  </details>
+
+  <div class="tpl-note" id="tplNote" hidden><span id="tplNoteText"></span> <button class="btn ghost mini" id="tplAct" type="button"></button><button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open">?</button></div>
+  <div id="list"></div>
+  <div class="noresults" id="noresults" data-i18n="noresults"></div>
+
+  <footer class="foot" data-i18n="foot.form"></footer>
+  <p class="foot-legal" data-i18n="foot.legal"></p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3><span data-i18n="share.h"></span> <button class="help-q" type="button" data-help="share" data-i18n-title="help.open">?</button></h3>
+    <p data-i18n="share.p"></p>
+    <p class="share-note" id="shareTplNote" hidden></p>
+    <div class="share-kind" id="shareKind"></div>
+    <div class="linkbox"><input type="text" id="shareLink" readonly><button class="btn primary" id="copyLink" data-i18n="share.copy"></button></div>
+    <div id="qr"></div>
+    <p style="text-align:center;margin:2px 0 0" data-i18n="share.qrNote"></p>
+    <div class="tpl-share" id="tplShare">
+      <h4><span data-i18n="tplShare.h"></span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open">?</button></h4>
+      <p data-i18n="tplShare.p"></p>
+      <input type="text" id="tplName" autocomplete="off" maxlength="60" data-i18n-ph="tplShare.ph">
+      <div class="tpl-hint" id="tplHint" data-i18n="tplShare.latin"></div>
+      <button class="btn primary tpl-cur" id="tplCurBtn" type="button" hidden></button>
+      <div class="row">
+        <button class="btn primary" id="tplShareBtn" type="button" data-i18n="tplShare.share"></button>
+        <button class="btn ghost" id="tplSaveBtn" type="button" data-i18n="tplShare.save"></button>
+      </div>
+      <button class="btn ghost mini" id="shareBack" type="button" data-i18n="tplShare.back" hidden></button>
+    </div>
+    <button class="btn ghost" id="overlayClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+  </div>
+</div>
+
+<div class="overlay" id="savedOverlay">
+  <div class="modal">
+    <h3><span data-i18n="saved.h"></span> <button class="help-q" type="button" data-help="received" data-i18n-title="help.open">?</button></h3>
+    <p data-i18n="saved.p"></p>
+    <div id="savedList"></div>
+    <h4 class="sub-h"><span data-i18n="saved.tplH"></span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open">?</button></h4>
+    <p class="sub-p" data-i18n="saved.tplP"></p>
+    <div id="savedTplList"></div>
+    <button class="btn ghost" id="savedClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+  </div>
+</div>
+
+<div class="overlay" id="mineOverlay">
+  <div class="modal">
+    <h3><span data-i18n="mine.h"></span> <button class="help-q" type="button" data-help="lists" data-i18n-title="help.open">?</button></h3>
+    <p data-i18n="mine.p"></p>
+    <button class="btn primary" id="mineNew" style="width:100%;margin-bottom:8px" data-i18n="mine.new"></button>
+    <button class="btn ghost" id="mineSaveNew" style="width:100%;margin-bottom:10px" data-i18n="mine.copy"></button>
+    <button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden></button>
+    <div id="mineList"></div>
+    <h4 class="sub-h"><span data-i18n="mine.tplH"></span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open">?</button></h4>
+    <p class="sub-p" data-i18n="mine.tplP"></p>
+    <button class="btn ghost" id="mineTplSave" type="button" style="width:100%;margin-bottom:6px" data-i18n="mine.tplSave"></button>
+    <div id="mineTplList"></div>
+    <h4 class="sub-h"><span data-i18n="mine.cmpH"></span> <button class="help-q" type="button" data-help="compare" data-i18n-title="help.open">?</button></h4>
+    <p class="sub-p" data-i18n="mine.cmpP"></p>
+    <div id="mineCmpList"></div>
+    <div class="backup">
+      <p data-i18n="backup.hint"></p>
+      <div class="row">
+        <button class="btn ghost" id="backupSave" type="button" data-i18n="backup.save"></button>
+        <button class="btn ghost" id="backupLoad" type="button" data-i18n="backup.load"></button>
+        <input type="file" id="backupFile" accept=".json,application/json" hidden>
+      </div>
+    </div>
+    <button class="btn ghost" id="mineClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+  </div>
+</div>
+
+<div class="overlay" id="pdfOverlay">
+  <div class="modal">
+    <h3><span data-i18n="hdr.pdf"></span> <button class="help-q" type="button" data-help="pdf" data-i18n-title="help.open">?</button></h3>
+    <p class="share-note" id="pdfScope" hidden></p>
+    <label class="only-toggle"><input type="checkbox" id="onlyMarked" checked> <span data-i18n="onlyMarked"></span></label>
+    <label class="only-toggle"><input type="checkbox" id="pdfFavLimits"> <span data-i18n="pdf.favLimits"></span></label>
+    <button class="btn primary" id="pdfGo" type="button" style="width:100%;margin-top:16px" data-i18n="pdf.go"></button>
+    <button class="btn ghost" id="pdfClose" type="button" style="margin-top:8px;width:100%" data-i18n="cancel"></button>
+  </div>
+</div>
+
+<div class="overlay" id="resetOverlay">
+  <div class="modal">
+    <h3 data-i18n="reset.h"></h3>
+    <p id="resetText"></p>
+    <button class="btn primary" id="resetList" type="button" style="width:100%;margin-bottom:8px" data-i18n="reset.list"></button>
+    <button class="btn ghost" id="resetFav" type="button" style="width:100%"></button>
+    <button class="btn ghost" id="resetClose" type="button" style="margin-top:14px;width:100%" data-i18n="cancel"></button>
+  </div>
+</div>
+
+<div class="overlay" id="migrateOverlay">
+  <div class="modal">
+    <h3 id="migrateH"></h3>
+    <p id="migrateText"></p>
+    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes"></button>
+    <button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel"></button>
+  </div>
+</div>
+
+<script src="js/boot.js?v=573" data-page="form" data-v="573"></script>
+</body>
+</html>

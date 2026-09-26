@@ -1,0 +1,548 @@
+/* css/style.css — shared by index.html and compare.html. Theme colours are CSS variables in :root. */
+
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#f5f1ec; --panel:#fffdfb; --ink:#241c22; --muted:#8a7d84;
+    --line:#e6ddd6; --line2:#efe8e2;
+    --accent:#8a2d47; --accent-soft:#f3e3e8;
+    --limit:#b23b3b; --maybe:#b9852a; --yes:#2f7d54; --love:#9d2f68;
+    --limit-bg:#f6e2e0; --maybe-bg:#f6ecda; --yes-bg:#e0f0e6; --love-bg:#f4e0ec;
+    --chip:#efe7e2; --chip-ink:#5c5158;
+    --shadow:0 1px 2px rgba(40,20,30,.06);
+    --radius:11px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#161114; --panel:#1f181c; --ink:#efe6ea; --muted:#9a8b92;
+      --line:#332a30; --line2:#2a2226;
+      --accent:#e79bb2; --accent-soft:#33232b;
+      --limit:#e58080; --maybe:#e0b566; --yes:#7fc79c; --love:#e694c2;
+      --limit-bg:#3a2422; --maybe-bg:#382f1f; --yes-bg:#213329; --love-bg:#37232f;
+      --chip:#2c2329; --chip-ink:#c8bbc2;
+      --shadow:0 1px 2px rgba(0,0,0,.3);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#161114; --panel:#1f181c; --ink:#efe6ea; --muted:#9a8b92;
+    --line:#332a30; --line2:#2a2226;
+    --accent:#e79bb2; --accent-soft:#33232b;
+    --limit:#e58080; --maybe:#e0b566; --yes:#7fc79c; --love:#e694c2;
+    --limit-bg:#3a2422; --maybe-bg:#382f1f; --yes-bg:#213329; --love-bg:#37232f;
+    --chip:#2c2329; --chip-ink:#c8bbc2;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 128px)}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:15px; line-height:1.45; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:820px; margin:0 auto; padding:0 14px 80px}
+
+  header.top{
+    position:sticky; top:0; z-index:30;
+    padding-top:env(safe-area-inset-top,0px);
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{max-width:820px; margin:0 auto; padding:9px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .brand{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:19px; letter-spacing:.2px; white-space:nowrap}
+  .brand .lock{opacity:.5; font-family:Inter,sans-serif; font-size:14px; margin-right:5px}
+  .top-actions{margin-left:auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap}
+  .btn{
+    font:inherit; font-weight:500; cursor:pointer; border-radius:9px;
+    border:1px solid var(--line); background:var(--panel); color:var(--ink);
+    padding:8px 12px; line-height:1; transition:border-color .15s, background .15s;
+  }
+  .btn:hover{border-color:var(--accent)}
+  .btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  :root[data-theme="dark"] .btn.primary{color:#1a1013}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn.primary{color:#1a1013} }
+  .btn.ghost{background:transparent}
+  .btn[disabled]{opacity:.55; cursor:default}
+  .icon-btn{padding:8px 10px; font-size:15px}
+
+  .subbar{max-width:820px; margin:0 auto; padding:0 14px 9px; display:flex; gap:10px; align-items:center}
+  .search{flex:1; position:relative}
+  .search input{width:100%; font:inherit; padding:9px 12px 9px 34px; border-radius:9px; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
+  .search input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
+  .search svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.45}
+  select.jump{font:inherit; padding:9px 10px; border-radius:9px; max-width:44%; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
+  .progress-row{max-width:820px; margin:0 auto; padding:0 14px 8px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12.5px; color:var(--muted)}
+  #progress{white-space:nowrap}
+  .only-toggle{display:inline-flex; align-items:center; gap:7px; cursor:pointer; color:var(--ink); user-select:none}
+  .only-toggle input{width:16px; height:16px; accent-color:var(--accent); cursor:pointer}
+
+  .intro{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin:18px 0 10px; box-shadow:var(--shadow)}
+  .intro h1{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:26px; margin:0 0 6px}
+  .intro p{margin:6px 0; color:var(--muted); font-size:13.5px; line-height:1.55}
+  .idfields{display:flex; gap:12px; flex-wrap:wrap; margin-top:12px}
+  .idfields label{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); flex:1; min-width:130px}
+  .idfields input{font:inherit; padding:9px 11px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+  .idfields input:focus{outline:2px solid var(--accent); outline-offset:1px}
+
+  .legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:14px 2px 6px; font-size:12.5px; color:var(--muted)}
+  .legend b{color:var(--ink); font-weight:600}
+  .swatch{display:inline-block; width:11px; height:11px; border-radius:3px; vertical-align:middle; margin-right:5px}
+
+  details.about{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); margin:10px 0; box-shadow:var(--shadow); overflow:hidden}
+  details.about>summary{cursor:pointer; padding:14px 18px; font-family:Fraunces,Georgia,serif; font-size:18px; font-weight:600; list-style:none; display:flex; align-items:center; gap:8px}
+  details.about>summary::-webkit-details-marker{display:none}
+  details.about>summary::after{content:"▾"; margin-left:auto; color:var(--muted); font-size:13px; transition:transform .2s}
+  details.about[open]>summary::after{transform:rotate(180deg)}
+  .about-body{padding:2px 18px 18px; border-top:1px solid var(--line2)}
+  .field{margin:14px 0 0}
+  .field>.flabel{font-size:12.5px; color:var(--muted); margin-bottom:7px}
+  .opts{display:flex; flex-wrap:wrap; gap:7px}
+  .opt{font:inherit; font-size:13.5px; cursor:pointer; padding:7px 12px; border-radius:20px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+  .opt:hover{border-color:var(--accent)}
+  .opt[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:600}
+  .about-body textarea{width:100%; font:inherit; margin-top:6px; padding:10px 12px; border-radius:8px; min-height:52px; resize:vertical; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+  .about-body textarea:focus{outline:2px solid var(--accent); outline-offset:1px}
+  .safeword input{width:100%; max-width:340px; font:inherit; margin-top:6px; padding:9px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+
+  .cat{margin-top:26px; scroll-margin-top:132px}
+  .cat-head{display:flex; align-items:baseline; gap:10px; padding:0 2px 4px; border-bottom:2px solid var(--accent); margin-bottom:2px}
+  .cat-head h2{font-family:Fraunces,Georgia,serif; font-weight:600; font-size:20px; margin:0}
+  .cat-head .sub{font-size:12.5px; color:var(--muted)}
+  .cat-head .count{margin-left:auto; font-size:12px; color:var(--muted)}
+
+  .item{display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:1px solid var(--line2); flex-wrap:wrap}
+  .item-name{flex:1 1 210px; min-width:160px}
+  .item-name .main{display:block; font-size:14.5px}
+  .item-name .sub{display:block; font-size:11.5px; color:var(--muted); margin-top:1px}
+  .item-controls{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .item-desc{flex-basis:100%; font-size:12.5px; line-height:1.5; color:var(--ink); background:var(--line2); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:8px 12px; margin:2px 0 0}
+  .item-desc[hidden]{display:none}
+
+  .mini{font:inherit; font-size:12px; cursor:pointer; padding:6px 10px; border-radius:16px; white-space:nowrap; border:1px solid var(--line); background:transparent; color:var(--chip-ink)}
+  .mini:hover{border-color:var(--accent)}
+  .mini.on{background:var(--chip); border-color:var(--accent); color:var(--ink); font-weight:500}
+  .mini.help{width:29px; padding:6px 0; text-align:center; font-weight:600; color:var(--muted)}
+  .mini.help.on{color:var(--accent)}
+  .mini:focus-visible, .scale button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .scale{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden}
+  .scale button{font:inherit; font-size:12.5px; cursor:pointer; padding:7px 11px; border:none; background:var(--panel); color:var(--muted); border-left:1px solid var(--line); white-space:nowrap; transition:background .12s,color .12s}
+  .scale button:first-child{border-left:none}
+  .scale button:hover{color:var(--ink)}
+  .scale button[data-v="limit"].sel{background:var(--limit-bg); color:var(--limit); font-weight:600}
+  .scale button[data-v="maybe"].sel{background:var(--maybe-bg); color:var(--maybe); font-weight:600}
+  .scale button[data-v="yes"].sel{background:var(--yes-bg); color:var(--yes); font-weight:600}
+  .scale button[data-v="love"].sel{background:var(--love-bg); color:var(--love); font-weight:600}
+
+  .item.filtered-out{display:none}
+  .cat.empty{display:none}
+  .noresults{padding:40px 10px; text-align:center; color:var(--muted); display:none}
+
+  footer.foot{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; line-height:1.6}
+
+  .toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:10px; font-size:13.5px; box-shadow:0 6px 20px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:60}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-2px)}
+
+  #printArea{display:none}
+  @media print{
+    body{background:#fff!important}
+    body>*:not(#printArea){display:none!important}
+    #printArea{display:block!important}
+  }
+
+  @media (max-width:560px){
+    .brand{font-size:17px}
+    .item-name{flex-basis:100%}
+    .scale button{padding:7px 9px}
+    select.jump{max-width:40%}
+    .idfields label{min-width:120px}
+  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+
+
+/* ============ site additions ============ */
+.overlay{position:fixed;inset:0;background:rgba(20,10,15,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:80}
+.overlay.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);max-height:90vh;overflow:auto}
+.modal h3{font-family:Fraunces,Georgia,serif;margin:0 0 4px;font-size:21px}
+.modal p{color:var(--muted);font-size:13px;margin:4px 0 12px;line-height:1.55}
+.linkbox{display:flex;gap:8px}
+.linkbox input{flex:1;min-width:0;font:inherit;font-size:12.5px;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#qr{display:flex;justify-content:center;margin:16px 0 4px;min-height:20px}
+#qr img,#qr canvas{border-radius:8px;background:#fff;padding:8px}
+.banner{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:12px 15px;margin:16px 0;font-size:13px;color:var(--ink);line-height:1.5;display:none}
+.banner .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cmp-inputs{display:grid;gap:14px;grid-template-columns:1fr 1fr;margin:18px 0}
+@media (max-width:600px){.cmp-inputs{grid-template-columns:1fr}}
+.cmp-col .cmp-name{width:100%;font:inherit;padding:8px 11px;margin-bottom:6px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cmp-col label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:5px}
+.cmp-col textarea{width:100%;min-height:82px;font:inherit;font-size:12.5px;padding:9px 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);resize:vertical}
+.cmp-summary{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 4px}
+.cmp-stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;flex:1;min-width:120px}
+.cmp-stat b{display:block;font-family:Fraunces,Georgia,serif;font-size:22px;font-weight:600}
+.result-group{margin-top:24px}
+.result-group h3{font-family:Fraunces,Georgia,serif;font-size:19px;margin:0 0 2px;display:flex;align-items:center;gap:9px}
+.result-group .sub{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+.rrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line2);font-size:14px}
+.rrow .nm .sub{color:var(--muted);font-size:11.5px;display:block}
+.rrow .who{color:var(--muted);font-size:11.5px}
+.badge{font-size:12px;font-weight:600;padding:3px 11px;border-radius:12px;white-space:nowrap}
+.b-match{background:var(--love-bg);color:var(--love)}
+.b-good{background:var(--yes-bg);color:var(--yes)}
+.b-maybe{background:var(--maybe-bg);color:var(--maybe)}
+.b-limit{background:var(--limit-bg);color:var(--limit)}
+.b-one{background:var(--chip);color:var(--chip-ink)}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+.pagelink{color:var(--accent);text-decoration:none;font-weight:500}
+.pagelink:hover{text-decoration:underline}
+
+/* saved profiles list */
+.saved-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line2)}
+.saved-row .meta b{font-weight:600}
+.saved-row .meta span{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.saved-row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn.mini{padding:5px 9px;font-size:12px}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.hint{color:var(--muted);font-size:11px;font-weight:400;margin-left:4px}
+input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
+
+/* role-at-top block */
+.role-top{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:4px 0 16px}
+.role-explain{font-size:13.5px;color:var(--ink);line-height:1.55;margin-bottom:12px}
+.role-top .field{margin:0}
+/* compare filter bar */
+.cmp-filter{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+.btn.mini.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* language switcher (header) */
+.lang-sw{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-right:2px}
+.lang-btn{border:0;background:transparent;color:var(--muted);font:600 12px Inter,system-ui,sans-serif;padding:7px 10px;cursor:pointer}
+.lang-btn+.lang-btn{border-left:1px solid var(--line)}
+.lang-btn.on{background:var(--accent-soft);color:var(--accent)}
+/* compare: profile line per person */
+.cmp-profile{font-size:12.5px;color:var(--muted);margin:0 0 6px;line-height:1.5}
+.cmp-profile b{color:var(--ink);font-weight:600}
+
+/* header: title + languages on one line, actions below */
+.brand-row{display:flex;align-items:center;gap:12px;flex:1 1 100%;min-width:0}
+.brand-row .lang-sw{margin-left:auto}
+.top-actions{margin-left:0}
+/* My lists: the list currently open */
+.saved-row.current .meta b{color:var(--accent)}
+.saved-row .meta .cur-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:1px 7px;margin:2px 0}
+/* compare search */
+.cmp-search{margin:16px 0 4px}
+
+/* compare: "?" hint under a result row */
+.rrow{flex-wrap:wrap}
+.rrow .nm{flex:1 1 180px;min-width:0}
+.rrow .item-desc{margin-top:4px}
+
+/* green dot = item added after the v371 release (KC.NEW_FROM_CODE) */
+.new-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--yes);vertical-align:middle;position:relative;top:-1px}
+.item-name{position:relative}
+.item-name > .new-dot{position:absolute;left:-15px;top:7px}
+/* narrow phones: keep all language buttons on screen */
+@media (max-width:560px){
+  .brand-row{gap:8px}
+  .brand-row .brand{font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .lang-btn{padding:6px 7px;font-size:11px}
+}
+
+/* compact sticky header: progress in the title row, export toggle next to "Download PDF" */
+.progress-inline{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.top-inner{padding:7px 14px;row-gap:7px}
+.top-actions{gap:6px}
+.top-actions .btn{padding:6px 10px;font-size:14px}
+.top-actions .icon-btn{padding:6px 9px}
+.subbar{flex-wrap:wrap;row-gap:6px}
+.subbar .only-toggle{font-size:12.5px;color:var(--muted);white-space:nowrap}
+@media (max-width:560px){ .subbar .only-toggle{flex-basis:100%;font-size:11.5px} }
+.subbar{padding-top:0;padding-bottom:8px}
+@media (max-width:560px){
+  .brand-row{flex-wrap:wrap;row-gap:2px}
+  .progress-inline{order:3;flex-basis:100%;font-size:11.5px}
+  .top-actions .btn{padding:6px 8px;font-size:13px}
+}
+.subbar select.jump{flex:0 1 190px;min-width:0}
+/* phones: all action buttons visible at once (no sideways scrolling), wrapped into compact rows */
+@media (max-width:560px){
+  .top-actions{flex-wrap:wrap;width:100%;gap:5px}
+  .top-actions .btn{padding:6px 7px;font-size:12.5px;flex:1 1 auto;text-align:center}
+  .top-actions .icon-btn{flex:0 0 auto}
+}
+
+/* "Show: all / unanswered / new" next to the section menu */
+.subbar select.view-sel{flex:0 1 170px;min-width:0}
+@media (max-width:560px){ .subbar select.jump{flex:1 1 40%} }
+
+/* My lists: backup block */
+.backup{border-top:1px solid var(--line2);margin-top:12px;padding-top:10px}
+.backup p{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.backup .row{display:flex;gap:8px;flex-wrap:wrap}
+.backup .row .btn{flex:1 1 150px}
+
+/* compare: participant cards */
+.cmp-inputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cmp-col-head{display:flex;gap:6px;align-items:center}
+.cmp-col-head .cmp-name{flex:1;min-width:0}
+.cmp-pick{width:100%;font:inherit;font-size:13px;padding:7px 8px;margin:6px 0;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cmp-pick:disabled{opacity:.5}
+/* compare: pair table */
+.pair-wrap{overflow-x:auto}
+.pair-table{border-collapse:collapse;font-size:13px;margin-top:6px}
+.pair-table th{font-weight:600;padding:6px 8px;text-align:left;white-space:nowrap;color:var(--ink)}
+.pair-table td{padding:4px;text-align:center;border-top:1px solid var(--line2)}
+.pair-table td.self{color:var(--muted)}
+.pair-n{font:inherit;font-weight:600;min-width:38px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--accent-soft);color:var(--accent);cursor:pointer}
+/* desktop: give the search box the room, keep both menus compact */
+.subbar .search{flex:1 1 180px;min-width:150px}
+.subbar select.jump{flex:0 1 150px}
+/* phones: row 1 = search + Show, row 2 = Section + export toggle */
+@media (max-width:560px){
+  .subbar{row-gap:6px}
+  .subbar .search{order:1;flex:1 1 52%;min-width:0}
+  .subbar select.view-sel{order:2;flex:1 1 38%}
+  .subbar select.jump:not(.view-sel){order:3;flex:1 1 40%;max-width:none}
+  .subbar .only-toggle{order:4;flex:1 1 50%;flex-basis:auto;white-space:normal;line-height:1.25}
+  .subbar select.jump{padding:8px 8px;font-size:14px}
+}
+@media (max-width:560px){
+  .subbar select.jump:not(.view-sel){flex:0 1 48%}
+  .subbar .only-toggle{flex:1 1 44%;min-width:0;font-size:11px}
+}
+
+/* pair table: role under the name, Top+Bottom switch */
+.pair-table .role-tag{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
+.pair-mode{margin:8px 0 4px}
+
+/* damaged link warning */
+.banner.damaged{border-color:var(--limit);background:color-mix(in srgb, var(--limit) 12%, var(--panel))}
+/* phones: two fixed rows — [theme][Compare][Received] / [My lists][Share][PDF][Clear] */
+@media (max-width:560px){
+  .top-actions .btn{padding:6px 5px;font-size:12px}
+  .top-actions #compareBtn{flex:2 1 42%}
+  .top-actions #savedBtn{flex:1 1 30%}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{flex:1 1 20%}
+}
+/* phones: fixed 8-column grid, always exactly two rows of buttons */
+@media (max-width:560px){
+  .top-actions{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;overflow:visible}
+  .top-actions > *{min-width:0}
+  .top-actions .btn{white-space:normal;line-height:1.15;padding:6px 3px;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .top-actions #themeBtn{grid-column:span 1}
+  .top-actions #compareBtn{grid-column:span 4}
+  .top-actions #savedBtn{grid-column:span 3}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{grid-column:span 2}
+}
+@media (max-width:560px){
+  .top-actions{align-items:stretch}
+  .top-actions .btn{font-size:11.5px;padding:6px 2px}
+}
+/* phones (final): row 1 is filled exactly by theme + Compare + Received, so the other four
+   always start row 2 and share it according to their label lengths */
+@media (max-width:560px){
+  .top-actions{display:flex;flex-wrap:wrap;gap:5px}
+  .top-actions .btn{white-space:nowrap;line-height:1;padding:7px 6px;font-size:11.5px}
+  .top-actions #themeBtn{flex:0 0 34px;padding:7px 0}
+  .top-actions #compareBtn{flex:0 1 calc(58% - 40px)}
+  .top-actions #savedBtn{flex:0 1 42%}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{flex:1 1 auto}
+}
+@media (max-width:560px){
+  .top-actions #savedBtn{flex:1 0 calc(42% - 12px)}
+}
+@media (max-width:370px){
+  .top-actions{gap:4px}
+  .top-actions .btn{font-size:11px;padding:7px 4px}
+}
+/* seven languages: keep the switcher on the title line on narrow phones */
+@media (max-width:480px){
+  .brand-row .brand{font-size:15px}
+  .lang-btn{padding:5px 4px;font-size:10.5px}
+}
+/* Thai has marks above and below the line: a bit more line height in compact buttons */
+html[lang="th"] .top-actions .btn, html[lang="th"] .lang-btn{line-height:1.35}
+/* Traditional Chinese: Taiwanese system fonts first, so Han characters get Traditional glyph shapes */
+html[lang="zh-Hant"] body{font-family:Inter,"PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans CJK TC",system-ui,sans-serif}
+
+/* ---------- favourites (♥), filter panel, templates ---------- */
+.mini.fav{width:29px;padding:6px 0;text-align:center;font-size:14px;line-height:1;color:var(--muted);opacity:.6}
+.mini.fav:hover{opacity:1}
+.mini.fav.on{opacity:1;color:var(--love);border-color:var(--love);background:var(--love-bg)}
+/* search row: [search][Section][Filters ▾][♥]; "Filters" folds out template + "Show" */
+.subbar .search{flex:1 1 180px;min-width:120px}
+.subbar #jump{flex:0 1 190px;max-width:none;min-width:0}
+.subbar .filt-btn{flex:0 0 auto;padding:8px 12px;font-size:14px;white-space:nowrap}
+.subbar .filt-btn::after{content:" ▾";font-size:11px}
+.subbar .filt-btn[aria-expanded="true"]::after{content:" ▴"}
+.subbar .filt-btn.on{border-color:var(--accent);color:var(--accent)}
+.filt-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle;position:relative;top:-1px}
+.filt-dot[hidden]{display:none}
+/* "only favourites": a heart toggle (the checkbox itself is visually hidden) */
+.fav-toggle{flex:0 0 auto;position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:17px;cursor:pointer;user-select:none}
+.fav-toggle input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.fav-toggle:hover{border-color:var(--love)}
+.fav-toggle.on{color:var(--love);border-color:var(--love);background:var(--love-bg)}
+.fav-toggle:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.filt-bar{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.filt-bar[hidden]{display:none}
+.filt-row{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);flex:1 1 250px;min-width:0}
+.filt-row > span{white-space:nowrap}
+.filt-row select{font:inherit;font-size:14px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);flex:1 1 auto;min-width:0;max-width:100%}
+/* note above the list while a template is on */
+.tpl-note{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:10px 13px;margin:16px 0 0;font-size:13px;line-height:1.5;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tpl-note[hidden]{display:none}
+.tpl-note span{flex:1 1 240px}
+.banner .banner-tpl{display:block;margin-top:6px}
+/* share window: which link is shown + template block */
+.share-note{color:var(--accent)!important;font-weight:500}
+.share-note[hidden]{display:none}
+.share-kind{font-size:12.5px;font-weight:600;color:var(--ink);margin:0 0 6px}
+.tpl-share{border-top:1px solid var(--line2);margin-top:14px;padding-top:12px}
+.tpl-share h4, .sub-h{font-family:Fraunces,Georgia,serif;font-size:17px;margin:0 0 2px}
+.tpl-share input{width:100%;font:inherit;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin-bottom:3px}
+.tpl-share input.bad{border-color:var(--limit);outline:1px solid var(--limit)}
+.tpl-hint{font-size:11.5px;color:var(--muted);margin:0 0 8px}
+.tpl-hint.warn{animation:kc-hint 1.8s ease-out forwards}
+@keyframes kc-hint{0%,70%{color:var(--limit);font-weight:600}100%{color:var(--muted);font-weight:400}}
+.tpl-share .row{display:flex;gap:8px;flex-wrap:wrap}
+.tpl-share .row .btn{flex:1 1 170px}
+.tpl-share #shareBack{margin-top:8px}
+.tpl-share #shareBack[hidden]{display:none}
+.sub-h{margin-top:18px;border-top:1px solid var(--line2);padding-top:12px}
+.modal p.sub-p{margin:2px 0 6px}
+#resetFav:disabled{opacity:.45;cursor:default}
+#pdfOverlay .only-toggle{font-size:14px;margin-top:6px}
+/* phones: one row [search][Section][Filters][♥]; very narrow phones: search gets its own row */
+@media (max-width:560px){
+  .subbar .search{order:1;flex:1 1 100px;min-width:0}
+  .subbar #jump{order:2;flex:0 1 100px;padding:8px 6px;font-size:14px}
+  .subbar .filt-btn{order:3;padding:8px 8px;font-size:13px}
+  .subbar .fav-toggle{order:4;width:38px}
+  .subbar .filt-bar{order:5;padding:7px 8px}
+  .filt-row{flex-basis:100%}
+}
+/* 350–370 px: still one row, everything a bit tighter */
+@media (max-width:370px){
+  .subbar{gap:6px}
+  .subbar .search{flex:1 1 90px}
+  .subbar .search input{padding-left:30px}
+  .subbar .search svg{left:9px}
+  .subbar #jump{flex:0 1 84px;padding:8px 4px;font-size:13px}
+  .subbar .filt-btn{padding:8px 6px;font-size:12.5px}
+  .subbar .fav-toggle{width:34px}
+}
+/* narrower than 350 px: search gets its own row */
+@media (max-width:349px){
+  .subbar .search{flex-basis:100%}
+  .subbar #jump{flex:1 1 40%}
+}
+/* narrow phones: ♥ + ? + the scale stay on one line */
+@media (max-width:370px){
+  .item-controls{gap:4px}
+  .mini.fav, .mini.help{width:26px}
+  .scale button{padding:7px 6px}
+}
+
+/* ---------- help "?", help window, notice after a template link, template rows ---------- */
+.help-q{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:600 12.5px/1 Inter,Arial,sans-serif;cursor:pointer;vertical-align:middle}
+.help-q:hover{border-color:var(--accent);color:var(--accent)}
+.help-q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.brand-row .help-q{margin-left:-2px}
+.modal h3 .help-q, .modal h4 .help-q{position:relative;top:-2px;margin-left:4px}
+.filt-bar .help-q{margin-left:auto}
+.tpl-note .help-q{margin-left:-4px}
+.help-modal{max-width:560px}
+.help-toc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
+.help-toc .btn.mini{padding:4px 9px;font-size:12px}
+.help-body section{border-top:1px solid var(--line2);padding-top:10px;margin-top:12px;scroll-margin-top:8px}
+.help-body h4{font-family:Fraunces,Georgia,serif;font-size:17px;margin:0 0 4px}
+.help-body p, .help-body li{font-size:13.5px;line-height:1.55;color:var(--ink)}
+.help-body p{margin:4px 0 8px}
+.help-body ul{margin:4px 0 6px;padding-left:20px}
+.help-body li{margin:3px 0}
+.notice-bar{background:var(--yes-bg);border:1px solid var(--yes);border-radius:10px;padding:12px 15px;margin:16px 0 0;font-size:13px;line-height:1.5;color:var(--ink)}
+.notice-bar[hidden]{display:none}
+.notice-bar .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.notice-bar .row [hidden]{display:none}
+/* template rows: name + count on top, the four buttons under it */
+.saved-row.tpl-row{flex-wrap:wrap;row-gap:6px}
+.saved-row.tpl-row .meta{flex:1 1 100%}
+.saved-row.tpl-row .acts{flex:1 1 100%;justify-content:flex-start}
+#mineTplSave[hidden]{display:none}
+@media (max-width:560px){
+  .brand-row .help-q{width:20px;height:20px;font-size:11.5px}
+}
+/* phones: title + "?" + languages share one line; a long title is cut with "…" instead of wrapping
+   (flex wraps before it shrinks, so the title gets a max width: row minus languages, "?" and gaps) */
+@media (max-width:560px){
+  .brand-row .brand{max-width:calc(100% - 254px)}
+}
+/* seven languages: switcher is ~171px at ≤480px, ~160px at ≤370px */
+@media (max-width:480px){
+  .brand-row .brand{max-width:calc(100% - 208px)}
+}
+@media (max-width:370px){
+  .lang-btn{padding:5px 3px}
+  .brand-row .brand{max-width:calc(100% - 196px)}
+}
+/* phones: the row must fit "Filters" with its dot next to ♥ — flex wraps before it shrinks, so keep the bases small */
+@media (max-width:560px){
+  .subbar .search{flex:1 1 60px}
+  .subbar #jump{flex:0 1 92px}
+}
+@media (max-width:349px){
+  .subbar #jump{flex:1 1 60px}
+}
+
+/* ---------- search row v557: [search][Section][Template…][All items][♥] ---------- */
+/* search and Section are short on purpose: words are short, and the opened list is wider than the closed one */
+.subbar .search{flex:1 1 150px;max-width:260px;min-width:110px}
+.subbar #jump{flex:0 1 150px;max-width:none}
+.subbar #tplSel{flex:0 1 180px;min-width:0}
+.subbar #view{flex:0 1 180px;min-width:0}
+.subbar #tplSel[hidden]{display:none}
+/* a list that filters something now is highlighted (like ♥) */
+.subbar select.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+/* phones: row 1 = search, Section, ♥; row 2 = Template…, All items */
+@media (max-width:560px){
+  .subbar{gap:6px}
+  .subbar .search{order:1;flex:1 1 100px;max-width:none;min-width:0}
+  .subbar #jump{order:2;flex:0 1 112px;padding:8px 6px;font-size:14px}
+  .subbar .fav-toggle{order:3;width:38px}
+  .subbar #tplSel{order:4;flex:1 1 40%;padding:8px 6px;font-size:14px}
+  .subbar #view{order:5;flex:1 1 40%;padding:8px 6px;font-size:14px}
+}
+@media (max-width:349px){
+  .subbar .search{flex:1 1 90px}
+  .subbar #jump{flex:0 1 96px}
+}
+/* a list that filters something: a small accent dot inside it instead of a coloured field (owner: the filled
+   field was a loud colour patch). The dot is a background, so the native list keeps working everywhere. */
+.subbar #tplSel.on, .subbar #view.on{border-color:var(--line);color:var(--ink);font-weight:400;
+  background:var(--panel) radial-gradient(circle, var(--accent) 0 3.5px, transparent 4px) no-repeat 10px 50% / 10px 10px;
+  padding-left:26px}
+/* "Share the current template «X»": full width like the buttons under it */
+.tpl-share .tpl-cur{display:block;width:100%;margin:0 0 8px}
+.tpl-share .tpl-cur[hidden]{display:none}
+/* the header lists may take the whole second row on phones (old select.jump max-width no longer applies) */
+.subbar #tplSel, .subbar #view{max-width:none}
+
+/* ---------- saved comparisons (3+ people) ---------- */
+.cmp-saved{width:100%;font:inherit;font-size:14px;padding:9px 10px;margin:16px 0 0;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cmp-savebar{margin:12px 0 10px}
+.cmp-savebar .btn{width:100%}
+.cmp-savednote{margin:-2px 0 10px}
+
+/* 18+ and disclaimer under the footer, both pages */
+.foot-legal{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+
+/* move to the new site (old build only): the bar sits at the very top of the page */
+.migrate-bar{margin-top:0;margin-bottom:14px;background:var(--accent-soft);border-color:var(--accent)}
+#mineMigrate[hidden]{display:none}
