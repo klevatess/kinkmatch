@@ -6,7 +6,7 @@
    (ad blocker, no network), nothing happens and the site works as usual.
    Events: open-link, open-template, share, pdf, compare-2, compare-3plus, compare-saved. */
 (function (KC) {
-  const CODE = "";
+  const CODE = "klevatess";
   /* where this file was loaded from -> the vendor copy next to it, same ?v= */
   const me = document.currentScript && document.currentScript.src;
   const SRC = me ? me.replace(/core\/stats\.js/, "vendor/goatcounter-count.js") : "js/vendor/goatcounter-count.js";
