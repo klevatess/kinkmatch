@@ -97,6 +97,7 @@
   }
   KC.$("pdfBtn").addEventListener("click", () => {
     KC.$("pdfFavLimits").checked = false; /* off every time the window opens */
+    KC.$("pdfPortrait").checked = false;
     pdfScope();
     pdfModal.open();
   });
@@ -104,26 +105,32 @@
   KC.$("pdfGo").addEventListener("click", async function () {
     const btn = this, old = btn.textContent; btn.disabled = true; btn.textContent = t("pdf.busy");
     KC.stats.event("pdf");
-    const sheet = F.buildSheet(); document.body.appendChild(sheet);
+    /* "Add the portrait as the first page" (off every time the window opens): its own page(s) before the list */
+    const sheets = (KC.$("pdfPortrait").checked && F.buildPortraitSheet ? [F.buildPortraitSheet()] : []).concat([F.buildSheet()]);
+    const sheet = sheets[sheets.length - 1];
+    sheets.forEach(sh => document.body.appendChild(sh));
     try {
       if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
-      const canvas = await html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: sheet.scrollWidth });
       const pdf = new window.jspdf.jsPDF("p", "pt", "a4");
-      const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
-      const margin = 24, imgW = pw - margin * 2, ratio = imgW / canvas.width, sliceH = Math.floor((ph - margin * 2) / ratio);
-      for (let y = 0, page = 0; y < canvas.height; page++) {
-        const h = Math.min(sliceH, canvas.height - y);
-        const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
-        const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
-        ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-        if (page > 0) pdf.addPage();
-        pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
-        y += h;
+      const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 24, imgW = pw - margin * 2;
+      let page = 0;
+      for (const sh of sheets) {
+        const canvas = await html2canvas(sh, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: sh.scrollWidth });
+        const ratio = imgW / canvas.width, sliceH = Math.floor((ph - margin * 2) / ratio);
+        for (let y = 0; y < canvas.height; page++) {
+          const h = Math.min(sliceH, canvas.height - y);
+          const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
+          const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
+          ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+          if (page > 0) pdf.addPage();
+          pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
+          y += h;
+        }
       }
       const fn = t("pdf.file") + (F.state.name ? "-" + F.state.name.replace(/\s+/g, "_") : "") + ".pdf";
       try { pdf.save(fn); } catch (e) { window.open(URL.createObjectURL(pdf.output("blob")), "_blank"); }
       KC.toast(t("toast.pdfReady"));
     } catch (err) { console.error(err); KC.toast(t("toast.pdfFail")); }
-    finally { document.body.removeChild(sheet); btn.disabled = false; btn.textContent = old; pdfModal.close(); }
+    finally { sheets.forEach(sh => { if (sh.parentNode) sh.parentNode.removeChild(sh); }); btn.disabled = false; btn.textContent = old; pdfModal.close(); }
   });
 })(window.KC);

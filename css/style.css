@@ -291,8 +291,9 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
 .cmp-inputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .cmp-col-head{display:flex;gap:6px;align-items:center}
 .cmp-col-head .cmp-name{flex:1;min-width:0}
-.cmp-pick{width:100%;font:inherit;font-size:13px;padding:7px 8px;margin:6px 0;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cmp-pick,.cmp-role{width:100%;font:inherit;font-size:13px;padding:7px 8px;margin:6px 0;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .cmp-pick:disabled{opacity:.5}
+.cmp-role{margin-top:0}
 /* compare: pair table */
 .pair-wrap{overflow-x:auto}
 .pair-table{border-collapse:collapse;font-size:13px;margin-top:6px}
@@ -546,3 +547,45 @@ html[lang="zh-Hant"] body{font-family:Inter,"PingFang TC","Microsoft JhengHei","
 /* move to the new site (old build only): the bar sits at the very top of the page */
 .migrate-bar{margin-top:0;margin-bottom:14px;background:var(--accent-soft);border-color:var(--accent)}
 #mineMigrate[hidden]{display:none}
+
+/* ---------- portrait (folding block) and the picture card ---------- */
+details.portrait .portrait-body{padding:4px 18px 18px}
+.pt-meta{color:var(--muted);font-size:13.5px;margin-bottom:8px}
+.pt-row{display:grid;grid-template-columns:minmax(0,1fr) 38% 44px;gap:10px;align-items:center;margin:5px 0;font-size:14px}
+.pt-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-bar{height:10px;border-radius:5px;background:var(--accent-soft);overflow:hidden}
+.pt-bar i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.pt-pct{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.pt-how,.pt-empty{color:var(--muted);font-size:12.5px;margin:10px 0}
+.pt-h{margin:14px 0 8px;font-size:15px}
+.pt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pt-chips span{background:var(--love-bg,#f4e0ec);color:var(--love,#9d2f68);border-radius:14px;padding:3px 10px;font-size:13px}
+.card-opts{display:flex;flex-wrap:wrap;gap:4px 14px;margin:6px 0 10px}
+.card-opts .only-toggle{margin:0}
+.card-preview{display:block;width:100%;max-width:240px;margin:0 auto 12px;border:1px solid var(--line);border-radius:10px;aspect-ratio:9/16;background:var(--panel)}
+@media (max-width:560px){.pt-row{grid-template-columns:minmax(0,1fr) 30% 42px;font-size:13px}}
+
+/* ---------- roulette "What shall we try?" (compare page) ---------- */
+.cmp-rl{margin:10px 0}
+.cmp-rl .btn{width:100%}
+.rl-out{min-height:120px;margin-top:10px}
+.rl-item{background:var(--love-bg);border-radius:10px;padding:12px 14px;margin:8px 0}
+.rl-item b{display:block;font-size:17px;color:var(--ink)}
+.rl-item .sub{display:block;font-size:12px;color:var(--muted)}
+.rl-item .rl-desc{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.rl-spinning .rl-item{opacity:.75}
+.rl-pair h4{margin:14px 0 4px;font-size:15px}
+.rl-note{color:var(--muted);font-size:13px;margin:6px 0}
+#rlOverlay .modal{max-height:88vh;overflow:auto}
+.help-body h5{font-size:13px;color:var(--accent);margin:12px 0 2px;font-weight:600}
+/* help window: two tabs — "How to use" | "What's new" (green dot = new) */
+.help-tabs{display:flex;gap:18px;align-items:flex-end;border-bottom:1px solid var(--line2);margin:0 0 4px;padding-right:4px}
+.help-tab{position:relative;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:2px 0 7px;font-family:Fraunces,Georgia,serif;font-size:19px;font-weight:600;color:var(--muted);cursor:pointer;text-align:left}
+.help-tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.help-tab:hover{color:var(--ink)}
+.help-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.help-tab .new-dot{position:absolute;top:1px;right:-10px}
+#helpNews h5:first-child{margin-top:8px}
+#helpNews h5:not(:first-child){border-top:1px solid var(--line2);padding-top:12px;margin-top:16px}
+/* the tabs stay at the top of the help window while its text scrolls */
+.help-tabs{position:sticky;top:-22px;margin-top:-22px;padding-top:22px;background:var(--panel);z-index:2}

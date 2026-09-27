@@ -1,7 +1,7 @@
 /* tests/harness.js — loads a page into jsdom and runs the modules in boot.js order. */
 const fs = require("fs"), path = require("path");
 const { JSDOM, VirtualConsole } = require("jsdom");
-const vc = new VirtualConsole(); vc.on("jsdomError", e => { if (!/Not implemented: navigation/.test(e.message)) console.error(e.message); });
+const vc = new VirtualConsole(); vc.on("jsdomError", e => { if (!/Not implemented: (navigation|HTMLCanvasElement)/.test(e.message)) console.error(e.message); });
 const ROOT = process.env.SITE || path.join(__dirname, "..");
 const BASE = "https://nekrons1.github.io/Kinkcheck/";
 
@@ -15,11 +15,22 @@ function manifest() {
 /* open a page. storage: {local:{}, session:{}} carried between "page loads" */
 /* patch: { "core/migrate.js": src => src.replace(...) } — test a build variant (e.g. the old-site sender)
    base: page address (default: the old site) */
-function open(page, { hash = "", search = "", storage = { local: {}, session: {} }, navLang = "ru", answers = {}, patch = {}, base = BASE } = {}) {
+/* pages are not "visual" (no animation-frame loop), so a page nobody refers to any more is freed by the
+   garbage collector — the whole suite fits in memory. (release/keep kept for compatibility: no-ops.) */
+function release() {}
+/* scope(): pages opened until .end() are closed by it (self-contained test blocks free their memory) */
+let SCOPE = null;
+const RECENT = [], MAX_OPEN = 30;
+function scope() { SCOPE = []; return { end() { const s = SCOPE || []; SCOPE = null; s.forEach(w => { try { w.close(); } catch (e) {} }); } }; }
+function open(page, { hash = "", search = "", storage = { local: {}, session: {} }, navLang = "ru", answers = {}, patch = {}, base = BASE, keep = false } = {}) {
   const file = page === "compare" ? "compare.html" : "index.html";
   const html = fs.readFileSync(path.join(ROOT, file), "utf8").replace(/<script[\s\S]*?<\/script>/g, "");
-  const dom = new JSDOM(html, { url: base + file + search + (hash ? "#" + hash : ""), runScripts: "outside-only", pretendToBeVisual: true, virtualConsole: vc });
+  const dom = new JSDOM(html, { url: base + file + search + (hash ? "#" + hash : ""), runScripts: "outside-only", pretendToBeVisual: false, virtualConsole: vc });
   const w = dom.window;
+  if (SCOPE) SCOPE.push(w);
+  /* memory: only the MAX_OPEN most recent pages stay alive (pages opened with keep:true are never closed).
+     Tests use a page right after opening it, so an old page is not needed any more by then. */
+  if (!keep) { RECENT.push(w); while (RECENT.length > MAX_OPEN) { try { RECENT.shift().close(); } catch (e) {} } }
   Object.defineProperty(w.navigator, "language", { value: navLang, configurable: true });
   for (const k in storage.local) w.localStorage.setItem(k, storage.local[k]);
   for (const k in storage.session) w.sessionStorage.setItem(k, storage.session[k]);
@@ -46,4 +57,4 @@ function dump(w) {
 }
 const click = (w, el) => el.dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-module.exports = { open, ok, eq, click, sleep, ROOT, BASE, report: () => ({ PASS, FAIL, fails }) };
+module.exports = { open, release, scope, ok, eq, click, sleep, ROOT, BASE, report: () => ({ PASS, FAIL, fails }) };

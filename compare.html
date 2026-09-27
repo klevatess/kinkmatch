@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=575">
+<link rel="stylesheet" href="css/style.css?v=583">
 </head>
 <body>
 
@@ -50,7 +50,16 @@
 </main>
 
 <div class="toast" id="toast"></div>
+<div class="overlay" id="rlOverlay">
+  <div class="modal">
+    <h3 id="rlH"></h3>
+    <label class="only-toggle"><input type="checkbox" id="rlBold"> <span data-i18n="rl.bold"></span></label>
+    <div class="rl-out" id="rlOut" aria-live="polite"></div>
+    <button class="btn primary" id="rlAgain" type="button" style="width:100%;margin:12px 0 8px" data-i18n="rl.again"></button>
+    <button class="btn ghost" id="rlClose" type="button" style="width:100%" data-i18n="close"></button>
+  </div>
+</div>
 
-<script src="js/boot.js?v=575" data-page="compare" data-v="575"></script>
+<script src="js/boot.js?v=583" data-page="compare" data-v="583"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@
    2 participants  -> detailed view: groups + filters "Yes from A/B", "Yes and Maybe from A/B".
    3+ participants -> group view: "Yes/Love from everyone" and a pair table (matches per pair);
                       a number in the table opens the detailed view for that pair.
+   Each participant has a role picker ("from the list" / Top / Bottom): a role chosen here replaces the one in the list.
    A comparison of 3+ can be saved (KC.store.cmp) and reopened from the picker at the top or from
    "My lists"; it then takes the newest version of every list on this device. */
 (function (KC) {
@@ -16,6 +17,9 @@
   let SAVED = null;                     /* the saved comparison on screen: {id, name} */
   let NOTE = null;                      /* after opening a saved one: {updated: [names], gone: [names]} */
   const C = KC.store.cmp;
+  /* what is on screen, for the roulette (compare/roulette.js) */
+  KC.cmpState = () => ({ pair: LAST, group: LAST ? null : GROUP, pmode: PMODE });
+  const rlBtn = () => '<div class="cmp-rl"><button class="btn ghost" type="button" data-act="roulette">' + esc(t("rl.btn")) + "</button></div>";
 
   KC.initTheme();
   KC.i18n.set(KC.i18n.detect(null));
@@ -25,15 +29,18 @@
 
   /* ---------- participants ---------- */
   const box = KC.$("parts");
-  function addPart(name, code) {
+  const ROLES = ["", "dom", "sub"];   /* "" = the role inside the list; no Switch (a list is filled for one role) */
+  const roleOpts = sel => { const v = sel.value; sel.innerHTML = ROLES.map(r => '<option value="' + r + '">' + esc(r ? t("cmp.roleSet", { role: t("role.short." + r) }) : t("cmp.roleList")) + "</option>").join(""); sel.value = v; };
+  function addPart(name, code, role) {
     if (box.children.length >= MAX) { KC.toast(t("cmp.maxN")); return null; }
     const i = box.children.length;
     const col = KC.el("div", "cmp-col");
     col.innerHTML = '<div class="cmp-col-head"><input class="cmp-name" autocomplete="off"><button class="btn ghost mini" type="button" data-act="rm">✕</button></div>'
-      + '<select class="cmp-pick"></select><textarea class="cmp-code"></textarea>';
+      + '<select class="cmp-pick"></select><select class="cmp-role"></select><textarea class="cmp-code"></textarea>';
     const nm = col.querySelector(".cmp-name");
     if (i < 2) { nm.id = i ? "nameB" : "nameA"; col.querySelector("textarea").id = i ? "codeB" : "codeA"; }
     nm.value = name || ""; col.querySelector("textarea").value = code || "";
+    const rs = col.querySelector(".cmp-role"); roleOpts(rs); rs.value = ROLES.indexOf(role) > 0 ? role : "";
     box.appendChild(col); relabel(); drawPickers(col);
     return col;
   }
@@ -41,6 +48,7 @@
     [...box.children].forEach((col, i) => {
       col.querySelector(".cmp-name").placeholder = t("cmp.person", { n: i + 1 }) + " — " + t("cmp.namePh");
       col.querySelector("textarea").placeholder = t("cmp.codePh");
+      const rs = col.querySelector(".cmp-role"); roleOpts(rs); rs.title = t("cmp.roleList");
       const rm = col.querySelector('[data-act="rm"]'); rm.hidden = box.children.length <= 2; rm.title = t("cmp.remove"); rm.setAttribute("aria-label", t("cmp.remove"));
     });
     KC.$("addPart").hidden = box.children.length >= MAX;
@@ -86,7 +94,7 @@
   function openSaved(id) {
     const e = C.byId(id), parts = e && C.resolve(id); if (!parts) return;
     box.innerHTML = "";
-    parts.slice(0, MAX).forEach(p => addPart(p.name, p.code));
+    parts.slice(0, MAX).forEach(p => addPart(p.name, p.code, p.role));
     const who = (p, i) => p.name || KC.codec.decode(p.code).name || t("cmp.person", { n: i + 1 });
     const note = { updated: [], gone: [] };
     parts.forEach((p, i) => { if (p.state !== "same") note[p.state].push(who(p, i)); });
@@ -101,7 +109,7 @@
     if (!GROUP || GROUP.length < C.MIN) return;
     const def = SAVED ? SAVED.name : GROUP.map(p => p.name).join(", ");
     const nm = prompt(t("prompt.cmpName"), def); if (nm === null) return;
-    const r = C.save(nm, GROUP.map(p => ({ name: p.typed, code: p.code })), SAVED && SAVED.id);
+    const r = C.save(nm, GROUP.map(p => ({ name: p.typed, code: p.code, role: p.role })), SAVED && SAVED.id);
     SAVED = { id: r.item.id, name: r.item.name }; drawSaved(); render(false);
     KC.stats.event("compare-saved");
     KC.toast(t(r.status === "updated" ? "toast.cmpUpdated" : "toast.cmpSaved"));
@@ -143,7 +151,7 @@
       + fbtn(FILTER, "all", t("cmp.all"))
       + fbtn(FILTER, "yesA", t("cmp.yesOf", { who: LAST.nA })) + fbtn(FILTER, "yesB", t("cmp.yesOf", { who: LAST.nB }))
       + fbtn(FILTER, "ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + fbtn(FILTER, "ymB", t("cmp.yesMaybeOf", { who: LAST.nB })) + "</div>"
-      + profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B);
+      + profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B) + rlBtn();
     if (FILTER !== "all") {
       const side = FILTER === "yesA" || FILTER === "ymA", who = side ? LAST.nA : LAST.nB, wm = FILTER.indexOf("ym") === 0;
       const rows = only(KC.match.yesOf(side ? LAST.A : LAST.B, wm)).map(r => ({ id: r.id, a: (LAST.A.items[r.id] || {}).interest || null, b: (LAST.B.items[r.id] || {}).interest || null }));
@@ -206,7 +214,7 @@
   }
   function renderGroup() {
     const P = GROUP, searching = !!KC.$("cmpSearch").value.trim();
-    let html = savedBar() + '<div class="cmp-filter">' + fbtn(GFILTER, "allYes", t("cmp.allYes")) + fbtn(GFILTER, "allYM", t("cmp.allYM")) + fbtn(GFILTER, "pairs", t("cmp.pairs")) + "</div>"
+    let html = savedBar() + rlBtn() + '<div class="cmp-filter">' + fbtn(GFILTER, "allYes", t("cmp.allYes")) + fbtn(GFILTER, "allYM", t("cmp.allYM")) + fbtn(GFILTER, "pairs", t("cmp.pairs")) + "</div>"
       + P.map(p => profileLine(p.name, p.st)).join("");
     if (GFILTER === "pairs") {
       const role = p => p.st.meta.role || "";
@@ -246,7 +254,10 @@
       const st = KC.codec.decode(raw);
       if (st.damaged) bad.push(i + 1);
       const typed = col.querySelector(".cmp-name").value.trim();
-      P.push({ name: typed || st.name || t("cmp.person", { n: i + 1 }), typed, code: raw, st });
+      /* a role chosen here replaces the one inside the list (tags, "Top + Bottom" pairs, roulette) */
+      const role = col.querySelector(".cmp-role").value;
+      if (role) st.meta = Object.assign({}, st.meta, { role });
+      P.push({ name: typed || st.name || t("cmp.person", { n: i + 1 }), typed, code: raw, st, role });
     });
     if (bad.length) { KC.toast(t("cmp.damaged", { n: bad.join(", ") })); return; }
     if (P.length < 2) { KC.toast(t("cmp.needBoth")); return; }
@@ -260,6 +271,7 @@
   KC.$("cmpSearch").addEventListener("input", () => { if (LAST || GROUP) render(false); });
   KC.$("results").addEventListener("click", e => {
     if (e.target.closest('button[data-act="save"]')) { saveCurrent(); return; }
+    if (e.target.closest('button[data-act="roulette"]')) { KC.roulette.open(); return; }
     const h = e.target.closest('button[data-act="help"]');
     if (h) { const d = h.parentNode.querySelector(".item-desc"); if (d) { d.hidden = !d.hidden; h.classList.toggle("on", !d.hidden); } return; }
     const pm = e.target.closest("button[data-pm]");

@@ -14,6 +14,8 @@
   const arr = k => { const a = KC.ls.get(k, []); return Array.isArray(a) ? a.filter(x => x && typeof x === "object" && !Array.isArray(x)) : []; };
   const recArr = () => arr(KC.KEYS.saved).filter(x => typeof x.code === "string");
   const newEntryId = p => p + Date.now() + Math.floor(Math.random() * 46656).toString(36);
+  /* a saved comparison part keeps a role chosen on the compare page only when it is Top or Bottom */
+  const roleOf = (p, r) => { if (r === "dom" || r === "sub") p.role = r; return p; };
 
   const S = KC.store = {
     newEntryId,
@@ -200,7 +202,7 @@
         const cl = S.cmp.list(), cIds = {}; cl.forEach(x => { cIds[x.id] = x; });
         b.compares.forEach(x => {
           if (!x || !x.id || !Array.isArray(x.parts)) return;
-          const parts = x.parts.filter(p => p && typeof p.code === "string").map(p => ({ name: typeof p.name === "string" ? p.name : "", uid: typeof p.uid === "string" ? p.uid : "", code: p.code }));
+          const parts = x.parts.filter(p => p && typeof p.code === "string").map(p => roleOf({ name: typeof p.name === "string" ? p.name : "", uid: typeof p.uid === "string" ? p.uid : "", code: p.code }, p.role));
           if (parts.length < S.cmp.MIN) return;
           const cur = cIds[x.id];
           if (cur) { if (fresher(x, cur)) { cur.name = typeof x.name === "string" ? x.name : ""; cur.parts = parts; cur.ts = x.ts; ac++; } return; }
@@ -283,7 +285,8 @@
        A part points at a list by its list id (uid), so opening the comparison takes the newest version
        on this device: my current list, "My lists", then "Received" (a newer link from the same person
        replaces the old one there). code = the version last seen, used when the list is gone from the device;
-       name = the name typed on the compare page ("" = the name inside the list). */
+       name = the name typed on the compare page ("" = the name inside the list);
+       role = "dom" | "sub" chosen on the compare page (absent = the role inside the list). */
     cmp: {
       MIN: 3,
       list()   { const a = KC.ls.get(KC.KEYS.cmp, []); return Array.isArray(a) ? a.filter(x => x && x.id && Array.isArray(x.parts)) : []; },
@@ -306,7 +309,7 @@
           const f = this.fresh(p.uid);
           const state = !p.uid ? "same" : !f ? "gone" : f === p.code ? "same" : "updated";
           if (f) p.code = f;
-          return { name: p.name || "", code: p.code || "", uid: p.uid || "", state };
+          return roleOf({ name: p.name || "", code: p.code || "", uid: p.uid || "", state }, p.role);
         });
         this.write(a);
         return out;
@@ -314,7 +317,7 @@
       /* parts: [{name, code}] -> {status: added|updated, item}; the same name updates that comparison */
       save(name, parts, id) {
         const a = this.list(), nm = (name || "").trim();
-        const ps = parts.map(p => ({ name: (p.name || "").trim(), uid: (KC.codec.decode(p.code).uid || ""), code: p.code }));
+        const ps = parts.map(p => roleOf({ name: (p.name || "").trim(), uid: (KC.codec.decode(p.code).uid || ""), code: p.code }, p.role));
         const i = a.findIndex(x => (id && x.id === id && (x.name || "") === nm) || (nm && (x.name || "").trim().toLowerCase() === nm.toLowerCase()));
         if (i >= 0) { const it = a.splice(i, 1)[0]; it.name = nm; it.parts = ps; it.ts = Date.now(); a.unshift(it); this.write(a); return { status: "updated", item: it }; }
         const item = { id: newEntryId("c"), name: nm, parts: ps, ts: Date.now() };
