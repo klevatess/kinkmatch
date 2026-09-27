@@ -8,7 +8,7 @@ A private, serverless BDSM practices checklist for talking about desires and lim
 
 ## What it does
 
-- **Checklist** — 488 practices in 14 sections. Mark each one *No*, *Maybe*, *Yes* or *Love*, add your role (Top / Bottom) and a short "About me".
+- **Checklist** — 493 practices in 14 sections. Mark each one *No*, *Maybe*, *Yes* or *Love*, add your role (Top / Bottom) and a short "About me".
 - **Share without an account** — your answers are packed into the link itself (or a QR code). Nothing is sent to a server.
 - **Compare** — paste two or more links (up to 10). For two people: matches, things to discuss and hard limits. For a group: what everyone likes and a table of pair matches. A role can be set per participant right on the compare page.
 - **Saved comparisons** — groups of 3+ can be saved and reopened; they pick up the newest version of every list on the device.
@@ -69,6 +69,12 @@ Links that people have already shared must keep working. Item codes and ids are 
 
 ## License
 
-[MIT](LICENSE) © 2026 klevatess.
+Copyright © 2026 klevatess.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the [GNU Affero General Public License v3.0](LICENSE) as published by the Free Software Foundation.
+
+It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the license for details.
+
+In short: you may use, change and share it, including commercially, but any modified version — also one that is only run as a website — must be released under the same license with its source code available to its users.
 
 Third-party parts keep their own licenses: GoatCounter `count.js` (ISC), html2canvas, jsPDF and qrcodejs (MIT), Inter and Fraunces fonts (SIL Open Font License).
