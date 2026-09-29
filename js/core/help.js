@@ -5,10 +5,10 @@
    Two tabs: "How to use" (the sections below) and "What's new" (help.news_html, a green dot on the tab).
    "What's new" holds only entries the owner asks for, each under its date, the newest at the top. */
 (function (KC) {
-  const SECTIONS = ["start", "answer", "filters", "lists", "share", "received", "tpl", "pdf", "compare", "privacy"];
+  const SECTIONS = ["start", "answer", "filters", "portrait", "lists", "share", "received", "tpl", "pdf", "compare", "roulette", "privacy"];
   const NEWS = "news";   /* its own tab, not a section of "How to use" */
   /* texts added to a section later, kept as separate keys so the original text stays as it was */
-  const MORE = { compare: ["help.compareSave_html"], privacy: ["help.privacyStats_html"] };
+  const MORE = { portrait: ["help.portraitDnd_html", "help.dndRace_html", "help.wod_html"], compare: ["help.compareSave_html", "help.compareSpace_html", "help.compareFold_html", "help.compareDnd_html", "help.compareParty_html", "help.compareWod_html"], tpl: ["help.tplNebula_html"], share: ["help.shareSend_html"], privacy: ["help.privacyStats_html"] };
   const shown = k => k !== "help.privacyStats_html" || !!(KC.stats && KC.stats.enabled); /* only while the counter is on */
   const t = k => KC.i18n.t(k);
   let modal = null;

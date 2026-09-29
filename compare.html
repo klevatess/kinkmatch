@@ -4,11 +4,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title data-i18n="cmp.title">Сравнение списков</title>
+<title data-i18n="cmp.title">Kinkosmos · Сравнение списков</title>
+<meta name="description" content="Анонимный чек-лист BDSM-практик: отметьте, что нравится, поделитесь ссылкой и сравните ответы с партнёром. Без регистрации, данные не уходят на сервер. 18+.">
+<meta name="rating" content="adult">
+<meta name="robots" content="noindex, follow">
+<link rel="alternate" hreflang="ru" href="https://klevatess.github.io/kinkmatch/compare.html?lang=ru">
+<link rel="alternate" hreflang="en" href="https://klevatess.github.io/kinkmatch/compare.html?lang=en">
+<link rel="alternate" hreflang="es" href="https://klevatess.github.io/kinkmatch/compare.html?lang=es">
+<link rel="alternate" hreflang="pt-BR" href="https://klevatess.github.io/kinkmatch/compare.html?lang=pt">
+<link rel="alternate" hreflang="ja" href="https://klevatess.github.io/kinkmatch/compare.html?lang=ja">
+<link rel="alternate" hreflang="th" href="https://klevatess.github.io/kinkmatch/compare.html?lang=th">
+<link rel="alternate" hreflang="zh-Hant" href="https://klevatess.github.io/kinkmatch/compare.html?lang=zh">
+<link rel="alternate" hreflang="x-default" href="https://klevatess.github.io/kinkmatch/compare.html">
+<meta name="theme-color" content="#f5f1ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161114" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kinkosmos">
+<meta property="og:title" content="Kinkosmos — чек-лист BDSM-практик / BDSM checklist">
+<meta property="og:description" content="Анонимный чек-лист BDSM-практик: отметьте, что нравится, и сравните с партнёром. An anonymous BDSM checklist to share and compare with a partner. 18+.">
+<meta property="og:url" content="https://klevatess.github.io/kinkmatch/compare.html">
+<meta property="og:image" content="https://klevatess.github.io/kinkmatch/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Kinkosmos">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="th_TH">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=585">
+<link rel="stylesheet" href="css/style.css?v=602">
 </head>
 <body>
 
@@ -33,17 +66,20 @@
   </section>
 
   <select class="cmp-saved" id="cmpSaved" hidden></select>
+  <div id="cmpSaveBar" hidden></div>
   <div class="cmp-inputs" id="parts"></div>
   <button class="btn ghost" id="addPart" type="button" style="width:100%;margin:0 0 10px" data-i18n="cmp.add"></button>
 
   <button class="btn primary" id="cmpBtn" style="width:100%;padding:12px" data-i18n="cmp.go"></button>
 
-  <div class="search cmp-search" id="cmpSearchBox" hidden>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-    <input type="search" id="cmpSearch" data-i18n-ph="search.ph" autocomplete="off">
+  <div id="results">
+    <div id="resHead"></div>
+    <div class="search cmp-search" id="cmpSearchBox" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="cmpSearch" data-i18n-ph="search.ph" autocomplete="off">
+    </div>
+    <div id="resBody"></div>
   </div>
-
-  <div id="results"></div>
 
   <footer class="foot" data-i18n="cmp.foot"></footer>
   <p class="foot-legal" data-i18n="foot.legal"></p>
@@ -52,14 +88,14 @@
 <div class="toast" id="toast"></div>
 <div class="overlay" id="rlOverlay">
   <div class="modal">
-    <h3 id="rlH"></h3>
-    <label class="only-toggle"><input type="checkbox" id="rlBold"> <span data-i18n="rl.bold"></span></label>
+    <h3><span id="rlH"></span> <button class="help-q" type="button" data-help="roulette" data-i18n-title="help.open">?</button></h3>
     <div class="rl-out" id="rlOut" aria-live="polite"></div>
+    <label class="only-toggle" style="margin-top:6px"><input type="checkbox" id="rlBold"> <span data-i18n="rl.bold"></span></label>
     <button class="btn primary" id="rlAgain" type="button" style="width:100%;margin:12px 0 8px" data-i18n="rl.again"></button>
     <button class="btn ghost" id="rlClose" type="button" style="width:100%" data-i18n="close"></button>
   </div>
 </div>
 
-<script src="js/boot.js?v=585" data-page="compare" data-v="585"></script>
+<script src="js/boot.js?v=602" data-page="compare" data-v="602"></script>
 </body>
 </html>

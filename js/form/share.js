@@ -26,11 +26,36 @@
   const NAME_OK = /^[A-Za-z0-9 .,!?'()+-]+$/;
   F.tplNameOk = v => NAME_OK.test(String(v || "").trim());
 
-  function show(link, kind) {
+
+  /* the "atlas" frame around the QR code (v586, owner): a double border with degree ticks, a star in each
+     corner and the site name. It lies outside the white quiet zone, so the code itself is untouched. */
+  function qrFrame(qr) {
+    const W = 312, spark = (x, y, r) => "M" + x + " " + (y - r) + "Q" + x + " " + y + " " + (x + r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y + r) + "Q" + x + " " + y + " " + (x - r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y - r) + "Z";
+    let g = '<rect x="6" y="6" width="' + (W - 12) + '" height="' + (W - 12) + '" rx="16" fill="none" stroke="var(--accent)" stroke-width="1.4"/>'
+      + '<rect x="12" y="12" width="' + (W - 24) + '" height="' + (W - 24) + '" rx="11" fill="none" stroke="var(--ink-line)" stroke-width="1"/>';
+    for (let p = 34; p <= W - 34; p += 8) { const L = (p - 34) % 40 === 0 ? 5 : 2.5;
+      g += '<path d="M' + p + " 12v" + L + "M" + p + " " + (W - 12) + "v-" + L + "M12 " + p + "h" + L + "M" + (W - 12) + " " + p + "h-" + L + '" stroke="var(--ink-line)" stroke-width="1"/>'; }
+    [[18, 18], [W - 18, 18], [18, W - 18], [W - 18, W - 18]].forEach(([a, b], i) => { g += '<path d="' + spark(a, b, i === 1 ? 7 : 5) + '" fill="var(--star)"/>'; });
+    g += '<rect x="' + (W / 2 - 56) + '" y="' + (W - 20) + '" width="112" height="16" rx="8" fill="var(--panel)"/>'
+      + '<text x="' + (W / 2) + '" y="' + (W - 8) + '" text-anchor="middle" font-family="Fraunces,Georgia,serif" font-size="12" font-weight="600" letter-spacing="1.5" fill="var(--accent)">✦ ' + KC.esc(KC.BRAND) + " ✦</text>";
+    qr.classList.add("qr-atlas");
+    qr.insertAdjacentHTML("afterbegin", '<svg class="qr-frame" viewBox="0 0 ' + W + " " + W + '" width="' + W + '" height="' + W + '" aria-hidden="true">' + g + "</svg>");
+  }
+
+  /* v600: how many answers the finished link carries (what the recipient will get — the applied template
+     included); an empty template link (no answers by design) shows no count */
+  function showCount(link, noCount) {
+    const el = KC.$("shareCount"); el.hidden = !!noCount; if (noCount) return;
+    let n = 0; try { n = Object.keys(KC.codec.decode(link.split("#")[1] || "").items || {}).length; } catch (e) {}
+    el.textContent = n ? t("share.count", { n }) : t("share.zero"); el.classList.toggle("zero", !n);
+  }
+  function show(link, kind, noCount) {
     KC.$("shareLink").value = link;
     KC.$("shareKind").textContent = kind;
-    const qr = KC.$("qr"); qr.innerHTML = "";
-    try { new QRCode(qr, { text: link, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); }
+    showCount(link, noCount);
+    KC.$("sendLink").hidden = !navigator.share;
+    const qr = KC.$("qr"); qr.innerHTML = ""; qr.classList.remove("qr-atlas");
+    try { new QRCode(qr, { text: link, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); qrFrame(qr); }
     catch (e) { qr.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center">' + KC.esc(t("share.qrTooLong")) + "</div>"; }
   }
   function showList() {
@@ -62,7 +87,7 @@
   F.shareTemplate = function (x) {
     const st = S.blank(); st.tpl = { id: x.tid, name: x.name, ids: x.ids };
     KC.$("shareTplNote").hidden = true; KC.$("tplShare").hidden = true; KC.$("shareBack").hidden = true;
-    show(base() + KC.codec.encode(st, KC.i18n.lang), t("share.kindTplOnly", { name: T.label(x) || t("unnamed"), n: x.ids.length }));
+    show(base() + KC.codec.encode(st, KC.i18n.lang), t("share.kindTplOnly", { name: T.label(x) || t("unnamed"), n: x.ids.length }), true);
     modal.open();
   };
 
@@ -116,6 +141,13 @@
   });
   KC.$("shareBack").addEventListener("click", showList);
 
+  /* v600: "Send…" — the phone's own share menu gets the whole link (no pasting into an address bar, where the
+     part after "#" can get lost). Only the url, so messengers do not glue text to it. */
+  KC.$("sendLink").addEventListener("click", () => {
+    if (!navigator.share) return;
+    KC.stats.event("share-send");
+    navigator.share({ url: KC.$("shareLink").value }).catch(e => { if (!e || e.name !== "AbortError") KC.toast(t("share.sendFail")); });
+  });
   KC.$("copyLink").addEventListener("click", async () => {
     const inp = KC.$("shareLink"); inp.select(); inp.setSelectionRange(0, 99999);
     try { await navigator.clipboard.writeText(inp.value); KC.toast(t("toast.copied")); }

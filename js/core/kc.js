@@ -3,6 +3,8 @@
 window.KC = window.KC || {};
 (function (KC) {
   KC.$ = id => document.getElementById(id);
+  /* the site's name: not translated (header, page title, QR frame, picture card) */
+  KC.BRAND = "Kinkosmos";
 
   KC.el = function (tag, cls, text) {
     const e = document.createElement(tag);
@@ -25,6 +27,13 @@ window.KC = window.KC || {};
     tpl:   "checklist-templates-v1",        // templates: own ("My lists") and received
     fav:   "checklist-favs-v1",             // favourites (♥) of lists opened from links: {listKey: [ids]}
     cmp:   "checklist-compares-v1",         // saved comparisons (3+ people): [{id, name, parts, ts}]
+    folds: "checklist-folds",               // compare page: which picture folds are open {pair, group}
+    dnd:   "checklist-dnd",                 // the PORTRAIT's mode (raw string): "1" = DnD class, "wod" = World of Darkness, none = the sign
+    wod:   "checklist-wod",                 // the portrait's World of Darkness line (raw string): vamp | wolf | fey | demon
+    dndPair:  "checklist-dnd-pair",         // v599: the same, remembered separately for the pair view of compare.html
+    wodPair:  "checklist-wod-pair",
+    dndGroup: "checklist-dnd-group",        // … and for the company (group) view
+    wodGroup: "checklist-wod-group",
   };
 
   KC.ls = {

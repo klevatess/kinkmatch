@@ -1,15 +1,96 @@
 /* form/portrait.js — "My portrait" (a folding block under "About me"), the vertical picture card and the
    portrait page for the PDF. Numbers come from core/portrait.js. Works for my list and for someone's list
    opened from a link (then it is "Portrait: <name>"). Follows the applied template like the rest of the page.
-   The card is drawn on a <canvas> (1080×1920): no names or answers leave the device unless the user saves it. */
+   The card is drawn on a <canvas> (1080×1920): no names or answers leave the device unless the user saves it.
+   On top of both: the constellation sign (KC.signs) — 9 stars, one per group, each labelled "group / %".
+   The card follows the site theme: light theme = paper card, dark theme = night card.
+   DnD mode (v591, KC.dnd): a switch above the picture shows a D&D class, subclass and joke alignment instead of
+   the sign; the picture card follows the mode shown. Grey stars of a class figure only shape the drawing.
+   World of Darkness mode (v597, KC.wod): the third button; a second row picks the line (vampire, werewolf, fey,
+   demon); the figure is the clan / tribe / kith / house, the lines under it come from KC.wod.details. */
 (function (KC) {
   const F = KC.form, t = (k, v) => KC.i18n.t(k, v), esc = KC.esc;
   const SITE = (KC.migrate ? KC.migrate.NEW_URL : "").replace(/^https?:\/\//, "").replace(/\/$/, "");
   const sec = KC.$("portraitSection"), body = KC.$("portraitBody");
+  let ptLang = null;   /* the language the open portrait was drawn in */
 
   const data = () => KC.portrait.compute(F.shown(), F.tplSet());
   const pctText = p => (p === null ? "—" : p + "%");
   const metaBits = st => ["role", "exp"].map(f => st.meta[f] ? KC.i18n.optLabel(f, st.meta[f]) : "").filter(Boolean);
+
+
+  /* ---------- the constellation sign ---------- */
+  const short = id => t("pt.s." + id);
+  const spark = (x, y, r) => "M" + x + " " + (y - r) + "Q" + x + " " + y + " " + (x + r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y + r) + "Q" + x + " " + y + " " + (x - r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y - r) + "Z";
+  const seeded = n => { let x = n; return () => (x = (x * 16807) % 2147483647) / 2147483647; };
+  const signSub = sg => sg.kind === "even" ? t("sign.even") : sg.main.map(m => short(m.id)).join(" + ");
+  /* the figure shown: the DnD class or the World of Darkness subtype when that mode is on, else the sign */
+  const mode = () => KC.dnd ? KC.dnd.mode() : "sign";
+  const dndOn = () => mode() === "dnd";
+  const figOf = d => mode() === "dnd" ? KC.dnd.pick(d) : mode() === "wod" ? KC.wod.pick(d) : KC.signs.pick(d);
+  /* the title lines of a figure: over-title, name, sub-line and (DnD) the alignment line */
+  function headOf(sg) {
+    if (sg.wod) {
+      const dt = KC.wod.details(F.shown(), data(), F.tplSet(), sg.line, sg.id), ln = KC.wod.lines(dt, t);
+      return { over: t((F.viewingShared ? "wod.of." : "wod.mine.") + sg.line), name: t("wod." + sg.line + "." + sg.id), sub: ln.sub + " · " + signSub(sg), rl: ln.rl, al: null, dt };
+    }
+    if (!sg.dnd) return { over: t(F.viewingShared ? "sign.of" : "sign.mine"), name: t("sign." + sg.id), sub: signSub(sg), al: null };
+    const st = F.shown(), set = F.tplSet(), al = KC.dnd.alignment(st, data(), set), race = KC.dnd.race(st, set), lv = KC.dnd.level(st, set);
+    return { over: t(F.viewingShared ? "dnd.of" : "dnd.mine"), name: t("dnd.c." + sg.cls), sub: t("dnd.s." + sg.cls + "." + sg.sub) + " · " + signSub(sg),
+      rl: t("dnd.r." + race) + " · " + t("dnd.lvl", { n: lv }), race, lv,
+      al: { name: t("dnd.al." + al), quip: t("dnd.aq." + al) }, alKey: al };
+  }
+  /* star radius: bright stars are big, the others grow with their group's percentage */
+  const starR = (st, big) => st.grey ? big * .2 : st.bright ? big : st.s && st.s.pct !== null ? big * (.27 + st.s.pct / 100 * .45) : big * .27;
+  function segsOf(sg, X, Y) {
+    const segs = [];
+    sg.lines.forEach(l => { const q = l[0] === "d" ? l.slice(1) : l; for (let i = 1; i < q.length; i++) segs.push([X(sg.stars[q[i - 1]]), Y(sg.stars[q[i - 1]]), X(sg.stars[q[i]]), Y(sg.stars[q[i]])]); });
+    return segs;
+  }
+  function signSVG(d) {
+    const sg = figOf(d); if (!sg) return "";
+    const hd = headOf(sg);
+    const W = 320, H = 320, box = 196, ox = (W - box) / 2, oy = (H - box) / 2, k = box / 100, rnd = seeded(9);
+    const X = st => ox + st.x * k, Y = st => oy + st.y * k;
+    /* label width: CJK characters are about twice as wide as Latin, Cyrillic or Thai ones */
+    const textW = s2 => Array.from(s2).reduce((a, ch) => a + (/[⺀-鿿가-힯＀-￯]/.test(ch) ? 13 : /[ัิ-ฺ็-๎]/.test(ch) ? 0 : 7.3), 0);
+    const pts = sg.stars.map(st => ({ x: X(st), y: Y(st), r: starR(st, 10), bright: st.bright }));
+    const sizes = sg.stars.map(st => st.s ? { w: Math.max(textW(short(st.s.id)), 30) + 2, h: 30 } : { w: 1, h: 1 });
+    const L = KC.signs.placeLabels(pts, segsOf(sg, X, Y), sizes, W, H);
+    /* only the part of the sky the figure uses: no empty band above and below */
+    const bb = KC.signs.bbox(pts.map(p => ({ x: p.x, y: p.y, r: p.bright ? 15 : p.r })), L, 10);
+    let g = '<svg viewBox="' + bb.x.toFixed(1) + " " + bb.y.toFixed(1) + " " + bb.w.toFixed(1) + " " + bb.h.toFixed(1) + '" style="width:' + Math.min(100, bb.w / W * 118).toFixed(1) + '%" role="img" aria-label="' + esc(hd.name) + '">';
+    let dust = ""; for (let i = 0; i < 50; i++) dust += '<circle cx="' + (bb.x + rnd() * bb.w).toFixed(1) + '" cy="' + (bb.y + rnd() * bb.h).toFixed(1) + '" r="' + (rnd() * .9 + .3).toFixed(2) + '"/>';
+    g += '<g fill="var(--dust)">' + dust + "</g>";
+    g += '<g fill="none" stroke="var(--ink-line)" stroke-width="1.1" stroke-linejoin="round">' + sg.lines.map(l => { const dash = l[0] === "d", q = dash ? l.slice(1) : l;
+      return '<polyline points="' + q.map(i => X(sg.stars[i]).toFixed(1) + "," + Y(sg.stars[i]).toFixed(1)).join(" ") + '"' + (dash ? ' stroke-dasharray="3 4"' : "") + "/>"; }).join("") + "</g>";
+    sg.stars.forEach((st, i) => {
+      const x = pts[i].x, y = pts[i].y, v = st.s ? st.s.pct : null;
+      if (st.grey) g += '<circle class="sg-grey" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2" fill="var(--muted)" opacity=".55"/>';
+      else if (st.bright) g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="15" fill="var(--star)" opacity=".16"/><path d="' + spark(x, y, 10) + '" fill="var(--star)"/>';
+      else if (v === null) g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="none" stroke="var(--muted)" stroke-width="1"/>';
+      else g += '<path d="' + spark(x, y, pts[i].r) + '" fill="var(--muted)" opacity="' + (.45 + v / 180).toFixed(2) + '"/>';
+    });
+    /* labels last, with a halo, so a line under a label never makes it unreadable */
+    sg.stars.forEach((st, i) => {
+      if (!st.s) return;
+      const v = st.s.pct, b = L[i], cx = (b.x + b.w / 2).toFixed(1);
+      g += '<text x="' + cx + '" y="' + (b.y + 12).toFixed(1) + '" text-anchor="middle" font-size="12.5" font-family="Inter,sans-serif" fill="currentColor" paint-order="stroke" stroke="var(--bg)" stroke-width="3" stroke-linejoin="round"' + (st.bright ? ' font-weight="600"' : "") + ">" + esc(short(st.s.id))
+        + '<tspan x="' + cx + '" dy="15" font-weight="700" fill="' + (st.bright ? "var(--star)" : v === null ? "var(--muted)" : "var(--accent)") + '">' + pctText(v) + "</tspan></text>";
+    });
+    const attrs = sg.dnd ? ' data-cls="' + sg.cls + '" data-al="' + hd.alKey + '" data-race="' + hd.race + '" data-lv="' + hd.lv + '"'
+      : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : "";
+    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
+      + (hd.rl ? '<div class="sg-rl">' + esc(hd.rl) + "</div>" : "") + '<div class="sg-sub">' + esc(hd.sub) + "</div>"
+      + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : "") + "</div>";
+  }
+  F.signOf = () => KC.signs.pick(data());
+
+  /* the "✦ Constellation | 🎲 DnD | 🦇 World of Darkness" switch above the picture (only when there is a picture) */
+  function modeSwitch(d) {
+    if (!KC.dnd || !KC.wod || !KC.signs.pick(d)) return "";
+    return KC.wod.switchHTML();
+  }
 
   /* ---------- the block on the page ---------- */
   function title() {
@@ -17,12 +98,14 @@
     KC.$("portraitTitle").textContent = F.viewingShared ? (nm ? t("pt.of", { name: nm }) : t("pt.of0")) : t("pt.mine");
   }
   F.renderPortrait = function () {
-    title();
+    title(); ptLang = KC.i18n.lang;
     if (!sec.open) return;                      /* drawn when opened: nothing to compute while folded */
     const d = data(), st = F.shown();
     if (!d.answered) { body.innerHTML = '<p class="pt-empty">' + esc(t("pt.empty")) + "</p>"; return; }
     const meta = metaBits(st);
     let h = (meta.length ? '<div class="pt-meta">' + esc(meta.join(" · ")) + "</div>" : "")
+      + modeSwitch(d)
+      + signSVG(d)
       + '<div class="pt-bars">' + d.sections.map(s => '<div class="pt-row"><span class="pt-name">' + esc(KC.portrait.label(s.id)) + "</span>"
         + '<span class="pt-bar"><i style="width:' + (s.pct || 0) + '%"></i></span><span class="pt-pct">' + pctText(s.pct) + "</span></div>").join("") + "</div>"
       + '<p class="pt-how">' + esc(t("pt.how")) + "</p>";
@@ -32,13 +115,26 @@
     body.innerHTML = h;
   };
   sec.addEventListener("toggle", () => { if (sec.open) { KC.stats.event("portrait"); F.renderPortrait(); } });
-  body.addEventListener("click", e => { if (e.target.closest("#ptCard")) openCard(); });
+  body.addEventListener("click", e => {
+    if (e.target.closest("#ptCard")) { openCard(); return; }
+    const m = e.target.closest(".pt-mode [data-mode]");
+    if (m) { const want = m.dataset.mode; if (want !== mode()) { KC.dnd.setMode(want); if (want !== "sign") KC.stats.event(want); F.renderPortrait(); } return; }
+    const w = e.target.closest(".pt-mode [data-wod]");
+    if (w && w.dataset.wod !== KC.wod.sub()) { KC.wod.setSub(w.dataset.wod); F.renderPortrait(); }
+  });
   /* answers change -> the open portrait follows (the progress line is updated after every answer) */
   const upd = F.updateProgress;
-  F.updateProgress = function () { upd.apply(this, arguments); if (sec.open) F.renderPortrait(); else title(); };
+  /* redrawn a moment after the last answer, not on every click: the sign's layout is the heaviest part */
+  let ptTimer = null;
+  F.updateProgress = function () {
+    upd.apply(this, arguments); title(); if (!sec.open) return;
+    clearTimeout(ptTimer);
+    if (ptLang !== KC.i18n.lang) { ptLang = KC.i18n.lang; F.renderPortrait(); }   /* a new language: at once */
+    else ptTimer = setTimeout(F.renderPortrait, 150);
+  };
 
   /* ---------- the picture card ---------- */
-  const OPTS = [["bars", true], ["love", true], ["role", true], ["exp", false], ["limits", false], ["name", false]];
+  const OPTS = [["sign", true], ["bars", true], ["love", true], ["role", true], ["exp", false], ["limits", false], ["name", false]];
   const cardModal = KC.modal("cardOverlay", "cardClose");
   const opt = k => { const el = KC.$("cardO_" + k); return !!(el && el.checked); };
 
@@ -55,6 +151,51 @@
   const fit = (ctx, s, w) => { if (ctx.measureText(s).width <= w) return s; while (s.length > 1 && ctx.measureText(s + "…").width > w) s = s.slice(0, -1); return s + "…"; };
   function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
+
+  /* the sign on the card: name, groups, the drawing with a label at every star; returns the new y */
+  function cardSign(ctx, sg, C, y, W, M, SANS, SERIF, big) {
+    const hd = headOf(sg);
+    ctx.textAlign = "center"; ctx.fillStyle = C.star; ctx.font = "600 92px " + SERIF; ctx.fillText(fit(ctx, hd.name, W - 2 * M), W / 2, y + 70);
+    if (hd.rl) {   /* DnD: race · level, the subclass, the alignment and its joke */
+      ctx.fillStyle = C.ink; ctx.font = "600 40px " + SANS; ctx.fillText(fit(ctx, hd.rl, W - 2 * M), W / 2, y + 124);
+      ctx.font = "500 32px " + SANS; ctx.fillText(fit(ctx, hd.sub, W - 2 * M), W / 2, y + 172);
+      if (hd.al) {
+        ctx.font = "700 34px " + SANS; ctx.fillStyle = C.accent; ctx.fillText(fit(ctx, hd.al.name, W - 2 * M), W / 2, y + 226);
+        ctx.font = "italic 500 31px " + SANS; ctx.fillStyle = C.muted; ctx.fillText(fit(ctx, hd.al.quip, W - 2 * M), W / 2, y + 270); y += 160;
+      } else y += 60;   /* World of Darkness: no alignment line */
+    } else { ctx.fillStyle = C.ink; ctx.font = "500 34px " + SANS; ctx.fillText(fit(ctx, hd.sub, W - 2 * M), W / 2, y + 122); }
+    ctx.textAlign = "left";
+    /* lay the figure out in a tall box, then use only the band it needs */
+    const SH = big ? 820 : 560, box = big ? 640 : 420, ox = (W - box) / 2, oyL = (SH - box) / 2, k = box / 100;   /* alone on the card: bigger */
+    const XL = st => ox + st.x * k - M, YL = st => oyL + st.y * k;
+    const pts = sg.stars.map(st => ({ x: XL(st), y: YL(st), r: starR(st, 30), bright: st.bright }));
+    ctx.font = "600 29px " + SANS;
+    const sizes = sg.stars.map(st => st.s ? { w: Math.max(ctx.measureText(short(st.s.id)).width, 70) + 6, h: 68 } : { w: 1, h: 1 });
+    const LB = KC.signs.placeLabels(pts, segsOf(sg, XL, YL), sizes, W - 2 * M, SH);
+    const bb = KC.signs.bbox(pts.map(p => ({ x: p.x, y: p.y, r: p.bright ? 44 : p.r })), LB, 16);
+    const dy = y + 150 - bb.y, X = st => XL(st) + M, Y = st => YL(st) + dy;
+    ctx.save(); ctx.strokeStyle = C.grid; ctx.lineWidth = 3; ctx.lineJoin = "round";
+    sg.lines.forEach(l => { const dash = l[0] === "d", q = dash ? l.slice(1) : l; ctx.setLineDash(dash ? [8, 10] : []); ctx.beginPath(); q.forEach((i, j) => { const st = sg.stars[i]; if (j) ctx.lineTo(X(st), Y(st)); else ctx.moveTo(X(st), Y(st)); }); ctx.stroke(); });
+    ctx.restore();
+    const spk = (x, yy, r) => { ctx.beginPath(); ctx.moveTo(x, yy - r); ctx.quadraticCurveTo(x, yy, x + r, yy); ctx.quadraticCurveTo(x, yy, x, yy + r); ctx.quadraticCurveTo(x, yy, x - r, yy); ctx.quadraticCurveTo(x, yy, x, yy - r); ctx.fill(); };
+    sg.stars.forEach((st, i) => {
+      const x = X(st), yy = Y(st), v = st.s ? st.s.pct : null;
+      if (st.grey) { ctx.globalAlpha = .55; ctx.fillStyle = C.muted; ctx.beginPath(); ctx.arc(x, yy, 6, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+      else if (st.bright) { ctx.globalAlpha = .18; ctx.fillStyle = C.star; ctx.beginPath(); ctx.arc(x, yy, 44, 0, 7); ctx.fill(); ctx.globalAlpha = 1; spk(x, yy, 30); }
+      else if (v === null) { ctx.strokeStyle = C.muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, yy, 8, 0, 7); ctx.stroke(); }
+      else { ctx.globalAlpha = .45 + v / 180; ctx.fillStyle = C.muted; spk(x, yy, pts[i].r); ctx.globalAlpha = 1; }
+    });
+    /* labels on top, with a halo in the card's background colour */
+    ctx.lineJoin = "round"; ctx.strokeStyle = C.bg; ctx.lineWidth = 8;
+    sg.stars.forEach((st, i) => {
+      if (!st.s) return;
+      const v = st.s.pct, b = LB[i], cx = b.x + M + b.w / 2, ty = b.y + dy;
+      ctx.textAlign = "center"; ctx.font = (st.bright ? "600 " : "500 ") + "29px " + SANS; ctx.strokeText(short(st.s.id), cx, ty + 28); ctx.fillStyle = C.ink; ctx.fillText(short(st.s.id), cx, ty + 28);
+      ctx.font = "700 30px " + SANS; ctx.strokeText(pctText(v), cx, ty + 62); ctx.fillStyle = st.bright ? C.star : v === null ? C.muted : C.accent; ctx.fillText(pctText(v), cx, ty + 62); ctx.textAlign = "left";
+    });
+    return y + 150 + bb.h + 24;
+  }
+
   F.drawCard = function (o) {
     const W = 1080, H = 1920, M = 70, IW = W - M * 2;
     const c = document.createElement("canvas"); c.width = W; c.height = H;
@@ -62,8 +203,13 @@
     const d = data(), st = F.shown();
     const SANS = 'Inter, "PingFang TC", "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans Thai", system-ui, sans-serif';
     const SERIF = 'Fraunces, Georgia, "Noto Serif CJK JP", serif';
-    const C = { bg: "#f5f1ec", panel: "#fffdfb", ink: "#241c22", muted: "#8a7d84", line: "#e6ddd6", accent: "#8a2d47", love: "#f4e0ec", loveInk: "#9d2f68", lim: "#f6e2e0", limInk: "#b23b3b", bar: "#e9dfe3" };
+    const root = document.documentElement.dataset.theme;
+    const night = root ? root === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    const C = night ? { bg: "#14101a", panel: "#221a27", ink: "#f3e9ee", muted: "#a898a8", line: "#3a2f3c", accent: "#f0a3bd", love: "#3b2233", loveInk: "#ff9fcf", lim: "#3a2224", limInk: "#f08c8c", bar: "#33283a", star: "#ff8cc6", grid: "rgba(240,163,189,.30)", dust: "rgba(255,240,248,.7)" }
+      : { bg: "#f5f1ec", panel: "#fffdfb", ink: "#241c22", muted: "#8a7d84", line: "#e6ddd6", accent: "#8a2d47", love: "#f4e0ec", loveInk: "#9d2f68", lim: "#f6e2e0", limInk: "#b23b3b", bar: "#e9dfe3", star: "#e0559a", grid: "rgba(138,45,71,.24)", dust: "rgba(138,45,71,.28)" };
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+    /* star dust over the whole card */
+    { const r = seeded(11); ctx.fillStyle = C.dust; for (let i = 0; i < 260; i++) { ctx.beginPath(); ctx.arc(r() * W, r() * H, r() * 1.8 + .5, 0, 7); ctx.fill(); } }
     ctx.fillStyle = C.accent; ctx.fillRect(0, 0, W, 16);
     let y = 150;
     ctx.textBaseline = "alphabetic";
@@ -75,9 +221,13 @@
     const meta = []; if (o.role && st.meta.role) meta.push(KC.i18n.optLabel("role", st.meta.role)); if (o.exp && st.meta.exp) meta.push(KC.i18n.fieldLabel("exp") + ": " + KC.i18n.optLabel("exp", st.meta.exp));
     if (meta.length) { ctx.fillStyle = C.ink; ctx.font = "500 38px " + SANS; ctx.fillText(fit(ctx, meta.join(" · "), IW), M, y); y += 64; }
     y += 10;
-    const bottom = H - 150;
+    let bottom = H - 150;
+    /* the sign and the percentages can be switched on and off separately (v587, owner) */
+    const sg = o.sign ? figOf(d) : null;   /* the mode shown on the page: sign, DnD class or World of Darkness */
+    if (sg && sg.wod) bottom -= 40;   /* room for the "not official" line */
+    if (sg) y = cardSign(ctx, sg, C, y, W, M, SANS, SERIF, !o.bars);
     if (o.bars) {
-      const rows = d.sections, rh = 52, nameW = 470, barX = M + nameW + 20, barW = IW - nameW - 20 - 110;
+      const rows = d.sections, rh = sg ? 44 : 52, nameW = 470, barX = M + nameW + 20, barW = IW - nameW - 20 - 110;
       rows.forEach((s, i) => {
         const ry = y + i * rh;
         ctx.fillStyle = C.ink; ctx.font = "500 31px " + SANS; ctx.fillText(fit(ctx, KC.portrait.label(s.id), nameW), M, ry + 34);
@@ -120,7 +270,11 @@
       });
       y += 24;
     });
-    ctx.fillStyle = C.muted; ctx.font = "500 32px " + SANS; ctx.textAlign = "center"; ctx.fillText(SITE, W / 2, H - 70); ctx.textAlign = "left";
+    if (sg && sg.wod) {   /* "not official World of Darkness material", small, above the footer */
+      ctx.fillStyle = C.muted; ctx.font = "500 22px " + SANS; ctx.textAlign = "center";
+      ctx.fillText(fit(ctx, t("wod.notOfficial"), IW), W / 2, H - 130); ctx.textAlign = "left";
+    }
+    ctx.fillStyle = C.muted; ctx.font = "500 32px " + SANS; ctx.textAlign = "center"; ctx.fillText("✦ " + KC.BRAND + (SITE ? " · " + SITE : ""), W / 2, H - 70); ctx.textAlign = "left";
     return c;
   };
 
@@ -133,7 +287,9 @@
   }
   function readOpts() { const o = {}; OPTS.forEach(([k]) => { o[k] = opt(k); }); return o; }
   function openCard() {
-    KC.$("cardOpts").innerHTML = OPTS.map(([k, on]) => '<label class="only-toggle"><input type="checkbox" id="cardO_' + k + '"' + (on ? " checked" : "") + "> " + esc(t("card.o." + k)) + "</label>").join("");
+    /* in DnD mode the "sign" switch is the class */
+    const lab = k => t(k === "sign" && mode() !== "sign" ? "card.o." + mode() : "card.o." + k);
+    KC.$("cardOpts").innerHTML = OPTS.map(([k, on]) => '<label class="only-toggle"><input type="checkbox" id="cardO_' + k + '"' + (on ? " checked" : "") + "> " + esc(lab(k)) + "</label>").join("");
     KC.$("cardShare").hidden = !(navigator.canShare && window.File);
     cardModal.open(); preview();
   }

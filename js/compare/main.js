@@ -13,6 +13,7 @@
   const MAX = 10;
   let LAST = null, FILTER = "all";   /* detailed pair view */
   let GROUP = null, GFILTER = "allYes"; /* group view: [{name, st}] */
+  let SEL = null, SELG = null;          /* the planet tapped in the group's solar system (index in GROUP) */
   let PMODE = "any";                    /* pair table: "any" | "role" (only Top + Bottom pairs) */
   let SAVED = null;                     /* the saved comparison on screen: {id, name} */
   let NOTE = null;                      /* after opening a saved one: {updated: [names], gone: [names]} */
@@ -144,14 +145,35 @@
   const only = rows => rows.filter(r => matches(r.id));
   const POS = { yes: 1, love: 1 };
 
+  /* ---------- the pictures fold away (v592, owner): closed at first, the page remembers open/closed ----------
+     "pair" = paired planets + the pair's constellations, "group" = the company's system. A closed fold is empty:
+     its picture is drawn when it is opened (the system's layout is the heaviest part of the page). */
+  const folds = () => { const o = KC.ls.get(KC.KEYS.folds, null); return o && typeof o === "object" ? o : {}; };
+  /* the group's fold: the solar system, or (DnD mode, v596) the party, or (World of Darkness, v597) the coterie,
+     pack, … — the switch sits on top of all of them */
+  const foldBody = kind => { if (kind === "pair") return KC.space.pairSVG(LAST.A, LAST.B, LAST.nA, LAST.nB);
+    if (!KC.dnd || !KC.wod) return KC.space.groupSVG(GROUP, SEL, GFILTER === "allYM");
+    const m = KC.dnd.mode("group");
+    return KC.space.modeSwitch("group") + (m === "dnd" ? KC.space.partyHTML(GROUP) : m === "wod" ? KC.space.wodGroupHTML(GROUP) : KC.space.groupSVG(GROUP, SEL, GFILTER === "allYM")); };
+  const fold = kind => { const on = !!folds()[kind];
+    return '<details class="about sp-fold" data-fold="' + kind + '"' + (on ? " open" : "") + "><summary>✦ " + esc(t("sp.fold." + kind)) + '</summary><div class="sp-fold-body">' + (on ? foldBody(kind) : "") + "</div></details>"; };
+  KC.$("results").addEventListener("toggle", e => {
+    const d = e.target; if (!d.matches || !d.matches("details.sp-fold")) return;
+    const o = folds(), kind = d.dataset.fold; o[kind] = d.open; KC.ls.set(KC.KEYS.folds, o);
+    const body = d.querySelector(".sp-fold-body");
+    if (d.open && !body.innerHTML && (kind === "pair" ? LAST : GROUP)) body.innerHTML = foldBody(kind);
+  }, true);   /* "toggle" does not bubble */
+
   /* ---------- detailed pair view ---------- */
   function renderPair() {
     const searching = !!KC.$("cmpSearch").value.trim();
-    let html = '<div class="cmp-filter">' + (LAST.fromGroup ? '<button class="btn mini" data-f="group">' + esc(t("cmp.backGroup")) + "</button>" : "")
+    /* v601 (owner): the filters sit under the star map, right above the lists (and the search next to them) */
+    HEAD = profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B) + rlBtn() + (FILTER === "all" ? fold("pair") : "")
+      + '<div class="cmp-filter">' + (LAST.fromGroup ? '<button class="btn mini" data-f="group">' + esc(t("cmp.backGroup")) + "</button>" : "")
       + fbtn(FILTER, "all", t("cmp.all"))
       + fbtn(FILTER, "yesA", t("cmp.yesOf", { who: LAST.nA })) + fbtn(FILTER, "yesB", t("cmp.yesOf", { who: LAST.nB }))
-      + fbtn(FILTER, "ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + fbtn(FILTER, "ymB", t("cmp.yesMaybeOf", { who: LAST.nB })) + "</div>"
-      + profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B) + rlBtn();
+      + fbtn(FILTER, "ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + fbtn(FILTER, "ymB", t("cmp.yesMaybeOf", { who: LAST.nB })) + "</div>";
+    let html = "";
     if (FILTER !== "all") {
       const side = FILTER === "yesA" || FILTER === "ymA", who = side ? LAST.nA : LAST.nB, wm = FILTER.indexOf("ym") === 0;
       const rows = only(KC.match.yesOf(side ? LAST.A : LAST.B, wm)).map(r => ({ id: r.id, a: (LAST.A.items[r.id] || {}).interest || null, b: (LAST.B.items[r.id] || {}).interest || null }));
@@ -214,11 +236,15 @@
   }
   function renderGroup() {
     const P = GROUP, searching = !!KC.$("cmpSearch").value.trim();
-    let html = savedBar() + rlBtn() + '<div class="cmp-filter">' + fbtn(GFILTER, "allYes", t("cmp.allYes")) + fbtn(GFILTER, "allYM", t("cmp.allYM")) + fbtn(GFILTER, "pairs", t("cmp.pairs")) + "</div>"
-      + P.map(p => profileLine(p.name, p.st)).join("");
+    if (SELG !== GROUP) { SEL = null; SELG = GROUP; }   /* a new company: no planet selected */
+    /* v601 (owner): "Save" moved under the saved-comparison picker; the filters sit under the star map */
+    KC.$("cmpSaveBar").innerHTML = savedBar(); KC.$("cmpSaveBar").hidden = false;
+    HEAD = rlBtn() + P.map(p => profileLine(p.name, p.st)).join("") + fold("group")   /* the system; "…and Maybe" counts Maybe too */
+      + '<div class="cmp-filter">' + fbtn(GFILTER, "allYes", t("cmp.allYes")) + fbtn(GFILTER, "allYM", t("cmp.allYM")) + fbtn(GFILTER, "pairs", t("cmp.pairs")) + "</div>";
+    let html = "";
     if (GFILTER === "pairs") {
       const role = p => p.st.meta.role || "";
-      html += '<div class="cmp-filter pair-mode">' + '<button class="btn mini' + (PMODE === "any" ? " on" : "") + '" data-pm="any">' + esc(t("cmp.pairsAny")) + "</button>"
+      HEAD += '<div class="cmp-filter pair-mode">' + '<button class="btn mini' + (PMODE === "any" ? " on" : "") + '" data-pm="any">' + esc(t("cmp.pairsAny")) + "</button>"
         + '<button class="btn mini' + (PMODE === "role" ? " on" : "") + '" data-pm="role">' + esc(t("cmp.pairsRole")) + "</button></div>"
         + (PMODE === "role" ? '<div class="sub">' + esc(t("cmp.pairsRoleSub")) + "</div>" : "");
       const noRole = P.filter(p => !role(p)).map(p => p.name);
@@ -240,10 +266,16 @@
       rows.map(r => rowHTML(r.id, P.map((p, i) => ({ name: p.name, v: r.vals[i] })))).join(""), rows.length);
   }
 
-  function render(scroll) {
+  /* #results = #resHead (profiles, roulette, star map, filters) + the search box + #resBody (the lists).
+     bodyOnly: typing in the search redraws only the lists, so the star map is not rebuilt and the field keeps focus */
+  let HEAD = "";
+  function render(scroll, bodyOnly) {
     KC.$("cmpSearchBox").hidden = false;
     const out = KC.$("results");
-    out.innerHTML = LAST ? renderPair() : renderGroup();
+    if (LAST) { KC.$("cmpSaveBar").hidden = true; KC.$("cmpSaveBar").innerHTML = ""; }   /* saving is for 3+ people */
+    const body = LAST ? renderPair() : renderGroup();
+    if (!bodyOnly) KC.$("resHead").innerHTML = HEAD;
+    KC.$("resBody").innerHTML = body;
     if (scroll && out.scrollIntoView) out.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -268,14 +300,35 @@
     else { LAST = null; GROUP = P; GFILTER = "allYes"; }
     render(true);
   });
-  KC.$("cmpSearch").addEventListener("input", () => { if (LAST || GROUP) render(false); });
+  KC.$("cmpSearch").addEventListener("input", () => { if (LAST || GROUP) render(false, true); });
+  KC.$("cmpSaveBar").addEventListener("click", e => { if (e.target.closest('button[data-act="save"]')) saveCurrent(); });
   KC.$("results").addEventListener("click", e => {
-    if (e.target.closest('button[data-act="save"]')) { saveCurrent(); return; }
     if (e.target.closest('button[data-act="roulette"]')) { KC.roulette.open(); return; }
+    /* v591: the pair's constellations ↔ DnD classes ↔ (v597) World of Darkness.
+       A button changes the mode (data-mode) or the World of Darkness line (data-wod); either way the block is redrawn.
+       (v592–v598 shared the choice with the portrait; v599, owner: each view remembers its own) */
+    /* v599: the pair and the company remember their own choice (scope), independent of the portrait */
+    const pickMode = (b, scope) => { if (!b || !KC.dnd || !KC.wod) return false;
+      if (b.dataset.mode) { const want = b.dataset.mode; if (want === KC.dnd.mode(scope)) return false; KC.dnd.setMode(want, scope); if (want !== "sign") KC.stats.event(want); return true; }
+      if (b.dataset.wod === KC.wod.sub(scope)) return false; KC.wod.setSub(b.dataset.wod, scope); return true; };
+    const gm = e.target.closest('.sp-fold[data-fold="group"] .pt-mode [data-mode], .sp-fold[data-fold="group"] .pt-mode [data-wod]');
+    if (gm && GROUP) {
+      if (pickMode(gm, "group")) gm.closest(".sp-fold").querySelector(".sp-fold-body").innerHTML = foldBody("group");
+      return;
+    }
+    const md = e.target.closest(".sp-signs .pt-mode [data-mode], .sp-signs .pt-mode [data-wod]");
+    if (md && LAST) {
+      if (!pickMode(md, "pair")) return;
+      const box = KC.$("results").querySelector(".sp-signs"), tmp = document.createElement("div");
+      tmp.innerHTML = KC.space.pairSigns(LAST.A, LAST.B, LAST.nA, LAST.nB); if (box && tmp.firstChild) box.replaceWith(tmp.firstChild);
+      return;
+    }
     const h = e.target.closest('button[data-act="help"]');
     if (h) { const d = h.parentNode.querySelector(".item-desc"); if (d) { d.hidden = !d.hidden; h.classList.toggle("on", !d.hidden); } return; }
     const pm = e.target.closest("button[data-pm]");
     if (pm) { PMODE = pm.dataset.pm; render(false); return; }
+    const pl = e.target.closest("[data-planet]");
+    if (pl && GROUP) { const v = +pl.dataset.planet; SEL = SEL === v ? null : v; render(false); return; }
     const pr = e.target.closest("button[data-pair]");
     if (pr) { const [i, j] = pr.dataset.pair.split(",").map(Number); LAST = { A: GROUP[i].st, B: GROUP[j].st, nA: GROUP[i].name, nB: GROUP[j].name, fromGroup: true }; FILTER = "all"; render(true); return; }
     const b = e.target.closest("button[data-f]"); if (!b) return;

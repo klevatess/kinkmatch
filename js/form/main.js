@@ -56,6 +56,9 @@
     return;
   }
 
+  /* the name field is disabled in the HTML until now, so a name typed while the scripts were loading is not
+     wiped by the first render (v600) */
+  KC.$("metaName").disabled = false;
   KC.i18n.mountSwitcher(() => { F.renderAll(); F.renderNotice(); });
   F.initTpl();
 
@@ -74,6 +77,9 @@
     /* a damaged link shows wrong answers: warn, never store it */
     F.receivedResult = F.linkDamaged ? { status: "damaged" } : S.received.add(F.sharedCode, F.state.name);
     KC.stats.event("open-link");
+    /* v600: anonymous counts of links that arrive empty or damaged (only the event name is sent) */
+    if (F.linkDamaged) KC.stats.event("open-link-damaged");
+    else if (!Object.keys(F.state.items).length && !tplLink) KC.stats.event("open-link-empty");
     F.renderBanner();
     KC.$("sharedBanner").style.display = "block";
     if (F.linkDamaged) { ["bannerCmp", "bannerKeep", "bannerSaveAs", "bannerTpl"].forEach(id => KC.$(id).hidden = true); KC.$("sharedBanner").classList.add("damaged"); }
@@ -101,7 +107,7 @@
     location.hash = KC.codec.extract(S.received.asListCode(x.code)); location.reload();
   });
 
-  KC.$("bannerOwn").addEventListener("click", () => { location.href = location.pathname; });
+  KC.$("bannerOwn").addEventListener("click", () => { location.href = F.homeUrl(); });
   KC.$("bannerKeep").addEventListener("click", () => {
     /* becomes a new own list; the previous one stays in My lists.
        Favourites made while viewing it and the template it was created by come along. */

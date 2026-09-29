@@ -20,7 +20,7 @@ function manifest() {
 function release() {}
 /* scope(): pages opened until .end() are closed by it (self-contained test blocks free their memory) */
 let SCOPE = null;
-const RECENT = [], MAX_OPEN = 30;
+const RECENT = [], MAX_OPEN = 22;
 function scope() { SCOPE = []; return { end() { const s = SCOPE || []; SCOPE = null; s.forEach(w => { try { w.close(); } catch (e) {} }); } }; }
 function open(page, { hash = "", search = "", storage = { local: {}, session: {} }, navLang = "ru", answers = {}, patch = {}, base = BASE, keep = false } = {}) {
   const file = page === "compare" ? "compare.html" : "index.html";
@@ -40,7 +40,9 @@ function open(page, { hash = "", search = "", storage = { local: {}, session: {}
   w.scrollTo = () => {}; w.HTMLElement.prototype.scrollIntoView = function () {};
   w.nav = null; // capture navigations
   const m = manifest();
-  const files = m.common.concat(m[page === "compare" ? "compare" : "form"]);
+  /* v600: pages load one language (boot.js "@lang"); the tests load all of them, in the old order */
+  const ALL = ["ru", "en", "pt", "es", "ja", "th", "zh"].map(l => "lang/" + l + ".ui.js").concat(["ru", "en", "pt", "es", "ja", "th", "zh"].map(l => "lang/" + l + ".practices.js"));
+  const files = [].concat(...m.common.concat(m[page === "compare" ? "compare" : "form"]).map(f => f === "@lang" ? ALL : [f]));
   const errors = [];
   w.addEventListener("error", e => errors.push(e.message));
   for (const f of files) {

@@ -16,7 +16,8 @@
 
   /* acts: array, or function(item) -> array; label: function(item) -> name; extra: function(item) -> text before the date */
   function rows(list, acts, label, badge, extra, cls) {
-    return list.map(x => '<div class="saved-row' + (cls ? " " + cls : "") + (badge && badge(x) ? " current" : "") + '" data-id="' + KC.esc(x.id) + '"><div class="meta"><b>' + KC.esc(label(x) || t("unnamed")) + "</b>"
+    return list.map(x => '<div class="saved-row' + (cls ? " " + cls : "") + (badge && badge(x) ? " current" : "") + '" data-id="' + KC.esc(x.id) + '"><div class="meta">'
+      + (cls === "tpl-row" ? '<button class="nb-thumb" type="button" data-act="nebula" title="' + KC.esc(t("tpl.nebula")) + '" aria-label="' + KC.esc(t("tpl.nebula")) + '">' + KC.nebula.svg(x.ids, 60, 60, KC.nebula.seedOf(x.id)) + "</button>" : "") + '<b>' + KC.esc(label(x) || t("unnamed")) + "</b>"
       + (badge && badge(x) ? '<span class="cur-badge">' + KC.esc(t("mine.current")) + "</span>" : "")
       + "<span>" + (extra && extra(x) ? KC.esc(extra(x)) + " · " : "") + fmtDate(x.ts) + "</span></div>"
       + '<div class="acts">' + (typeof acts === "function" ? acts(x) : acts).map(a => '<button class="btn ghost mini" data-act="' + a + '"' + (a === "del" ? ' title="' + KC.esc(t("act.delete")) + '">✕' : ">" + KC.esc(t("act." + a))) + "</button>").join("") + "</div></div>").join("");
@@ -38,6 +39,12 @@
     const btn = e.target.closest("button[data-act]"); if (!btn) return;
     const id = btn.closest(".saved-row").dataset.id, a = T.list(), item = a.find(x => x.id === id); if (!item) return;
     switch (btn.dataset.act) {
+      case "nebula": {   /* the thumbnail opens / closes the big nebula card under the row */
+        const row = btn.closest(".saved-row"), open = row.nextElementSibling && row.nextElementSibling.classList.contains("nb-open");
+        if (open) row.nextElementSibling.remove();
+        else row.insertAdjacentHTML("afterend", '<div class="nb-open">' + KC.nebula.card(item.ids, T.label(item) || t("unnamed"), KC.nebula.seedOf(item.id)) + "</div>");
+        btn.classList.toggle("on", !open); break;
+      }
       case "share": closeModal(); F.shareTemplate(item); break;
       case "use": closeModal(); F.openByTemplate(T.use(item), { fillOnly: 1 }); break;
       case "rename": {
@@ -135,7 +142,7 @@
       e.target.value = "";
       if (!res) { KC.toast(t("toast.backupBad")); return; }
       KC.toast(KC.i18n.t(res.templates ? "toast.backupLoadedTpl" : "toast.backupLoaded", res));
-      setTimeout(() => { location.href = location.pathname; }, 900);
+      setTimeout(() => { location.href = F.homeUrl(); }, 900);
     };
     r.readAsText(f);
   });
@@ -147,7 +154,7 @@
       case "load": {
         F.saveNow(); // current list is safe in its own entry
         const st = KC.store.normalize(item.data); st.onlyMarked = F.state.onlyMarked;
-        KC.store.writeOwn(st); M.setActive(item.id); location.href = location.pathname; break;
+        KC.store.writeOwn(st); M.setActive(item.id); location.href = F.homeUrl(); break;
       }
       case "rename": rename(item, () => { M.write(a); drawMine(); }, M.label(item)); break;
       case "del": M.write(a.filter(x => x.id !== id)); if (id === M.active()) M.setActive(""); drawMine(); break;

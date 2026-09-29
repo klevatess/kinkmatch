@@ -589,3 +589,146 @@ details.portrait .portrait-body{padding:4px 18px 18px}
 #helpNews h5:not(:first-child){border-top:1px solid var(--line2);padding-top:12px;margin-top:16px}
 /* the tabs stay at the top of the help window while its text scrolls */
 .help-tabs{position:sticky;top:-22px;margin-top:-22px;padding-top:22px;background:var(--panel);z-index:2}
+
+/* ===================== v586: star atlas (Kinkosmos) ===================== */
+:root{ --star:#e0559a; --ink-line:rgba(138,45,71,.28); --dust:rgba(138,45,71,.22); --b-col:#3d5a8a; --pl-dom:#8a2d47;
+  --nb-bg:#fbf5f7; --nb-star:#8a2d47; --nb-blend:multiply; }
+:root[data-theme="dark"]{ --star:#ff8cc6; --ink-line:rgba(231,155,178,.35); --dust:rgba(255,236,245,.55); --b-col:#8fb0e6; --pl-dom:#b48ce8;
+  --nb-bg:#150e18; --nb-star:#ffe8f3; --nb-blend:screen; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --star:#ff8cc6; --ink-line:rgba(231,155,178,.35); --dust:rgba(255,236,245,.55); --b-col:#8fb0e6; --pl-dom:#b48ce8;
+  --nb-bg:#150e18; --nb-star:#ffe8f3; --nb-blend:screen; } }
+
+/* header: faint sparkles; the logo (a small constellation) + the site name */
+header.top{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='90'%3E%3Cg fill='%238a2d47' fill-opacity='.16'%3E%3Cpath d='M20 18q0 5 5 5q-5 0-5 5q0-5-5-5q5 0 5-5z'/%3E%3Ccircle cx='70' cy='60' r='1.3'/%3E%3Ccircle cx='118' cy='14' r='1'/%3E%3Cpath d='M160 52q0 4 4 4q-4 0-4 4q0-4-4-4q4 0 4-4z'/%3E%3Ccircle cx='200' cy='30' r='1.2'/%3E%3Ccircle cx='96' cy='80' r='.9'/%3E%3C/g%3E%3C/svg%3E");}
+:root[data-theme="dark"] header.top{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='90'%3E%3Cg fill='%23ffe8f3' fill-opacity='.45'%3E%3Cpath d='M20 18q0 5 5 5q-5 0-5 5q0-5-5-5q5 0 5-5z'/%3E%3Ccircle cx='70' cy='60' r='1.3'/%3E%3Ccircle cx='118' cy='14' r='1'/%3E%3Cpath d='M160 52q0 4 4 4q-4 0-4 4q0-4-4-4q4 0 4-4z'/%3E%3Ccircle cx='200' cy='30' r='1.2'/%3E%3Ccircle cx='96' cy='80' r='.9'/%3E%3C/g%3E%3C/svg%3E");}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) header.top{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='90'%3E%3Cg fill='%23ffe8f3' fill-opacity='.45'%3E%3Cpath d='M20 18q0 5 5 5q-5 0-5 5q0-5-5-5q5 0 5-5z'/%3E%3Ccircle cx='70' cy='60' r='1.3'/%3E%3Ccircle cx='118' cy='14' r='1'/%3E%3Cpath d='M160 52q0 4 4 4q-4 0-4 4q0-4-4-4q4 0 4-4z'/%3E%3Ccircle cx='200' cy='30' r='1.2'/%3E%3Ccircle cx='96' cy='80' r='.9'/%3E%3C/g%3E%3C/svg%3E");} }
+.brand .logo{display:inline-flex;align-items:center;gap:7px}
+.brand .logo svg{width:30px;height:22px;color:var(--accent);flex:0 0 auto}
+.brand .logo b{font-weight:600;letter-spacing:.4px}
+
+/* section headings: a small ink sparkle (pink stays for ♥ and Love only) */
+.cat-head h2::before{content:"✦";color:var(--accent);opacity:.55;font-size:.62em;margin-right:7px;position:relative;top:-3px}
+.cat-head{border-bottom:1px dashed var(--ink-line)}
+.progress-inline::before{content:"✦ ";color:var(--accent);opacity:.55}
+
+/* portrait: the constellation sign */
+.pt-sign{margin:4px -4px 10px;padding:10px 0 0;border-radius:12px;background:var(--bg);border:1px solid var(--line);overflow:hidden;text-align:center}
+.pt-sign svg{display:block;width:100%;height:auto;color:var(--ink)}
+.sg-over{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.sg-name{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:30px;color:var(--star);line-height:1.15;padding:0 8px}
+.sg-sub{font-size:13.5px;color:var(--ink);padding:0 8px}
+
+/* compare: solar system, paired planets, the two constellations */
+.sp-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 12px 10px;margin:12px 0}
+.sp-box svg{display:block;width:100%;height:auto;color:var(--ink)}
+.sp-box [data-planet]{cursor:pointer}
+.sp-h{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:16px;margin:0 2px 4px}
+.sp-h2{margin-top:6px}
+.sp-note{font-size:12.5px;color:var(--muted);line-height:1.45;margin:4px 2px 0}
+.sp-legend{font-size:12.5px;line-height:1.45;color:var(--muted);margin:6px 2px 0}
+.sp-legend div{margin:3px 0}
+.sp-legend b{color:var(--ink);font-weight:600}
+.lg-line{display:inline-block;width:22px;height:0;border-top:3px solid var(--accent);opacity:.7;vertical-align:middle;margin-right:2px}
+.lg-line.lg-dash{border-top:3px dashed var(--accent)}
+.sp-near{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;margin:6px 2px 2px}
+.sp-near .sp-sub{flex-basis:100%;font-size:12px;color:var(--muted)}
+.sp-near b{font-weight:600}
+
+/* roulette: the ideas */
+.rl-lead{font-size:13.5px;line-height:1.5;margin:4px 0 8px;color:var(--ink)}
+.rl-idea{position:relative;border:1px solid var(--line);border-left:3px solid var(--star);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--panel)}
+.rl-idea b{display:block;font-size:15px}
+.rl-idea .sub{display:block;font-size:12px;color:var(--muted)}
+.rl-idea .rl-desc{display:block;font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+.rl-ans{font-size:12.5px;margin-top:6px;color:var(--muted)}
+
+/* share: the atlas frame around the QR code (outside the white quiet zone) */
+#qr.qr-atlas{position:relative;width:min(312px,100%);height:auto;aspect-ratio:1/1;margin:14px auto 4px;align-items:center}
+#qr.qr-atlas .qr-frame{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+#qr.qr-atlas img,#qr.qr-atlas canvas{position:relative;z-index:1;width:82%;height:auto;box-sizing:border-box}
+
+/* templates: nebula thumbnails and the big card */
+.nb-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);margin:4px 0 12px}
+.nb-card .nb-svg{display:block;width:100%;height:auto}
+.nb-name{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:17px;padding:10px 14px 2px;overflow-wrap:anywhere}
+.nb-name span{font-family:Inter,sans-serif;font-weight:400;font-size:13px;color:var(--muted)}
+.nb-leg{display:flex;flex-wrap:wrap;gap:4px 12px;padding:4px 14px 12px;font-size:12.5px;color:var(--muted)}
+.nb-lg{display:inline-flex;align-items:center;gap:5px}
+.nb-lg i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.nb-lg b{color:var(--ink);font-weight:600}
+.tpl-row .meta{display:grid;grid-template-columns:46px minmax(0,1fr);column-gap:12px;align-items:center}
+.tpl-row .meta .nb-thumb{grid-row:span 2}
+.tpl-row .meta b{align-self:end}
+.tpl-row .meta span{align-self:start}
+.nb-thumb{width:46px;height:46px;padding:0;border-radius:50%;overflow:hidden;border:1px solid var(--line);background:none;cursor:pointer}
+.nb-thumb svg{width:100%;height:100%;display:block}
+.nb-thumb.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.sp-sa{color:var(--accent)}.sp-sb{color:var(--b-col)}
+/* the smallest phones: the name must fit next to "?" and the 7 language buttons — the logo mark steps aside */
+@media (max-width:370px){ .brand .logo svg{display:none} }
+/* wide screens: the pictures keep a readable size instead of stretching */
+.pt-sign svg{max-width:420px;margin:0 auto}
+.sp-box svg{max-width:480px;margin-left:auto;margin-right:auto}
+/* v589: the pair's constellation signs on the compare page */
+.sg-match{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 6px;font-size:14px;font-weight:600;text-align:center}
+.sg-match .st{color:var(--star);letter-spacing:2px;font-size:15px;white-space:nowrap}
+.sg-match .st i{color:var(--line);font-style:normal}
+.sg-why{text-align:center;font-size:12.5px;color:var(--muted);margin:0 6px 4px}
+.sg-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sg-mini{text-align:center;min-width:0}
+.sg-mini .who{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sg-mini .nm{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:19px;color:var(--star);line-height:1.15;overflow-wrap:anywhere}
+.sg-mini .grp{font-size:11.5px;color:var(--ink)}
+.sp-box .sg-mini svg{display:block;width:100%;max-width:220px;height:auto;margin:0 auto;color:var(--ink)}
+/* v591: the portrait's "✦ Constellation | 🎲 DnD" switch and the DnD alignment line */
+.pt-mode{display:flex;justify-content:flex-end;gap:6px;margin:0 0 6px}
+.pt-mode .btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.sg-al{font-size:13px;color:var(--muted);padding:2px 10px 0;line-height:1.4}
+.sg-al b{color:var(--accent);font-weight:600}
+/* v591: DnD classes in the pair's constellations */
+.sp-signs .pt-mode{justify-content:center;margin:2px 0 6px}
+.sg-mini .al{font-size:11.5px;color:var(--accent);font-weight:600}
+/* v592: the compare pictures fold away (closed at first) */
+details.sp-fold>summary{font-size:17px}
+.sp-fold-body{padding:0 10px 10px}
+.sp-fold .sp-box{border:none;margin:0;padding:10px 4px 6px;border-radius:0}
+.sp-fold .sp-box+.sp-box{border-top:1px solid var(--line)}
+/* v596: DnD race · level line */
+.sg-rl{font-size:15px;font-weight:600;color:var(--ink);padding:0 8px 2px}
+.sg-mini .rl{font-size:12px;font-weight:600;color:var(--ink)}
+.dnd-foes{margin:10px 2px 2px}
+.dnd-foes .fh{font-size:13px;font-weight:600;margin:0 0 4px}
+.dnd-foe{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:13.5px}
+.dnd-foe:first-of-type{border-top:none}
+.dnd-foe .lv{flex:0 0 8.6em;color:var(--muted)}
+.dnd-foe b{font-weight:600}
+.dnd-foe .cr{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}
+.dnd-party{list-style:none;margin:4px 0 8px;padding:0}
+.dnd-party li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding:6px 2px;border-top:1px solid var(--line);font-size:13.5px}
+.dnd-party li:first-child{border-top:none}
+.dnd-party .who{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.dnd-party .what{color:var(--ink)}
+.dnd-party .al{color:var(--accent);font-size:12.5px;font-weight:600}
+.dnd-party .sub{flex-basis:100%;font-size:12px;color:var(--muted)}
+.dnd-sum{font-size:13px;color:var(--muted);margin:2px 2px 0}
+.dnd-note{font-size:11.5px;color:var(--muted);margin:6px 2px 0}
+.sp-fold-body>.pt-mode{justify-content:center;margin:10px 0 0}
+/* v597: World of Darkness — the line switch under the mode switch, the Dark Pack notice */
+.pt-mode{flex-wrap:wrap}
+.pt-wod-sub{margin-top:-2px}
+.pt-wod-sub .btn{padding-left:8px;padding-right:8px}
+/* narrow screens: the four lines as a tidy 2 × 2 block instead of 3 + 1 */
+@media (max-width:520px){.pt-wod-sub{display:grid;grid-template-columns:repeat(2,auto);justify-content:end}.sp-signs .pt-wod-sub,.sp-fold-body>.pt-wod-sub{justify-content:center}}
+.sp-signs .pt-wod-sub{justify-content:center;margin:-2px 0 6px}
+.sp-fold-body>.pt-wod-sub{justify-content:center;margin:6px 0 0}
+.wod-note{font-size:10.5px;line-height:1.35;color:var(--muted);margin:8px 4px 0;text-align:center}
+/* v600: another language is being fetched */
+.lang-sw.loading{opacity:.55;cursor:progress}
+/* v600: the number of answers in the share link, and "Send…" */
+.share-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 0}
+.share-count{font-size:13px;color:var(--muted);margin:0 2px;flex:1 1 auto}
+.share-count.zero{color:var(--limit);font-weight:600}
+.share-send{margin-left:auto;flex:0 0 auto}   /* v601 (owner): small, not a big colour block */
+/* v601: "new" dot next to "My portrait" */
+.pt-new{margin:0 2px}

@@ -112,8 +112,11 @@
     KC.store.mine.setActive("");
     const st = KC.store.blank(); st.onlyMarked = F.state.onlyMarked;
     KC.store.writeOwn(st);
-    location.href = location.pathname;
+    location.href = F.homeUrl();
   };
+  /* my own list, reloaded in the language shown now (v600: without ?lang= a visitor who never picked a language
+     got the phone's language after "Start a new list") */
+  F.homeUrl = () => location.pathname + "?lang=" + KC.i18n.lang;
 
   /* profile: role block at the top + "About me" */
   F.renderProfile = function () {
@@ -211,7 +214,7 @@
     KC.$("progress").textContent = t("progress", { n, total });
   };
 
-  /* search + "Show" filter (all / unanswered / new / answered / Yes-Love-Maybe) + template + "only ♥".
+  /* search + "Show" filter (all / unanswered / new / answered / Yes-Love-Maybe / only No) + template + "only ♥".
      Evaluated only when one of them changes, so a row you just answered stays in place until then.
      "answered" and "positive" also sort each section by answer (Love, Yes, Maybe, No), as in the PDF. */
   const POSITIVE = { love: 1, yes: 1, maybe: 1 };
@@ -235,6 +238,7 @@
         if (m && view === "new") m = row.dataset.new === "1";
         if (m && view === "answered") m = !!a;
         if (m && view === "positive") m = !!POSITIVE[a];
+        if (m && view === "no") m = a === "limit";   /* v601 (owner): only the "No" answers, section by section */
         if (m && favs) m = !!favs[id];
         row.classList.toggle("filtered-out", !m); if (m) visible++;
       });
