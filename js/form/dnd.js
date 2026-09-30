@@ -1,9 +1,15 @@
 /* form/dnd.js — the joke "DnD mode" of the portrait (v591, owner): instead of the constellation sign, a D&D class
    and subclass, drawn as a constellation in the class's style, plus a joke alignment.
-   Which variant: the same main groups as the sign (KC.signs.pick), but a pair does NOT depend on the order
-   ("S/M + D/s" = "D/s + S/M"): 9 single variants, 36 pairs, the Chimera (three groups close together) = 46.
+   Which class (v603, owner): a PROFILE, as in the World of Darkness — every class has weights over the 9 portrait
+   groups (CLS); dev = a group's % − the person's average % − the usual skew of real lists (TYP);
+   score = Σ w·dev / Σ|w| + a calibrated bias (CLSB); the highest wins. Before v603 the class came from the sign's
+   two strongest groups, and almost everyone (bondage and sex are high in most real lists) got a Monk, Fighter,
+   Warlock or Sorcerer.
+   Which subclass: among the class's variants in VAR (9 single, 36 pairs — order-free —, the Chimera = 46):
+   a single variant wins when its group is the strongest dev and GAP_D ahead of the second; the Chimera (Sorcerer
+   only) when the three strongest devs are within EVEN_D; otherwise the pair with the highest average dev.
    Only official 5e subclasses (PHB 2014/2024, DMG, XGtE, TCoE); 13 classes, 3–4 variants each (owner).
-   A figure: 9 stars, one per portrait group (the main groups are the bright ones, the rest take the other
+   A figure: 9 stars, one per portrait group (the variant's groups are the bright ones, the rest take the other
    groups strongest first, as in the signs) + grey stars that only shape the drawing (indexes 9+ in the lines).
    Alignment (owner, v595): every portrait group counts. d = a group's % minus the person's average %;
    Good = Σ wGood·d / Σ|wGood|, Law = Σ wLaw·d / Σ|wLaw| (weights: AXES below, chosen by the owner);
@@ -50,16 +56,63 @@
   const keyOf = main => main.length === 3 ? "*"
     : main.map(m => Object.keys(KC.signs.KEY).find(k => KC.signs.KEY[k] === m.id)).sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b)).join("");
 
+  /* v603 (owner): the usual skew of real lists (owner's group, portrait variant A): a group's % minus the person's
+     average, averaged over people. Shared with the World of Darkness; taken off before profiles are compared. */
+  const TYP = { intimacy: -4, bondage: 11, fetishes: -3, "role-play": -5, ds: 2, sm: 10, "sex-penetration": 16, "voyeurism-exhibitionism": -9, "bodily-fluids": -19 };
+  /* portrait -> {dev: group -> % − average − TYP, secs: groups with a percentage} (null when none) */
+  function devs(d) {
+    const secs = d.sections.filter(s => s.pct !== null && KC.signs.GROUPS.indexOf(s.id) >= 0);
+    if (!secs.length) return null;
+    const mean = secs.reduce((a, s) => a + s.pct, 0) / secs.length, dev = {};
+    secs.forEach(s => { dev[s.id] = s.pct - mean - (TYP[s.id] || 0); });
+    return { dev, secs };
+  }
+  /* class profiles: group letter (as in the signs) -> weight, + a bias calibrated so that every class comes out about
+     equally often on lists spread like real ones (owner, v603) */
+  const CLS = { cleric: ["n1 d.4", 0.14], rogue: ["v1 r.5", 0], wizard: ["r1 f.5", -0.54], monk: ["b1 n.3", -0.52], fighter: ["s.7 x.7", 0.15],
+    barbarian: ["s1 w.3", -0.81], paladin: ["d1 n.3", 0.2], warlock: ["d.7 f.7", 0.35], sorcerer: ["x1 w.5", 0.01], bard: ["x.7 v.7", 0.18],
+    druid: ["w1 n.4", -0.3], ranger: ["b.6 r.6 v.4", 1.25], artificer: ["f1 b.5", -0.1] };
+  /* a single variant: its group GAP_D ahead of the second (the sign's 30 points × .45, the spread of real lists);
+     the Chimera: the three strongest within EVEN_D (owner, v603) */
+  const GAP_D = 13.6, EVEN_D = 2.3;
+  let clsW = null;
+  const clsWeights = () => clsW || (clsW = Object.keys(CLS).reduce((o, c) => { const w = {};
+    CLS[c][0].split(" ").forEach(tk => { w[KC.signs.KEY[tk[0]]] = parseFloat(tk.slice(1)); }); o[c] = w; return o; }, {}));
+  /* dev -> classes, best first: [{cls, score}] */
+  function classes(dev) {
+    const W = clsWeights();
+    return Object.keys(CLS).map(c => { let num = 0, den = 0;
+      Object.keys(W[c]).forEach(g => { num += W[c][g] * (dev[g] || 0); den += Math.abs(W[c][g]); });
+      return { cls: c, score: num / den + CLS[c][1] }; }).sort((a, b) => b.score - a.score);
+  }
+  /* the variant of a class: {key, groups (strongest first)} or null when the class has none that fits */
+  function variant(cls, dev) {
+    const g = Object.keys(dev).sort((a, b) => dev[b] - dev[a]);
+    const keys = Object.keys(VAR).filter(k => VAR[k][0] === cls);
+    if (keys.indexOf("*") >= 0 && g.length >= 3 && dev[g[0]] - dev[g[2]] <= EVEN_D) return { key: "*", groups: g.slice(0, 3) };
+    const one = keys.find(k => k.length === 1 && KC.signs.KEY[k] === g[0]);
+    if (one && (g.length === 1 || dev[g[0]] - dev[g[1]] >= GAP_D)) return { key: one, groups: [g[0]] };
+    let best = null, bs = -1e9;
+    keys.filter(k => k.length === 2).forEach(k => { const a = KC.signs.KEY[k[0]], b = KC.signs.KEY[k[1]];
+      if (dev[a] === undefined || dev[b] === undefined) return;
+      const sc = (dev[a] + dev[b]) / 2; if (sc > bs) { bs = sc; best = { key: k, groups: dev[a] >= dev[b] ? [a, b] : [b, a] }; } });
+    return best;
+  }
+
   /* portrait data -> the figure in the same shape as a sign (stars 0–8 carry a group, grey stars follow), or null */
   function pick(d) {
-    const sg = KC.signs.pick(d); if (!sg) return null;
-    const key = keyOf(sg.main), [cls, sub] = VAR[key], [P, E, L, B] = FIG[cls];
-    const rest = d.sections.filter(s => KC.signs.GROUPS.indexOf(s.id) >= 0 && sg.main.indexOf(s) < 0);
+    const dv = devs(d); if (!dv) return null;
+    let v = null, cls = null;
+    classes(dv.dev).some(c => { v = variant(c.cls, dv.dev); if (v) cls = c.cls; return !!v; });
+    if (!v) return null;
+    const main = v.groups.map(id => dv.secs.find(s => s.id === id));
+    const [, sub] = VAR[v.key], [P, E, L, B] = FIG[cls];
+    const rest = d.sections.filter(s => KC.signs.GROUPS.indexOf(s.id) >= 0 && main.indexOf(s) < 0);
     const stars = P.map(p => ({ x: p[0], y: p[1], bright: false, s: null }));
-    sg.main.forEach((m, k) => { stars[B[k]].bright = true; stars[B[k]].s = m; });
+    main.forEach((m, k) => { stars[B[k]].bright = true; stars[B[k]].s = m; });
     let r = 0; stars.forEach(st => { if (!st.s) st.s = rest[r++] || null; });
     E.forEach(p => stars.push({ x: p[0], y: p[1], grey: true, bright: false, s: null }));
-    return { dnd: true, key, cls, sub, stars, lines: L, main: sg.main, kind: sg.kind };
+    return { dnd: true, key: v.key, cls, sub, stars, lines: L, main, kind: main.length === 1 ? "single" : main.length === 3 ? "even" : "pair" };
   }
 
   /* the joke alignment: st = the list, d = its portrait, set = the applied template (or null) */
@@ -78,20 +131,21 @@
   /* the numbers behind the alignment: {key: "roll" | "boring" | null, good, law} (v597: the World of Darkness
      mode needs the numbers, e.g. the fey court) */
   function alignNum(st, d, set) {
-    let n = 0, no = 0, maybe = 0, answered = 0;
+    let n = 0, no = 0, maybe = 0, love = 0, answered = 0;
     KC.CATS.forEach(c => { if (KC.portrait.OUT[c.id]) return; c.items.forEach(([, id]) => {
       if (set && !set.has(id)) return;
       n++; const v = (st.items[id] || {}).interest;
       if (v) answered++;
-      if (v === "limit") no++; else if (v === "maybe") maybe++; else if (!v) no += .5;   /* unanswered = half a "No" */
+      if (v === "limit") no++; else if (v === "maybe") maybe++; else if (v === "love") love++; else if (!v) no += .5;   /* unanswered = half a "No" */
     }); });
     const pNo = n ? no / n : 0;   /* also used for the fey Banality (v599) */
-    if (answered < LIM.FEW || !n) return { key: "roll", good: 0, law: 0, pNo };
+    const pLove = answered ? love / answered : 0;   /* share of "Love" among the answers: the fey Glamour (v603) */
+    if (answered < LIM.FEW || !n) return { key: "roll", good: 0, law: 0, pNo, pLove };
     const pMaybe = maybe / answered, role = st.meta && st.meta.role;
     const sc = scores(d);
     const good = sc.good + (role === "sub" ? LIM.ROLE : 0);
     const law = sc.law + LIM.K * (pNo - LIM.NO0) - LIM.K * (pMaybe - LIM.MAYBE0) + (role === "dom" ? LIM.ROLE : 0);
-    return { key: pNo >= LIM.NO ? "boring" : null, good, law, pNo };
+    return { key: pNo >= LIM.NO ? "boring" : null, good, law, pNo, pLove };
   }
   function alignment(st, d, set) {
     const a = alignNum(st, d, set); if (a.key) return a.key;
@@ -104,22 +158,26 @@
      27 clusters of items that cut across the sections; each cluster marks its items on some of 7 axes
      ("1+" = the first pole of axis 1, "1-" = the second). A pole's value = liked share of its answered items
      (Love 1, Yes .8, Maybe .3, No 0), a pole needs 5 answers; an axis = first pole − second pole.
-     A race = two poles, its points = how strongly the person leans to each; the most points wins.
-     Every axis within ±12 → Human. "About me": large/extensive experience +10 Dragonborn,
-     latex / leather / goth +10 Tiefling. Session length counts for "slow" / "rush". */
+     A race = two poles. v603 (owner): the poles are STANDARDISED — z = (axis − its usual value in real lists AXT) /
+     its usual spread AXSD (an axis with too few answers: z = 0); a race's points = z of its two poles + a calibrated
+     bias RACEB; the most points wins. Before, raw poles were compared and softness + privacy (the Halfling) are the
+     strongest poles of almost every real list. Every |z| < .5 → Human. "About me" (in z): large/extensive
+     experience +.6 Dragonborn (v604, owner: clothing no longer counts for the Tiefling). Session length counts for
+     "slow" / "rush".
+     AXT / AXSD are shared with the World of Darkness (paths, auspices). */
   const POLES = [["power", "play"], ["mind", "body"], ["ritual", "spont"], ["gear", "hands"], ["slow", "rush"], ["crowd", "private"], ["hard", "soft"]];
   const CL = {
     protocol: ["1+ 2+ 3+ 5+", "following-orders discipline rituals honorifics contract-slave total-power-exchange 24-7-d-s-lifestyle prompt-obedience eye-contact-rules speech-restrictions no-sounds gor-training kneeling daily-diary mantra-meditation personality-modification name-change symbolic-jewelry collar-in-private metal-collar punishment-scene chosen-food bathroom-control exercise-required photo-proof initiation-rites standing-in-corner kneeling-on-buckwheat corner-kneeler"],
-    pet: ["1- 3+", "age-play dd-lg-md-lb animal-roleplay puppy-play kitten-play pony-play furry leash muzzles hand-feeding kigurumi bratting brat-taming switching-roles wrestling praise begging schoolroom-scenes"],
+    pet: ["1- 3+", "age-play dd-lg-md-lb animal-roleplay puppy-play kitten-play pony-play furry leash muzzles hand-feeding kigurumi bratting brat-taming switching-roles wrestling praise begging schoolroom-scenes cow-play pig-play"],
     service: ["1+ 3+", "chores serving-as-a-maid massage pedicures-foot-massage manicures chauffeuring forced-servitude uniform-wearing erotic-dancing serving-other-doms other-sub-serves-you"],
-    object: ["1+ 2+", "objectification sex-doll-use depersonalisation dronification mindbreak freeuse glory-hole stuck-in-wall fuck-box serving-as-furniture serving-as-art used-as-toy-for-other-sub sleep-play unseen-actor blind-stranger auctioned"],
-    words: ["2+ 1+", "verbal-humiliation forced-thanking forced-self-degradation humiliating-body-writing body-writing lecturing dirty-talk forced-begging-acts humiliation-in-private mouth-soaping phone-sex"],
+    object: ["1+ 2+", "objectification sex-doll-use depersonalisation dronification mindbreak freeuse glory-hole stuck-in-wall fuck-box serving-as-furniture serving-as-art used-as-toy-for-other-sub sleep-play unseen-actor blind-stranger auctioned hair-as-mop"],
+    words: ["2+ 1+", "verbal-humiliation forced-thanking forced-self-degradation humiliating-body-writing body-writing lecturing dirty-talk forced-begging-acts humiliation-in-private mouth-soaping phone-sex floor-licking"],
     look: ["2+ 3+", "forced-dressing forced-feminization cross-dressing chosen-clothing shaving-head-hair shaving-body-hair forced-nudity forced-nudity-private slutty-clothing"],
     wardrobe: ["3+ 4+", "leather-wearing rubber-latex-wearing latex-sweat spandex-clothing corsets lingerie-wearing stockings-wearing high-heel-wearing formal-clothing gas-masks masks cosplay clothed-sex clothes-tearing tights-tearing clothes-cutting piercing-fetish harness-leather cuffs-leather leather-restraints nerd-hikikomori clowncore"],
     worship: ["3+ 2-", "boot-worship cock-worship foot-worship toe-licking-giving toe-licking-receiving ass-worship pussy-worship high-heel-worship stocking-worship armpit-fetish homage-with-tongue oral-fixation"],
     rope: ["3+ 4+ 5+", "rope-bondage-simple rope-bondage-shibari semenawa harness-rope suspension-upright suspension-horizontal suspension-inverted partial-suspension breast-bondage hair-bondage predicament-bondage mutually-restrictive-bondage bondage-light arm-leg-sleeves spreader-bars wall-cross-mounting loveswing"],
     iron: ["4+ 5+ 1+", "cages-cells chains manacles-irons cuffs-metal cuffs-handcuff thumb-cuffs toe-cuffs zip-tie-bondage tape-bondage stocks chastity-device locking-anal-plug locking-vaginal-insert bondage-all-day bondage-heavy left-tied-unattended straight-jacket mummification sleep-sacks bondage-bag vacbed immobilisation mitts prison-scenes nose-hook"],
-    dark: ["2+ 4+ 5+", "blindfolds ear-plugs hood-full-head sensory-deprivation gag-ball gag-bit gag-cloth gag-inflatable gag-phallic gag-ring gag-tape panty-gag sex-in-total-darkness sleep-deprivation"],
+    dark: ["2+ 4+ 5+", "blindfolds ear-plugs hood-full-head sensory-deprivation gag-ball gag-bit gag-cloth gag-inflatable gag-phallic gag-ring gag-tape panty-gag sex-in-total-darkness sleep-deprivation sock-gag-own sock-gag-top"],
     touch: ["7- 1- 5+ 2-", "teasing tickling scratching wartenberg-pinwheel ice-cubes wax-play hot-wax-dripping scent-play caning-sensation vampire-gloves finger-claws nipple-play biting hickies ear-licking oil-play nuru-massage suction-cups ice-dildo"],
     spank: ["2- 7+ 4-", "spanking-hand spanking-over-the-knee spanking-hairbrush spanking-leather-slappers spanking-wooden-paddles body-slapping whipping-belt whipping-flogger whipping-cat-o-nine whipping-single-tail riding-crop rubber-band-snapping caning-english rattan birching bastinado palm-strikes strapping pussy-spanking breast-whipping impact-bruising sap-gloves pain-mild pain-massage pressure-points beating-soft bruising-temporary hair-pulling rough-grabbing"],
     extreme: ["7+ 2- 4+", "pain-severe beating-hard punching kicking face-slapping ballbusting pussy-punching pussy-kicking pussy-whipping breast-torture cbt cbt-crushing cbt-stretching ball-stretching zippers-clothespins zippers-clamps zippers-needles nipple-weights tongue-clothespins clamps-labia-clit piercing-temporary labia-sewing-needle labia-stapling medical-stapler branding scarification tattooing piercing-permanent nipple-piercing wax-burns standing-on-nails spike-mat reducing-to-tears brutal-treatment trampling-barefoot trampling-shoes trampling-punk-boots face-stepping biting-hard wasabi-on-genitals menthol-balm-labia menthol-eye-drops figging fire-play fire-cupping hot-wax-high-temp hot-wax-hair-removal wax-inside-vagina riding-the-horse abrasion clothespins nipple-clamps"],
@@ -128,7 +186,7 @@
     orgasm: ["5+ 1+", "edging orgasm-control orgasm-denial forced-orgasm overstimulation sexual-deprivation tantric-yoni forced-masturbation masturbation mutual-masturbation"],
     public: ["6+ 2+", "collar-in-public leash-walk-outside humiliation-in-public anal-plug-public exhibitionism-friends exhibitionism-strangers forced-nudity-others outdoor-scenes stripping erotic-photos photo-exchange video-of-you fake-public-use"],
     watch: ["6+ 2+", "voyeurism-others voyeurism-your-dom video-others forced-watching-others forced-porn-watching mirror-play sex-in-front-of-a-mirror cuckolding-hotwife"],
-    wild: ["3- 4- 7+", "sex-in-snow sex-in-rain hair-drag-snow hair-drag-rain nude-in-snow mud-play outdoor-sex outdoor-bondage chained-outdoors cold-shower sauna-whisk nettle-play-urtication leeches"],
+    wild: ["3- 4- 7+", "sex-in-snow sex-in-rain hair-drag-snow hair-drag-rain nude-in-snow mud-play outdoor-sex outdoor-bondage chained-outdoors cold-shower sauna-whisk nettle-play-urtication leeches abandoned-building-sex"],
     feast: ["1- 3- 4-", "food-play nyotaimori sake-from-thighs food-smearing-sploshing drinking-from-feet forced-drinking-from-feet forced-unpleasant-food forced-drinking-beer-cider drinking-bathwater forced-drinking-bathwater funnel-play smoking-fetish"],
     taboo: ["3- 7+", "golden-showers swallowing-urine urination-in-front omorashi period-play blood-play spitting spitting-in-mouth human-ashtray trash-play forced-staying-in-sweat-cum underwear-sniffing wearing-partners-underwear milking pussy-juice-play squirting licking-fingers-clean rimming"],
     home: ["7- 6- 4-", "romance-affection hugging gentle-touch kissing-body kissing-mouth spooning using-real-names sleepover aftercare shared-bathing lap-pillow-ear-cleaning petting-over-clothes thigh-sex"],
@@ -141,7 +199,12 @@
   const RACES = { human: ["body", "rush"], elf: ["ritual", "slow"], drow: ["power", "mind"], dwarf: ["gear", "power"], dragonborn: ["power", "ritual"],
     halforc: ["hard", "rush"], goliath: ["hard", "body"], tiefling: ["mind", "hard"], yuanti: ["mind", "slow"], halfling: ["soft", "private"],
     tabaxi: ["play", "spont"], changeling: ["mind", "play"], kenku: ["mind", "hands"] };
-  const RLIM = { MIN: 5, FLAT: 12, BONUS: 10 };
+  const RLIM = { MIN: 5, FLAT: .5, BONUS: .6 };
+  /* v603 (owner's group, portrait variant A): the usual value ± the usual spread of each axis in real lists */
+  const AXT = [-3, 1, 9, -9, -7, -12, -23], AXSD = [12, 9, 11, 10, 16, 18, 15];
+  /* calibrated so that every race comes out about equally often on lists spread like real ones */
+  const RACEB = { human: -0.28, elf: -0.03, drow: 0.15, dwarf: 0.03, dragonborn: 0.15, halforc: 0.01, goliath: -0.02, tiefling: 0.35,
+    yuanti: 0.07, halfling: -0.4, tabaxi: -0.35, changeling: 0.24, kenku: 0.06 };
   const RW = { love: 1, yes: .8, maybe: .3, limit: 0 };
   let poleIds = null;
   function poles() {
@@ -161,14 +224,18 @@
       val[p] = n >= RLIM.MIN ? 100 * sum / n : null; });
     return POLES.map(([a, b]) => val[a] === null || val[b] === null ? (nulls ? null : 0) : val[a] - val[b]);
   }
+  /* the standardised poles: {pole: z ≥ 0} (a pole below its usual value counts for the opposite pole) */
+  function zPoles(st, set) {
+    const raw = axes(st, set, true), z = {};
+    POLES.forEach(([a, b], i) => { const v = raw[i] === null ? 0 : (raw[i] - AXT[i]) / AXSD[i]; z[a] = Math.max(0, v); z[b] = Math.max(0, -v); });
+    return z;
+  }
   function race(st, set) {
-    const ax = axes(st, set), str = {};
-    if (ax.every(v => Math.abs(v) < RLIM.FLAT)) return "human";
-    POLES.forEach(([a, b], i) => { str[a] = Math.max(0, ax[i]); str[b] = Math.max(0, -ax[i]); });
+    const z = zPoles(st, set);
+    if (POLES.every(([a, b]) => z[a] < RLIM.FLAT && z[b] < RLIM.FLAT)) return "human";
     const m = st.meta || {}, sc = {};
-    Object.keys(RACES).forEach(r => { sc[r] = str[RACES[r][0]] + str[RACES[r][1]]; });
+    Object.keys(RACES).forEach(r => { sc[r] = z[RACES[r][0]] + z[RACES[r][1]] + RACEB[r]; });
     if (m.exp === "large" || m.exp === "extensive") sc.dragonborn += RLIM.BONUS;
-    if ((m.attire || []).some(a => a === "latex" || a === "leather" || a === "goth")) sc.tiefling += RLIM.BONUS;
     return Object.keys(sc).reduce((a, b) => sc[b] > sc[a] ? b : a);   /* a tie: the earlier race in RACES */
   }
 
@@ -210,5 +277,6 @@
   const setOn = (v, scope) => setMode(v ? "dnd" : "sign", scope);
 
   KC.dnd = { FIG, VAR, ORDER, ALIGN, LIM, AXES, scores, keyOf, pick, alignNum, alignment, on, set: setOn, mode, setMode,
-    POLES, CL, RACES, RLIM, axes, race, XP, level, DMG, MON, foes };
+    TYP, devs, CLS, GAP_D, EVEN_D, classes, variant,
+    POLES, CL, RACES, RLIM, AXT, AXSD, RACEB, axes, zPoles, race, XP, level, DMG, MON, foes };
 })(window.KC);

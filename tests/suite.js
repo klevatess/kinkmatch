@@ -20,11 +20,11 @@ const S = (title) => console.log("\n## " + title);
   ok(!p.errors.length, "no script errors on load: " + p.errors.join(" | "));
   const ids = [], codes = [];
   KC.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); codes.push(code); }));
-  eq(ids.length, 493, "item count");
+  eq(ids.length, 500, "item count");
   eq(new Set(ids).size, ids.length, "unique ids"); eq(new Set(codes).size, codes.length, "unique codes");
   const byCode = {}; KC.CATS.forEach(c => c.items.forEach(([code, id]) => byCode[code] = id));
   eq(OLD.ORDER.map((id, i) => byCode[i]), OLD.ORDER, "codes 0..370 still mean the same items as in old versions");
-  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(493).keys()], "codes are 0..492 with no gaps or reuse");
+  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(500).keys()], "codes are 0..499 with no gaps or reuse");
   eq(["furry","xenophilia-tentacles","trampling-barefoot","trampling-shoes","rubber-band-snapping","forced-drinking-beer-cider","irrumatio-to-vomiting","bukkake","cum-in-eyes","nerd-hikikomori","humiliating-body-writing","wax-burns","spitting-in-mouth","snowballing","used-as-toy-for-other-sub","bondage-bag"].map(id => ids.indexOf(id) >= 0), Array(16).fill(true), "16 added items present");
   eq(["sleep-sacks", "bondage-bag", "scarification", "electricity-violet-wand"].map(id => KC.i18n.item(id, "ru").name), ["Спальный мешок", "Бондажный мешок", "Шрамирование", "Электро — вайолет-ванд"], "RU names as requested");
   eq(KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "wax-burns"), true, "wax burns under marking");
@@ -65,7 +65,7 @@ const S = (title) => console.log("\n## " + title);
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
   });
-  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 493, "EN names unique");
+  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 500, "EN names unique");
   const enCyr = ids.filter(id => /[а-яё]/i.test(KC.i18n.item(id, "en").desc)); eq(enCyr, [], "EN hints contain no Cyrillic");
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
@@ -121,7 +121,7 @@ const S = (title) => console.log("\n## " + title);
   p = open("form", { navLang: "ru" });
   let { w, d } = p;
   eq(p.KC.i18n.lang, "ru", "RU browser -> RU page");
-  eq(d.querySelectorAll(".item").length, 493, "493 rows rendered");
+  eq(d.querySelectorAll(".item").length, 500, "500 rows rendered");
   ok(d.querySelector(".brand-row #langSw"), "language switcher sits in the title row");
   const dotted = [...d.querySelectorAll(".item .new-dot")].map(x => x.closest(".item").dataset.id).sort();
   const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 418) newer.push(id); }));
@@ -150,7 +150,7 @@ const S = (title) => console.log("\n## " + title);
   let saved = JSON.parse(w.localStorage.getItem("practices-checklist-v1"));
   eq(saved.items, { hugging: { interest: "love" }, "spanking-hand": { interest: "maybe" }, "fisting-anal": { interest: "limit" }, "impact-bruising": { interest: "yes" } }, "answers saved (toggle-off removed)");
   eq(saved.meta, { role: "sub", exp: "medium", rel: "poly", attire: ["lace", "leather"] }, "profile saved as keys");
-  eq(d.getElementById("progress").textContent, "Отмечено 4 из 493 практик", "progress text");
+  eq(d.getElementById("progress").textContent, "Отмечено 4 из 500 практик", "progress text");
   const link = p.KC.form.shareLink();
   ok(/[#&]lg=ru(&|$)/.test(link), "share link carries lg=ru");
   ok(/[#&]m=/.test(link), "share link carries profile (m=)");
@@ -172,7 +172,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector('#roleTop .opt[data-val="sub"]').getAttribute("aria-pressed") === "true", "role survived switch");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submissive / Bottom", "role label translated");
   eq(d.getElementById("metaName").value, "Борис", "name survived switch");
-  eq(d.getElementById("progress").textContent, "4 of 493 practices marked", "EN progress");
+  eq(d.getElementById("progress").textContent, "4 of 500 practices marked", "EN progress");
   eq(d.getElementById("shareBtn").textContent, "Share", "header translated");
   eq(d.documentElement.lang, "en", "<html lang> updated");
   ok(/lg=en/.test(p.KC.form.shareLink()), "link now carries lg=en");
@@ -185,7 +185,7 @@ const S = (title) => console.log("\n## " + title);
   ok(row("hugging").querySelector('.scale button[data-v="love"]').classList.contains("sel"), "answer survived switch to PT");
   eq(row("hugging").querySelector('.scale button[data-v="love"]').textContent, "Adoro", "PT scale");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submisso(a) / Bottom", "PT role label");
-  eq(d.getElementById("progress").textContent, "4 de 493 práticas marcadas", "PT progress");
+  eq(d.getElementById("progress").textContent, "4 de 500 práticas marcadas", "PT progress");
   const ptHash = p.KC.form.shareLink().split("#")[1];
   ok(/lg=pt/.test(ptHash), "PT link carries lg=pt");
   eq(open("form", { hash: ptHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "pt", "PT link opens in PT");
@@ -351,7 +351,7 @@ const S = (title) => console.log("\n## " + title);
   eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
   ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
   const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
-  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 493 практик", "counter = what is shown");
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 500 практик", "counter = what is shown");
   eq(gLink, gShown, "link contains exactly what the counter says");
   Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
 
@@ -381,7 +381,7 @@ const S = (title) => console.log("\n## " + title);
   const srt = o => Object.entries(o).sort();
   eq(srt(KCn.codec.decode(KCn.codec.encode(withNew)).items), srt(withNew.items), "link with new items round-trips");
   const allNew = {}; KCn.CATS.forEach(c => c.items.forEach(([, id], i) => allNew[id] = { interest: vals[i % 4] }));
-  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 493, "fully filled 493-item link round-trips");
+  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 500, "fully filled 500-item link round-trips");
 
   /* form: "Show" filter */
   S("Show filter");
@@ -390,7 +390,7 @@ const S = (title) => console.log("\n## " + title);
   const vsel = p.d.getElementById("view");
   eq([...vsel.options].map(o => o.textContent), ["Все пункты", "Только без ответа", "Только новые", "Отвеченные, по ответам", "Обожаю / Да / Может", "Только «Нет»"], "Show menu labels (v601: + only No)");
   vsel.value = "unanswered"; vsel.dispatchEvent(new p.w.Event("change"));
-  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [491, -1, -1], "unanswered: answered items hidden");
+  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [498, -1, -1], "unanswered: answered items hidden");
   click(p.w, p.d.querySelector('.item[data-id="chains"] .scale button[data-v="yes"]'));
   ok(vis().indexOf("chains") >= 0, "a row just answered stays visible until the filter is re-applied");
   vsel.dispatchEvent(new p.w.Event("change")); ok(vis().indexOf("chains") < 0, "re-applying hides it");
@@ -399,7 +399,7 @@ const S = (title) => console.log("\n## " + title);
   eq(vis().sort(), newIds.sort(), "new: exactly the green-dot items (" + newIds.length + ")");
   const sb = p.d.getElementById("search"); sb.value = "секс"; sb.dispatchEvent(new p.w.Event("input"));
   ok(vis().length > 0 && vis().every(id => newIds.indexOf(id) >= 0), "search combines with the filter");
-  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 493, "all items again");
+  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 500, "all items again");
 
   /* backup */
   S("Backup");
@@ -682,7 +682,7 @@ const S = (title) => console.log("\n## " + title);
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "ผ้าปิดตา", "TH name");
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "TH page shows English subtitle");
   eq(tp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "ชอบมาก", "TH scale + answer");
-  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 493 รายการ", "TH progress");
+  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 500 รายการ", "TH progress");
   ok(/lg=th/.test(tp.KC.form.shareLink()), "TH link carries lg=th");
   eq(open("form", { hash: tp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "th", "TH link opens in Thai");
   ok(/ลิมิตเด็ดขาด/.test(tp.KC.form.buildSheet().textContent), "TH PDF sheet");
@@ -694,7 +694,7 @@ const S = (title) => console.log("\n## " + title);
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "眼罩", "ZH name");
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "ZH page shows English subtitle");
   eq(zp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "超愛", "ZH scale + answer");
-  eq(zp.d.getElementById("progress").textContent, "已勾選 4／493 項", "ZH progress");
+  eq(zp.d.getElementById("progress").textContent, "已勾選 4／500 項", "ZH progress");
   ok(/lg=zh/.test(zp.KC.form.shareLink()), "ZH link carries lg=zh");
   eq(open("form", { hash: zp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "zh", "ZH link opens in Chinese");
   ok(/硬限制/.test(zp.KC.form.buildSheet().textContent), "ZH PDF sheet");
@@ -706,7 +706,7 @@ const S = (title) => console.log("\n## " + title);
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
   eq(p.d.querySelector('.item[data-id="face-sitting"] .sub').textContent, "Face-sitting", "JA page shows English subtitle");
   eq(p.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "大好き", "JA scale + answer");
-  eq(p.d.getElementById("progress").textContent, "493項目中 4項目にチェック済み", "JA progress");
+  eq(p.d.getElementById("progress").textContent, "500項目中 4項目にチェック済み", "JA progress");
   ok(/lg=ja/.test(p.KC.form.shareLink()), "JA link carries lg=ja");
   ok(/ハードリミット/.test(p.KC.form.buildSheet().textContent), "JA PDF sheet");
   const js = p.d.getElementById("search"); js.value = "鞭"; js.dispatchEvent(new p.w.Event("input"));
@@ -856,13 +856,13 @@ const S = (title) => console.log("\n## " + title);
   const tact = b3.d.getElementById("tplAct");
   eq(tact.textContent, "Показать все пункты", "note button: show all");
   click(b3.w, tact);
-  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [493, "Только пункты шаблона", ""], "show all: every item, button to go back");
+  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [500, "Только пункты шаблона", ""], "show all: every item, button to go back");
   ok(/создана по шаблону «Evening»\. Показаны все пункты\./.test(b3.d.getElementById("tplNoteText").textContent), "note still says what the list was created by");
   await sleep(300);
   eq(LS(b3, OK_).template.name, "Evening", "showing all does not unbind the list");
   click(b3.w, tact); eq(visP(b3).length, 5, "back to the template's items");
   const bsel = b3.d.getElementById("tplSel"); bsel.value = ""; bsel.dispatchEvent(new b3.w.Event("change"));
-  eq([visP(b3).length, b3.KC.form.state.template.name], [493, "Evening"], "“No template” in Filters: a view choice only");
+  eq([visP(b3).length, b3.KC.form.state.template.name], [500, "Evening"], "“No template” in Filters: a view choice only");
   bsel.value = td.tpl.id; bsel.dispatchEvent(new b3.w.Event("change"));
   const bl = b3.KC.form.shareLink(), bld = b3.KC.codec.decode(bl);
   eq([Object.keys(bld.items), bld.by && bld.by.id, bld.tpl], [["hugging"], td.tpl.id, undefined], "plain link of a list by a template: its answers + fi= mark");
@@ -884,7 +884,7 @@ const S = (title) => console.log("\n## " + title);
   const borisRow = [...b3.d.querySelectorAll("#mineList .saved-row")].find(r => !/по шаблону/.test(r.textContent));
   click(b3.w, borisRow.querySelector('[data-act="load"]'));
   b3 = open("form", { storage: b3.storage() });
-  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 493], "switched to my plain list");
+  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 500], "switched to my plain list");
   r3 = open("form", { hash: tplLink.split("#")[1], storage: b3.storage() });
   b3 = open("form", { storage: r3.storage() });
   eq([b3.KC.form.state.template.name, Object.keys(b3.KC.form.state.items).sort(), LS(b3, MK).length], ["Evening", ["chains", "hugging"], 2], "template link from another list: my list by it is reopened (not a new one)");
@@ -910,7 +910,7 @@ const S = (title) => console.log("\n## " + title);
   S("Templates: someone's list shown by my template");
   const bobPlain = KCn.codec.encode({ uid: "BOB002", name: "Bob", items: { hugging: { interest: "yes" }, "spanking-hand": { interest: "love" }, chains: { interest: "maybe" } }, meta: {} }, "ru");
   rv = open("form", { hash: bobPlain, storage: recStorage });
-  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 493], "plain list: no template, no note");
+  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 500], "plain list: no template, no note");
   click(rv.w, rv.d.getElementById("bannerTpl"));
   ok(!rv.d.getElementById("tplSel").hidden, "“Show by a template…” points at the template list in the header");
   const rsel = rv.d.getElementById("tplSel"); rsel.value = td.tpl.id; rsel.dispatchEvent(new rv.w.Event("change"));
@@ -926,7 +926,7 @@ const S = (title) => console.log("\n## " + title);
   click(dz.w, dz.d.querySelector('#savedTplList button[data-act="del"]'));
   eq([conf, LS(dz, TK).length], [1, 0], "deleting a template asks first");
   dz = open("form", { storage: dz.storage() });
-  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [493, true], "list by a deleted template: opens with all items");
+  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [500, true], "list by a deleted template: opens with all items");
   ok(/создана по шаблону «Evening», но этого шаблона больше нет среди сохранённых\. Показаны все пункты\./.test(dz.d.getElementById("tplNoteText").textContent), "…and still says what it was created by");
   click(dz.w, dz.d.getElementById("mineBtn"));
   ok(/по удалённому шаблону «Evening»/.test(dz.d.getElementById("mineList").textContent), "My lists: “by the deleted template”");
@@ -960,7 +960,7 @@ const S = (title) => console.log("\n## " + title);
   eq(KCn.codec.decode(emptyLink.replace(/&k=\w+/, "")).damaged, false, "…a link without checksum still opens");
   const bigSet = []; KCn.CATS.forEach(c => c.items.forEach(([, id]) => bigSet.push(id)));
   const bigL = KCn.codec.encode(Object.assign(KCn.store.blank(), { tpl: { id: "ABCDEF", name: "All", ids: bigSet } }), "ru"), bigD = KCn.codec.decode(bigL);
-  eq([bigD.tpl.ids.length, bigD.damaged], [493, false], "a template of every item round-trips (bitmap form)");
+  eq([bigD.tpl.ids.length, bigD.damaged], [500, false], "a template of every item round-trips (bitmap form)");
   ok(new URLSearchParams(bigL).get("t").length <= 90, "…in about 80 characters (grows 1 bit per item)");
 
   S("Templates: updates and own template");
@@ -1088,7 +1088,7 @@ const S = (title) => console.log("\n## " + title);
   eq([ts.hidden, ts.value, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [false, td.tpl.id, "Evening", true], "list by a template: the header list shows its name, highlighted");
   eq(ts.options[0].textContent, "✕ Без шаблона", "first option removes it");
   ts.value = ""; ts.dispatchEvent(new hq.w.Event("change"));
-  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [493, "Шаблон…", false], "one pick: no template, the list says “Template…”");
+  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [500, "Шаблон…", false], "one pick: no template, the list says “Template…”");
 
   S("v557: share the current template");
   hq = open("form", { storage: recStorage });
@@ -1582,7 +1582,7 @@ const S = (title) => console.log("\n## " + title);
     eq(one("intimacy", ["love", "love", "love"]), 73, "3× Love alone: 73% (average 100%, amount 45%)");
     ok(one("intimacy", ["love", "love", "love"]) > one("intimacy", ["yes", "yes", "yes"]) && one("intimacy", ["yes", "yes", "yes"]) > one("intimacy", ["maybe", "maybe", "maybe"]), "Love > Yes > Maybe");
     ok(one("intimacy", ["love", "yes", "limit", "maybe"]) < one("intimacy", ["love", "yes", "maybe"]), "No pulls the group down");
-    eq(one("intimacy", ["limit", "limit", "yes"]), 0, "never below 0%");
+    eq([one("intimacy", ["limit", "limit", "limit"]), one("intimacy", ["limit", "limit", "yes"])], [0, 8], "never below 0%; v603 (variant A): a “Yes” among “No” still counts in “how many” (8%)");
     eq(one("intimacy", ["love", "love"]), null, "fewer than 3 answers: no percentage");
     eq(P.compute({ items: {} }).sections.map(s => s.id).sort(), ["bodily-fluids", "bondage", "ds", "fetishes", "intimacy", "role-play", "sex-penetration", "sm", "voyeurism-exhibitionism"], "9 groups: D/s and S/M merged, role play on its own");
     const outSt = { items: Object.assign(mk("session-length", ["love", "love", "love"]), mk("non-monogamy", ["love", "love", "love"])) };
@@ -1948,11 +1948,15 @@ const S = (title) => console.log("\n## " + title);
     eq(miss, [], "every DnD text exists in all 7 languages");
     const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => (b.pct === null ? -1 : b.pct) - (a.pct === null ? -1 : a.pct)) });
     const all = o => Object.assign({ intimacy: 10, bondage: 10, fetishes: 10, "role-play": 10, ds: 10, sm: 10, "sex-penetration": 10, "voyeurism-exhibitionism": 10, "bodily-fluids": 10 }, o);
-    const a = DD.pick(D(all({ ds: 70, sm: 60 }))), b = DD.pick(D(all({ sm: 70, ds: 60 })));
-    eq([a.cls, a.sub, b.cls, b.sub], ["paladin", "vengeance", "paladin", "vengeance"], "D/s + S/M and S/M + D/s: the same class (Paladin, Oath of Vengeance)");
+    /* v603: the class is a profile; a pair variant still does not depend on the order of its two groups */
+    const a = DD.pick(D(all({ ds: 70, sm: 65 })));
+    eq([a.cls, a.sub, a.kind], ["paladin", "vengeance", "pair"], "D/s far above, S/M close behind → Paladin, Oath of Vengeance (D/s + S/M)");
+    const dvOf = o => DD.devs(D(all(o))).dev;
+    eq([DD.variant("paladin", dvOf({ ds: 70, sm: 65 })).key, DD.variant("paladin", dvOf({ ds: 65, sm: 80 })).key], ["ds", "ds"], "…S/M + D/s in the other order: the same variant");
     eq(a.stars.filter(x => x.bright).map(x => x.s.id).sort().join(), "ds,sm", "…the two main groups are the bright stars");
     eq([a.stars.filter(x => !x.grey).length, a.stars.filter(x => !x.grey && x.s).length, a.stars.filter(x => x.grey && x.s).length], [9, 9, 0], "…9 stars carry the groups, grey stars carry none");
-    eq([DD.pick(D(all({ intimacy: 90 }))).sub, DD.pick(D(all({ intimacy: 50, bondage: 49, fetishes: 48 }))).sub], ["life", "wildmagic"], "one group far ahead → its own subclass; three close → Sorcerer, Wild Magic");
+    const ch = DD.pick(D(all({ "sex-penetration": 76, "bodily-fluids": 41, intimacy: 56 })));
+    eq([DD.pick(D(all({ intimacy: 90 }))).sub, ch.cls + " " + ch.sub, ch.kind], ["life", "sorcerer wildmagic", "even"], "one group far ahead → its own subclass; a Sorcerer with three groups close (after the usual skew) → Wild Magic");
     // alignment
     const items = {}; let N = 0; K.CATS.forEach(c => { if (!K.portrait.OUT[c.id]) c.items.forEach(([, id]) => { items[id] = c.id; N++; }); });
     const ids = Object.keys(items);
@@ -1984,7 +1988,7 @@ const S = (title) => console.log("\n## " + title);
     click(g.w, sw().querySelector('[data-mode="dnd"]'));
     const dv = g.d.querySelector(".pt-sign.pt-dnd");
     ok(!!dv && /Ваш класс/.test(dv.textContent) && dv.querySelectorAll("svg .sg-grey").length > 0 && !!dv.querySelector(".sg-al b"), "DnD: “Your class”, the class figure with grey stars, the alignment line");
-    ok(/Колдун|Монах|Воин|Паладин|Следопыт|Друид|Плут/.test(dv.querySelector(".sg-name").textContent) && /Бондаж/.test(dv.querySelector(".sg-sub").textContent), "…the class of the strongest groups, with the subclass and the groups");
+    ok(/Колдун|Монах|Воин|Паладин|Следопыт|Друид|Плут/.test(dv.querySelector(".sg-name").textContent) && /D\/s/.test(dv.querySelector(".sg-sub").textContent), "…the class by its profile, with the subclass and the variant's groups");
     ok(DD.ALIGN.indexOf(dv.dataset.al) >= 0, "…with an alignment");
     eq(g.w.localStorage.getItem("checklist-dnd"), "1", "the mode is remembered on this device");
     click(g.w, g.d.getElementById("ptCard"));
@@ -2084,9 +2088,13 @@ const S = (title) => console.log("\n## " + title);
     const ids = [...all];
     const mk = (fn, meta) => { const it = {}; ids.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
     const inCl = (...cl) => { const s2 = new Set(); cl.forEach(k => DD.CL[k][1].split(" ").forEach(id => s2.add(id))); return s2; };
-    eq(DD.race(mk(() => "yes"), null), "human", "everything the same → Human");
-    const rope = inCl("rope", "protocol", "orgasm", "wardrobe", "worship");
-    eq(DD.race(mk((id, i) => rope.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null), "elf", "ritual + slow build (rope, protocol, edging) → Elf");
+    /* v603: poles are measured from the usual value of real lists (AXT), so a list right at the usual values is Human */
+    const same = mk(() => "yes"), keep = DD.AXT.slice();
+    DD.axes(same, null).forEach((v, i) => { DD.AXT[i] = v; });
+    const hu = DD.race(same, null); keep.forEach((v, i) => { DD.AXT[i] = v; });
+    eq(hu, "human", "a list right at the usual values of real lists → Human");
+    const rope = inCl("rope", "protocol", "orgasm", "wardrobe", "worship"), rit = inCl("protocol", "touch");
+    eq(DD.race(mk((id, i) => rit.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null), "elf", "ritual + slow build (protocol, slow caresses) → Elf");
     const iron = inCl("iron", "wardrobe", "orgasm");
     eq(DD.race(mk((id, i) => iron.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null), "dwarf", "gear + power (iron, gear, orgasm control) → Dwarf");
     const soft = inCl("home", "touch");
@@ -2148,7 +2156,7 @@ const S = (title) => console.log("\n## " + title);
     const f = open("form"), K = f.KC, W = K.wod, DD = K.dnd;
     const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
     eq(W.LINES, ["vamp", "wolf", "fey", "demon"], "four lines");
-    eq(W.LINES.map(L => Object.keys(W.FIG[L]).length), [12, 12, 10, 7], "12 clans, 12 tribes, 10 kiths, 7 houses");
+    eq(W.LINES.map(L => Object.keys(W.FIG[L]).length), [12, 12, 12, 7], "12 clans, 12 tribes, 12 kiths (v604: + Selkies, Clurichauns), 7 houses");
     ok(!W.FIG.vamp.ghoul && !W.FIG.wolf.furies && !W.FIG.vamp.salubri && !W.FIG.vamp.caitiff && !W.FIG.vamp.ravnos, "no Ghouls, Black Furies, Salubri, Caitiff, Ravnos (owner)");
     eq(W.LINES.map(L => Object.keys(W.PROF[L]).filter(id => !W.FIG[L][id]).length), [0, 0, 0, 0], "every profile has a figure");
     eq(W.LINES.map(L => Object.keys(W.FIG[L]).filter(id => !W.PROF[L][id])), [["malkavian"], [], [], []], "every figure has a profile; the Malkavians have a rule instead (v601)");
@@ -2180,7 +2188,7 @@ const S = (title) => console.log("\n## " + title);
     eq(W.choose(D(all({ "voyeurism-exhibitionism": 70 })), "vamp"), "malkavian", "voyeurism far above everything → Malkavians");
     ok(W.choose(D(all({ "voyeurism-exhibitionism": 70, "role-play": 66 })), "vamp") !== "malkavian", "…but not when a second group is close behind");
     ok(W.choose(D(all({ bondage: 60 })), "vamp") !== "malkavian", "bondage 30 points above the rest is ordinary for real lists (the usual skew): not a Malkavian");
-    eq(W.choose(D({ intimacy: 36, bondage: 77, fetishes: 62, "role-play": 52, ds: 74, sm: 69, "sex-penetration": 41, "voyeurism-exhibitionism": 34, "bodily-fluids": 26 }), "vamp"), "ventrue", "the owner's portrait → Ventrue (v601: Giovanni = fluids + D/s)");
+    eq(W.choose(D({ intimacy: 36, bondage: 77, fetishes: 62, "role-play": 52, ds: 74, sm: 69, "sex-penetration": 41, "voyeurism-exhibitionism": 34, "bodily-fluids": 26 }), "vamp"), "ventrue", "the owner's portrait → Ventrue (v601: Giovanni = fluids + D/s; v603 recalibrated: still Ventrue)");
     const fig = W.pick(D(all({ "bodily-fluids": 80, "sex-penetration": 75 })), "demon");
     eq([fig.wod, fig.line, fig.id, fig.stars.filter(x => x.bright).map(x => x.s.id).sort().join()], [true, "demon", "defilers", "bodily-fluids,sex-penetration"], "the figure: the sign's main groups are the bright stars");
     // details
@@ -2196,11 +2204,12 @@ const S = (title) => console.log("\n## " + title);
     const t20 = det(lv20, "wolf", "talons");
     eq([t20.breed, t20.rank, t20.gnosis, t20.rage], ["lupus", "elder", 8, W.RAGE0[t20.aus] + 3], "Elder Red Talon: Gnosis 5 + 3 = 8, Rage = auspice start + 3");
     const f20 = det(lv20, "fey", "boggan");
-    eq([f20.seem, f20.glamour, f20.banality], ["grump", 7, 4], "level 20 Grump who likes everything: Glamour 4 + 3 = 7, Banality 3 + Grump 1 = 4");
+    eq([f20.seem, f20.glamour, f20.banality], ["grump", 10, 2], "level 20 Grump who loves everything: Glamour at its cap 10, Banality 1 + Grump 1 = 2 (v603)");
     const allNo = mk(() => "limit"), fNo = det(allNo, "fey", "boggan");
-    eq([fNo.seem, fNo.glamour, fNo.banality], ["childling", 5, 7], "all “No”: a Childling with Glamour 5, Banality at its cap 7");
+    eq([fNo.seem, fNo.glamour, fNo.banality], ["childling", 3, 7], "all “No”: a Childling with Glamour 2 + 1 = 3, Banality at its cap 7 (v603)");
     ok(!/wod\./.test(W.lines(t20, K.i18n.t).sub + W.lines(f20, K.i18n.t).sub) && /Ярость/.test(W.lines(t20, K.i18n.t).sub) && /Банальность/.test(W.lines(f20, K.i18n.t).sub), "the lines show Rage · Gnosis and Glamour · Banality");
-    ok(Object.keys(W.PATHS).indexOf(det(lv20, "vamp", "brujah").path) >= 0, "everything even → still a path (v602: no “flat = Humanity” rule)");
+    const v20 = det(lv20, "vamp", "brujah");
+    ok(v20.sect === "sab" ? Object.keys(W.PATHS).indexOf(v20.path) >= 0 : v20.hum >= 2, "everything even → a path in the Sabbat, Humanity in the Camarilla (v602: no “flat = Humanity” rule; v603)");
     eq(det(mk(() => "yes"), "wolf", "talons").breed, "lupus", "Red Talons are always Lupus");
     const taboo = new Set(DD.CL.taboo[1].split(" "));
     const met = mk((id, i) => taboo.has(id) ? "love" : i % 2 ? "limit" : "maybe");
@@ -2267,11 +2276,11 @@ const S = (title) => console.log("\n## " + title);
     const P = a => D(Object.fromEntries(G.map((g, i) => [g, a[i]])));
     const group = { P1: [36,77,62,52,74,69,41,34,26], P2: [29,73,47,58,63,73,68,45,0], P3: [39,42,0,0,0,24,74,44,15], P4: [52,77,48,55,17,9,60,12,9], P5: [50,71,55,54,50,61,52,38,24] };
     const got = Object.keys(group).map(n => W.LINES.map(L => W.choose(P(group[n]), L)).join(" "));
-    eq(got, ["ventrue shadow sidhe devils", "gangrel fenris sidhe devourers", "setite fianna satyr defilers", "tremere gaia boggan malefactors", "assamite stargazers troll scourges"], "the owner's first group (v601 weights; nobody is a Slayer)");
+    eq(got, ["ventrue shadow sidhe devils", "gangrel talons pooka devourers", "setite fianna satyr defilers", "tremere uktena boggan malefactors", "tremere uktena nocker malefactors"], "the owner's first group (v605 hand-tuned Devils; nobody is a Slayer)");
     const group2 = { P1: [35,78,58,54,73,68,52,37,25], P2: [29,73,47,58,63,73,68,45,0], P6: [47,56,50,37,57,58,59,53,23], P3: [46,71,46,54,51,71,81,53,54], P4: [49,76,58,58,22,10,59,10,14], P7: [37,46,0,44,0,0,52,66,0], P5: [49,72,54,54,51,63,49,39,20] };
     eq(Object.keys(group2).map(n => W.LINES.map(L => W.choose(P(group2[n]), L)).join(" ")),
-      ["ventrue shadow sidhe devils", "gangrel fenris sidhe devourers", "toreador striders troll fiends", "assamite gnawers redcap defilers", "tremere uktena boggan malefactors", "malkavian striders eshu fiends", "gangrel talons troll scourges"],
-      "the owner's coterie of seven: the table agreed in v601 (no Caitiff, no Stargazers / Ghille Dhu flood, one Malkavian)");
+      ["lasombra shadow sidhe devils", "gangrel talons pooka devourers", "toreador striders sidhe devils", "nosferatu gnawers selkie defilers", "tremere uktena nocker malefactors", "malkavian striders eshu fiends", "tremere uktena sluagh malefactors"],
+      "the owner's coterie of seven: the table after v605 (no Caitiff, one Malkavian, one Selkie; old v602 percentages — the v605 section checks a variant-A portrait)");
     ok(!/W/.test(W.PROF.demon.slayers[0]) && W.PROF.demon.slayers[0] === "R1 S.6", "Slayers: no fluids (owner)");
     eq([W.PROF.fey.satyr[0], W.PROF.fey.boggan[0]], ["X1 N.3", "N1 S-.3"], "fey variant E: Satyrs and Boggans");
     // share window
@@ -2365,7 +2374,7 @@ const S = (title) => console.log("\n## " + title);
     eq(Object.keys(W.AUSP).map(k => W.AUSP[k].length), [2, 3, 3, 3, 3], "auspices own 2–3 poles each (one strongest pole decides)");
     const all = [].concat(...Object.keys(W.AUSP).map(k => W.AUSP[k])).sort();
     eq(all, [].concat(...K.dnd.POLES).sort(), "…and together they cover all 14 poles exactly once");
-    ok(Object.keys(W.PATHB).length === 14 && Object.keys(W.PATHS).every(k => W.PATHB[k] !== undefined), "every path has its calibrated shift");
+    ok(Object.keys(W.PATHB).length === 13 && Object.keys(W.PATHS).every(k => W.PATHB[k] !== undefined), "every path has its calibrated shift (v603: 13, no Path of Humanity)");
     ok(K.dnd.axes({ items: {}, meta: {} }, null, true).every(v => v === null) && K.dnd.axes({ items: {}, meta: {} }, null).every(v => v === 0), "axes(…, true): a pole with too few answers is null (0 without the flag, as before)");
     /* the owner's group is checked outside the repo (their lists are private); here: the rules on made-up lists */
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
@@ -2376,7 +2385,158 @@ const S = (title) => console.log("\n## " + title);
     eq(det(mk(["extreme", "spank"]), "wolf").aus, "ahroun", "hard impact → Ahroun");
     const facs = ["reconciler", "faustian", "luciferan", "ravener", "cryptic"];
     const F = (law, good) => { const dl = law - W.CENTRE.LAW, dg = good - W.CENTRE.GOOD; return Math.abs(dl) < W.CENTRE.R && Math.abs(dg) < W.CENTRE.R ? "cryptic" : dl >= 0 ? (dg >= 0 ? "reconciler" : "faustian") : (dg >= 0 ? "luciferan" : "ravener"); };
-    eq([F(15, 10), F(15, -11), F(-6, 28), F(-10, -10), F(1, -4)], facs, "demon factions: four quarters around (law +2, good 0) and Cryptic in the middle");
+    eq([F(15, 10), F(15, -11), F(-6, 28), F(-10, -10), F(3, -1)], facs, "demon factions: four quarters around the centre (v603: law +4, good +2) and Cryptic in the middle");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v603: portrait without 0 % groups; DnD classes by profile, races on standardised poles; fey Glamour / Banality; Camarilla Humanity");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, DD = K.dnd, W = K.wod;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const catOf = {}; K.CATS.forEach(c => c.items.forEach(([, id]) => { catOf[id] = c.id; }));
+    const mk = (fn, meta) => { const it = {}; ids.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
+    // portrait, variant A: "No" does not wipe out "how many"
+    const bond = ids.filter(id => catOf[id] === "bondage");
+    const st = mk((id, i) => { const k = bond.indexOf(id); if (k >= 0) return k < 15 ? "yes" : k < 24 ? "maybe" : "limit"; return i % 2 ? "yes" : "maybe"; });
+    const g = K.portrait.compute(st, null).sections.find(x => x.id === "bondage");
+    ok(bond.length - 24 > 15 && g.pct > 0, "a group with more “No” than “Yes” and 15 “Yes” is above 0 % (" + g.pct + " %)");
+    const allNo = K.portrait.compute(mk(() => "limit"), null).sections.filter(x => x.pct !== null);
+    ok(allNo.length && allNo.every(x => x.pct === 0), "only “No” → 0 % everywhere, as before");
+    // the usual skew: 9 groups, shared by DnD and the World of Darkness
+    eq(Object.keys(DD.TYP).sort(), K.signs.GROUPS.slice().sort(), "TYP covers all 9 groups");
+    ok(W.TYP === DD.TYP && W.AXT === DD.AXT && W.AXSD === DD.AXSD, "…shared with the World of Darkness, as are AXT / AXSD");
+    // classes: a profile each, every class reachable
+    eq(Object.keys(DD.CLS).sort(), Object.keys(DD.FIG).sort(), "every class has a profile (13)");
+    ok(Object.keys(DD.CLS).every(c => Math.abs(DD.CLS[c][1]) <= 1.3), "class biases within ±1.3 (v604: the Ranger 1.25)");
+    const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => b.pct - a.pct) });
+    const L = K.signs.KEY, got = {};
+    Object.keys(DD.CLS).forEach(c => { const p = {}; K.signs.GROUPS.forEach(gid => { p[gid] = 40 + DD.TYP[gid]; });
+      DD.CLS[c][0].split(" ").forEach(tk => { p[L[tk[0]]] += 30 * parseFloat(tk.slice(1)); }); got[c] = DD.pick(D(p)).cls; });
+    eq(Object.keys(got).filter(c => got[c] !== c), [], "a portrait shaped like a class's profile gets that class — all 13 reachable");
+    const fig = DD.pick(D({ intimacy: 36, bondage: 60, fetishes: 40, "role-play": 55, ds: 40, sm: 45, "sex-penetration": 50, "voyeurism-exhibitionism": 60, "bodily-fluids": 20 }));
+    eq([fig.cls, fig.stars.filter(x => x.bright).length, fig.stars.filter(x => x.bright).every(x => fig.main.indexOf(x.s) >= 0)], ["rogue", fig.main.length, true], "voyeurism + role-play above the usual → Rogue; the variant's groups are the bright stars");
+    ok(Object.keys(DD.VAR).filter(k => DD.VAR[k][1] === "wildmagic").every(k => DD.VAR[k][0] === "sorcerer"), "Wild Magic belongs to the Sorcerer only");
+    // races: every race reachable on made-up lists
+    const inCl = (...cl) => { const s2 = new Set(); cl.forEach(k => DD.CL[k][1].split(" ").forEach(id => s2.add(id))); return s2; };
+    const R = { human: ["pet", "classic"], elf: ["protocol", "touch"], drow: ["protocol"], dwarf: ["protocol", "iron"], dragonborn: ["protocol", "wardrobe"],
+      halforc: ["service", "company"], goliath: ["pet", "spank"], tiefling: ["protocol", "edge"], yuanti: ["dark", "home"], halfling: ["home"],
+      tabaxi: ["pet", "wild"], changeling: ["pet"], kenku: ["spank", "home"] };
+    const rg = {}; Object.keys(R).forEach(r => { const s2 = inCl(...R[r]); rg[r] = DD.race(mk((id, i) => s2.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null); });
+    eq(Object.keys(rg).filter(r => rg[r] !== r), [], "all 13 races reachable");
+    ok(Object.keys(DD.RACEB).length === 13 && DD.RLIM.FLAT === .5, "every race has its bias; Human when every |z| < .5");
+    const soft = inCl("home", "touch"), z = DD.zPoles(mk((id, i) => soft.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null);
+    ok(z.soft > 0 && z.hard === 0, "a pole's z is measured from the usual value (softness above the usual → soft > 0)");
+    // fey: Glamour 1–10, Banality 1–7; vampires: Humanity 3–10 only in the Camarilla, the Sabbat keeps a path
+    let rs = 1; const rnd = () => { rs = (rs * 16807) % 2147483647; return rs / 2147483647; };
+    const A = ["limit", "maybe", "yes", "love", null], glam = new Set(), ban = new Set(), bad = [];
+    for (let n = 0; n < 150; n++) {
+      const w = [rnd(), rnd(), rnd(), rnd(), rnd() * .6], sum = w.reduce((a, b) => a + b, 0);
+      const s2 = mk(() => { let r = rnd() * sum, k = 0; while (r > w[k]) r -= w[k++]; return A[k]; }, { role: n % 2 ? "dom" : "sub" });
+      const d = K.portrait.compute(s2, null), fy = W.details(s2, d, null, "fey", "boggan"), vp = W.details(s2, d, null, "vamp", W.choose(d, "vamp") || "brujah");
+      glam.add(fy.glamour); ban.add(fy.banality);
+      if (!(fy.glamour >= 1 && fy.glamour <= 10 && fy.banality >= 1 && fy.banality <= 7)) bad.push("fey " + fy.glamour + "/" + fy.banality);
+      if (vp.sect === "cam" ? !(vp.hum >= 2 && vp.hum <= 8 && vp.path === undefined) : !(vp.hum === undefined && W.PATHS[vp.path])) bad.push("vamp " + JSON.stringify(vp));
+    }
+    eq(bad, [], "Glamour 1–10, Banality 1–7; Humanity 3–10 only in the Camarilla, a path otherwise (150 made-up lists)");
+    ok(glam.size >= 4 && ban.size >= 4, "Glamour and Banality are spread (" + [...glam].sort((a, b) => a - b).join(",") + " / " + [...ban].sort((a, b) => a - b).join(",") + ")");
+    ok(!W.PATHS.humanity && !W.PATHB.humanity, "no Path of Humanity in the Sabbat (owner, v603)");
+    const lawful = mk((id, i) => i % 2 ? "limit" : "yes", { role: "dom" }), vc = W.details(lawful, K.portrait.compute(lawful, null), null, "vamp", "ventrue");
+    eq([vc.sect, vc.hum >= 2, vc.path], ["cam", true, undefined], "a Camarilla vampire has Humanity instead of a path");
+    ok(W.lines(vc, K.i18n.t).sub === "Человечность " + vc.hum, "…shown as “Humanity N” (" + W.lines(vc, K.i18n.t).sub + ")");
+    const hum = (good, l) => Math.max(2, Math.min(8, Math.round(5.5 + good / 5) - [13, 17].filter(x => l >= x).length));
+    eq([hum(0, 1), hum(20, 5), hum(-40, 10), hum(0, 13), hum(0, 17), hum(20, 20)], [6, 8, 2, 5, 4, 8], "Humanity = 5.5 + good / 5, −1 from level 13 and 17, within 2–8 (v606)");
+    const miss = []; LANGS.forEach(l => { if (!K.i18n.has("ui", "wod.hum", l)) miss.push(l); });
+    eq(miss, [], "“Humanity {n}” in all 7 languages");
+    // help texts (owner-approved wording)
+    const h = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
+    h.KC.help.open("portrait");
+    const ht = h.d.getElementById("help-portrait").textContent;
+    ok(/сильнее, чем обычно тянутся люди/.test(ht) && /Класс решает профиль/.test(ht) && /у Камарильи — Человечность/.test(ht) && !/по двум самым сильным разделам, порядок не важен/.test(ht), "help: race, class and Humanity explained the v603 way");
+    ok(!f.errors.length && !h.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v604: 7 new practices, boot worship renamed; Selkies and Clurichauns; the Ranger with voyeurism; no clothing bonus for the Tiefling");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, DD = K.dnd, W = K.wod;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const codeOf = {}, next = {}, catOf = {};
+    K.CATS.forEach(c => c.items.forEach(([n, id], i) => { codeOf[id] = n; catOf[id] = c.id; if (i + 1 < c.items.length) next[id] = c.items[i + 1][1]; }));
+    const want = [["homage-with-tongue", "floor-licking", 493, "humiliation"], ["trash-play", "hair-as-mop", 494, "humiliation"], ["outdoor-sex", "abandoned-building-sex", 495, "voyeurism-exhibitionism"],
+      ["panty-gag", "sock-gag-own", 496, "bondage"], ["sock-gag-own", "sock-gag-top", 497, "bondage"], ["pony-play", "cow-play", 498, "role-play"], ["cow-play", "pig-play", 499, "role-play"]];
+    eq(want.filter(([a, id, c, cat]) => codeOf[id] !== c || next[a] !== id || catOf[id] !== cat).map(w => w[1]), [], "codes 493–499, each placed after its related item");
+    const miss = []; want.forEach(([, id]) => LANGS.forEach(l => { if (!K.i18n.has("items", id, l)) miss.push(l + ":" + id); }));
+    eq(miss, [], "every new practice has a name and a hint in all 7 languages");
+    eq([K.i18n.item("floor-licking", "ru").name, K.i18n.item("pig-play", "ru").name, K.i18n.item("boot-worship", "ru").name], ["Вылизывание пола", "Пиг-плей (свинья)", "Поклонение обуви (в т.ч. поцелуи)"], "RU names (owner); boot worship now includes kissing");
+    ok(want.every(([, id]) => codeOf[id] >= K.NEW_FROM_CODE), "the new items get the green “new” dot");
+    const inCl = {}; Object.keys(DD.CL).forEach(k => DD.CL[k][1].split(" ").forEach(id => { inCl[id] = k; }));
+    eq(want.map(([, id]) => inCl[id]), ["words", "object", "wild", "dark", "dark", "pet", "pet"], "the new items count for the race (clusters)");
+    // fey: 12 kiths
+    eq(Object.keys(W.PROF.fey).length, 12, "12 fey kiths with profiles");
+    const nm = []; ["selkie", "clurichaun"].forEach(k => LANGS.forEach(l => { if (!K.i18n.has("ui", "wod.fey." + k, l)) nm.push(l + ":" + k); }));
+    eq([nm, K.i18n.t("wod.fey.selkie")], [[], "Селки"], "Selkies and Clurichauns named in all 7 languages (RU “Селки”, owner)");
+    const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => b.pct - a.pct) });
+    const base = g => { const p = {}; K.signs.GROUPS.forEach(x => { p[x] = 40 + DD.TYP[x]; }); Object.keys(g).forEach(x => { p[x] += g[x]; }); return D(p); };
+    eq([W.choose(base({ "bodily-fluids": 30, intimacy: 15, "role-play": 9 }), "fey"), W.choose(base({ "sex-penetration": 30, sm: 18, fetishes: 9 }), "fey")], ["selkie", "clurichaun"], "fluids + tenderness → Selkies; sex + S/M → Clurichauns");
+    // DnD: the Ranger, the Tiefling
+    eq(DD.CLS.ranger[0], "b.6 r.6 v.4", "the Ranger's profile adds voyeurism (owner, v604)");
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const mk = (fn, meta) => { const it = {}; ids.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
+    let bad = 0; for (let n = 1; n <= 30; n++) { const st = mk((id, i) => ["limit", "maybe", "yes", "love"][(i * n + n) % 4]);
+      const a = DD.race(st, null), b = DD.race({ items: st.items, meta: { attire: ["latex", "leather", "goth"] } }, null); if (a !== b) bad++; }
+    eq(bad, 0, "clothing (latex, leather, goth) never changes the race any more");
+    ok(!K.wr && !K.i18n.has("ui", "wr.toWr", "ru"), "the Chaos gods are not in this version (a separate plan)");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v605: hand-tuned Ventrue / Lasombra and Devils / Malefactors (owner)");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, W = K.wod;
+    const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => b.pct - a.pct) });
+    eq([W.PROF.vamp.ventrue[1], W.PROF.vamp.lasombra[1], W.PROF.demon.devils[1], W.PROF.demon.malefactors[1]], [-0.2, -0.11, 1.26, -1.16], "v605 biases: Ventrue −0.6 + 0.4, Lasombra 0.29 − 0.4, Devils 0.26 + 1.0, Malefactors −0.81 − 0.35");
+    eq([W.PROF.vamp.ventrue[0], W.PROF.vamp.lasombra[0], W.PROF.demon.devils[0], W.PROF.demon.malefactors[0]], ["D1 F.4", "B.8 D.8", "D1 R.3 V.3", "B1 F.8"], "profiles unchanged (only the biases were hand-tuned)");
+    ok(/owner, v605: hand-tuned/.test(fs.readFileSync(require("./harness").ROOT + "/js/form/wod.js", "utf8")), "hand-tuned shifts are marked in the code (kept on recalibration)");
+    /* a made-up portrait in the owner's shape (variant A percentages, not the owner's list): v604 gave Lasombra + Malefactors */
+    const like = D({ intimacy: 37, bondage: 73, fetishes: 57, "role-play": 47, ds: 68, sm: 69, "sex-penetration": 49, "voyeurism-exhibitionism": 35, "bodily-fluids": 30 });
+    eq([W.choose(like, "vamp"), W.choose(like, "demon")], ["ventrue", "devils"], "a portrait like the owner's → Ventrue and Devils");
+    const P = W.PROF, keep = [P.vamp.ventrue[1], P.vamp.lasombra[1], P.demon.devils[1], P.demon.malefactors[1]];
+    P.vamp.ventrue[1] = -0.6; P.vamp.lasombra[1] = 0.29; P.demon.devils[1] = 0.26; P.demon.malefactors[1] = -0.81;
+    const old = [W.choose(like, "vamp"), W.choose(like, "demon")];
+    [P.vamp.ventrue[1], P.vamp.lasombra[1], P.demon.devils[1], P.demon.malefactors[1]] = keep;
+    eq(old, ["lasombra", "malefactors"], "…the same portrait with the v604 biases was Lasombra + Malefactors (the test would catch a revert)");
+    // nobody is a Slayer: the made-up groups of the v600 section and 2000 random lists around the usual skew
+    const G = K.signs.GROUPS; let n = 0, sl = 0, seed = 605; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 2000; i++) { const x = {}; G.forEach(g => { x[g] = Math.max(0, Math.min(100, Math.round(45 + K.dnd.TYP[g] + (rnd() - 0.5) * 50))); });
+      const id = W.choose(D(x), "demon"); if (id) { n++; if (id === "slayers") sl++; } }
+    ok(n === 2000 && sl / n < 0.1, "Slayers stay rare on random lists (" + sl + " of " + n + ")");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v606: Camarilla Humanity within 2–8 (owner)");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, W = K.wod;
+    eq(W.HUM, { BASE: 5.5, K: 5, OLD: [13, 17], MIN: 2, MAX: 8 }, "Humanity: middle 5.5, slope good / 5, −1 at levels 13 and 17, within 2–8");
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const V = ["limit", "maybe", "yes", "love"]; let seed = 606; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const seen = new Set(), bad = [];
+    for (let n = 0; n < 600; n++) {
+      /* made-up lists from very “kind” to very “cruel”: tenderness loved or refused, the rest random */
+      const kind = rnd(), it = {}; ids.forEach(id => { if (rnd() < 0.8) it[id] = { interest: V[Math.floor(rnd() * 4)] }; });
+      K.CATS.filter(c => c.id === "intimacy").forEach(c => c.items.forEach(([, id]) => { it[id] = { interest: kind > 0.5 ? "love" : "limit" }; }));
+      const st = { items: it, meta: { role: rnd() < 0.5 ? "dom" : "sub" } }, d = K.portrait.compute(st, null);
+      const vc = W.details(st, d, null, "vamp", "ventrue");
+      if (vc.hum !== undefined) { seen.add(vc.hum); if (vc.hum < 2 || vc.hum > 8 || vc.hum !== Math.round(vc.hum)) bad.push(vc.hum); }
+    }
+    eq(bad, [], "Humanity never below 2 or above 8");
+    ok(seen.size >= 4, "Humanity still spreads over the scale (" + [...seen].sort((a, b) => a - b).join(",") + ")");
     ok(!f.errors.length, "no script errors");
     _sc.end();
   }

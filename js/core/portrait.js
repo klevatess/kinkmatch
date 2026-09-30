@@ -6,7 +6,9 @@
      how much = the group's average points, with SHRINK imaginary answers at the person's overall average added
                 (a group with 3 answers stays near the person's usual level; with 60 answers they hardly matter);
      how many = 1 − e^(−liked points of the group / scale), scale = the person's liked points per group (≥ VMIN),
-                so someone who marks a lot needs more for the same percent.
+                so someone who marks a lot needs more for the same percent. Liked points = Love + Yes + Maybe only:
+                v603 (owner, variant A) — "No" answers are not subtracted here (they already lower "how much"); before,
+                a group with more "No" than "Yes" got 0 % however many Yes it had.
    A group with fewer than MIN answers has no percentage (null). Shared by the form page (portrait,
    picture card, PDF) and tests. */
 (function (KC) {
@@ -30,12 +32,12 @@
       KC.CATS.forEach(c => {
         if (OUT[c.id]) return;
         const gid = groupOf(c.id);
-        let g = by[gid]; if (!g) { g = by[gid] = { id: gid, sum: 0, n: 0, total: 0 }; groups.push(g); }
+        let g = by[gid]; if (!g) { g = by[gid] = { id: gid, sum: 0, pos: 0, n: 0, total: 0 }; groups.push(g); }
         c.items.forEach(([, id]) => {
           if (set && !set[id]) return;
           g.total++;
           const v = (items[id] || {}).interest; if (!W.hasOwnProperty(v)) return;
-          g.sum += W[v]; g.n++;
+          g.sum += W[v]; g.pos += Math.max(0, W[v]); g.n++;
           if (v === "love") love.push(id); else if (v === "limit") limits.push(id);
         });
       });
@@ -44,13 +46,13 @@
       const answered = used.reduce((a, g) => a + g.n, 0);
       const mu = answered ? S / answered : 0;                             /* the person's average points per answer */
       const withAns = used.filter(g => g.n).length;
-      const liked = used.reduce((a, g) => a + Math.max(0, g.sum), 0);
+      const liked = used.reduce((a, g) => a + g.pos, 0);
       const scale = Math.max(VMIN, withAns ? liked / withAns : 0);        /* the person's liked points per group */
       const sections = used.map(g => {
         let pct = null;
         if (g.n >= MIN) {
           const much = Math.max(0, (g.sum + SHRINK * mu) / (g.n + SHRINK) / MAX);
-          const many = 1 - Math.exp(-Math.max(0, g.sum) / scale);
+          const many = 1 - Math.exp(-g.pos / scale);
           pct = Math.max(0, Math.min(100, Math.round(100 * (much + many) / 2)));
         }
         return { id: g.id, pct, answered: g.n, total: g.total };
