@@ -112,7 +112,7 @@
     main.forEach((m, k) => { stars[B[k]].bright = true; stars[B[k]].s = m; });
     let r = 0; stars.forEach(st => { if (!st.s) st.s = rest[r++] || null; });
     E.forEach(p => stars.push({ x: p[0], y: p[1], grey: true, bright: false, s: null }));
-    return { dnd: true, key: v.key, cls, sub, stars, lines: L, main, kind: main.length === 1 ? "single" : main.length === 3 ? "even" : "pair" };
+    return { dnd: true, key: v.key, cls, sub, stars, lines: L, main, kind: main.length === 1 ? "single" : main.length === 3 ? "even" : "pair", many: KC.signs.manyOf(d) };
   }
 
   /* the joke alignment: st = the list, d = its portrait, set = the applied template (or null) */
@@ -168,10 +168,10 @@
   const POLES = [["power", "play"], ["mind", "body"], ["ritual", "spont"], ["gear", "hands"], ["slow", "rush"], ["crowd", "private"], ["hard", "soft"]];
   const CL = {
     protocol: ["1+ 2+ 3+ 5+", "following-orders discipline rituals honorifics contract-slave total-power-exchange 24-7-d-s-lifestyle prompt-obedience eye-contact-rules speech-restrictions no-sounds gor-training kneeling daily-diary mantra-meditation personality-modification name-change symbolic-jewelry collar-in-private metal-collar punishment-scene chosen-food bathroom-control exercise-required photo-proof initiation-rites standing-in-corner kneeling-on-buckwheat corner-kneeler"],
-    pet: ["1- 3+", "age-play dd-lg-md-lb animal-roleplay puppy-play kitten-play pony-play furry leash muzzles hand-feeding kigurumi bratting brat-taming switching-roles wrestling praise begging schoolroom-scenes cow-play pig-play"],
+    pet: ["1- 3+", "age-play dd-lg-md-lb animal-roleplay puppy-play kitten-play pony-play furry leash muzzles hand-feeding kigurumi bratting brat-taming switching-roles wrestling praise begging schoolroom-scenes cow-play pig-play pet-food-eating dressage-training"],
     service: ["1+ 3+", "chores serving-as-a-maid massage pedicures-foot-massage manicures chauffeuring forced-servitude uniform-wearing erotic-dancing serving-other-doms other-sub-serves-you"],
     object: ["1+ 2+", "objectification sex-doll-use depersonalisation dronification mindbreak freeuse glory-hole stuck-in-wall fuck-box serving-as-furniture serving-as-art used-as-toy-for-other-sub sleep-play unseen-actor blind-stranger auctioned hair-as-mop"],
-    words: ["2+ 1+", "verbal-humiliation forced-thanking forced-self-degradation humiliating-body-writing body-writing lecturing dirty-talk forced-begging-acts humiliation-in-private mouth-soaping phone-sex floor-licking"],
+    words: ["2+ 1+", "verbal-humiliation forced-thanking forced-self-degradation humiliating-body-writing body-writing lecturing dirty-talk forced-begging-acts humiliation-in-private mouth-soaping phone-sex floor-licking foreign-language-talk"],
     look: ["2+ 3+", "forced-dressing forced-feminization cross-dressing chosen-clothing shaving-head-hair shaving-body-hair forced-nudity forced-nudity-private slutty-clothing"],
     wardrobe: ["3+ 4+", "leather-wearing rubber-latex-wearing latex-sweat spandex-clothing corsets lingerie-wearing stockings-wearing high-heel-wearing formal-clothing gas-masks masks cosplay clothed-sex clothes-tearing tights-tearing clothes-cutting piercing-fetish harness-leather cuffs-leather leather-restraints nerd-hikikomori clowncore"],
     worship: ["3+ 2-", "boot-worship cock-worship foot-worship toe-licking-giving toe-licking-receiving ass-worship pussy-worship high-heel-worship stocking-worship armpit-fetish homage-with-tongue oral-fixation"],
@@ -187,13 +187,13 @@
     public: ["6+ 2+", "collar-in-public leash-walk-outside humiliation-in-public anal-plug-public exhibitionism-friends exhibitionism-strangers forced-nudity-others outdoor-scenes stripping erotic-photos photo-exchange video-of-you fake-public-use"],
     watch: ["6+ 2+", "voyeurism-others voyeurism-your-dom video-others forced-watching-others forced-porn-watching mirror-play sex-in-front-of-a-mirror cuckolding-hotwife"],
     wild: ["3- 4- 7+", "sex-in-snow sex-in-rain hair-drag-snow hair-drag-rain nude-in-snow mud-play outdoor-sex outdoor-bondage chained-outdoors cold-shower sauna-whisk nettle-play-urtication leeches abandoned-building-sex"],
-    feast: ["1- 3- 4-", "food-play nyotaimori sake-from-thighs food-smearing-sploshing drinking-from-feet forced-drinking-from-feet forced-unpleasant-food forced-drinking-beer-cider drinking-bathwater forced-drinking-bathwater funnel-play smoking-fetish"],
+    feast: ["1- 3- 4-", "food-play nyotaimori sake-from-thighs food-smearing-sploshing drinking-from-feet forced-drinking-from-feet forced-unpleasant-food forced-drinking-beer-cider drinking-bathwater forced-drinking-bathwater funnel-play smoking-fetish forced-floor-eating"],
     taboo: ["3- 7+", "golden-showers swallowing-urine urination-in-front omorashi period-play blood-play spitting spitting-in-mouth human-ashtray trash-play forced-staying-in-sweat-cum underwear-sniffing wearing-partners-underwear milking pussy-juice-play squirting licking-fingers-clean rimming"],
     home: ["7- 6- 4-", "romance-affection hugging gentle-touch kissing-body kissing-mouth spooning using-real-names sleepover aftercare shared-bathing lap-pillow-ear-cleaning petting-over-clothes thigh-sex"],
-    size: ["2- 7+", "fisting-vaginal fisting-anal double-penetration triple-penetration anal-plug-large object-insertion bottle-neck-vaginal bottle-neck-anal size-difference size-giantess deep-throating irrumatio irrumatio-to-vomiting xenophilia-tentacles egg-laying breeding-fantasy"],
+    size: ["2- 7+", "fisting-vaginal fisting-anal double-penetration triple-penetration anal-plug-large object-insertion bottle-neck-vaginal bottle-neck-anal size-difference size-giantess deep-throating irrumatio irrumatio-to-vomiting xenophilia-tentacles egg-laying breeding-fantasy double-penetration-one-hole"],
     company: ["6+ 5-", "group-multiple-men group-mixed orgy swinging swapping shared-temporarily supplying-fantasy multiple-subs-one-dom group-multiple-women harems cheating-fantasy prostitution-fantasy"],
     classic: ["2- 5- 6-", "genital-sex barebacking up-against-walls 69 dutch-rudder hand-jobs fingering fellatio cunnilingus-giving cunnilingus-receiving face-sitting breast-fucking anal-sex anal-play prostate-massage anal-teasing anal-beads anal-plug-small anal-plug-medium dildo-vaginal dildo-anal dildo-oral vibrator-external vibrator-internal vibrator-anal strap-on-wearing strap-on-penetrated strap-on-sucking rough-sex rough-fingering fingers-in-mouth"],
-    cum: ["2- 5- 3-", "cum-on-body cum-on-face bukkake cum-in-eyes pearl-necklace cum-in-mouth swallowing-semen snowballing condom-cum-in-mouth cum-in-vagina cum-in-ass creampie"],
+    cum: ["2- 5- 3-", "cum-on-body cum-on-face bukkake cum-in-eyes pearl-necklace cum-in-mouth swallowing-semen snowballing condom-cum-in-mouth cum-in-vagina cum-in-ass creampie sucking-cum-from-vagina"],
   };
   const SESS = { slow: ["session-long", "session-day", "session-multi-day"], rush: ["session-short"] };
   const RACES = { human: ["body", "rush"], elf: ["ritual", "slow"], drow: ["power", "mind"], dwarf: ["gear", "power"], dragonborn: ["power", "ritual"],
@@ -271,12 +271,30 @@
      v599 (owner): the portrait, the pair view and the company view each remember their OWN mode (scope
      "portrait" | "pair" | "group"), so a choice in the portrait never changes what the compare page opens with. */
   const KEY = scope => scope === "pair" ? KC.KEYS.dndPair : scope === "group" ? KC.KEYS.dndGroup : KC.KEYS.dnd;
-  const mode = scope => { const r = KC.ls.raw(KEY(scope)); return r === "1" ? "dnd" : r === "wod" && KC.wod ? "wod" : "sign"; };
-  const setMode = (m, scope) => { const k = KEY(scope); if (m === "dnd") KC.ls.setRaw(k, "1"); else if (m === "wod") KC.ls.setRaw(k, "wod"); else KC.ls.del(k); };
+  /* v610: "wr" = Servant of the Chaos gods (KC.wr), "wh" = Warhammer factions (KC.wh), "leg" = legions (KC.leg);
+     v612: "ow" = Warhammer: The Old World races (KC.ow), "wi" = Witcher schools (KC.wi). Each of these modes (the module KC[mode])
+     only while its switch in KC.FEATURES is on (a device that chose a switched-off mode sees the constellation) */
+  const usable = m => m === "wod" ? !!KC.wod : WR.indexOf(m) >= 0 && !!(KC[m] && KC.FEATURES && KC.FEATURES[m]);
+  const mode = scope => { const r = KC.ls.raw(KEY(scope)); return r === "1" ? "dnd" : usable(r) ? r : "sign"; };
+  const setMode = (m, scope) => { const k = KEY(scope); if (m === "dnd") KC.ls.setRaw(k, "1"); else if (usable(m)) KC.ls.setRaw(k, m); else KC.ls.del(k);
+    if (WRG.indexOf(m) >= 0 && usable(m)) KC.ls.setRaw(WRKEY(scope), m); };
+  /* v611: ⚔ Wr is one button on the left that opens its own tabs — Chaos gods (wr), factions (wh), legions (leg), (v612) Old World (ow), Witcher (wi).
+     The tab chosen last is remembered (per scope) and reopened by the ⚔ Wr button; a tab that is switched off is skipped. */
+  const WR = ["wr", "wh", "leg", "ow", "wi", "av"];   /* v616: + "av" = Avatar elements (KC.av), its own button like the Witcher */
+  /* v615 (owner): the Witcher (wi) is its own button next to ⚔ Wr, not a tab inside it. WR = every mode of this family
+     (they need the list itself: isWr, wrOf); WRG = the tabs under ⚔ Wr. */
+  const WRG = ["wr", "wh", "leg", "ow"];
+  const WRKEY = scope => scope === "pair" ? KC.KEYS.wrPair : scope === "group" ? KC.KEYS.wrGroup : KC.KEYS.wr;
+  const wrTabs = () => WRG.filter(usable);
+  const inWrg = m => WRG.indexOf(m) >= 0;
+  const wrLast = scope => { const r = KC.ls.raw(WRKEY(scope)), on = wrTabs(); return on.indexOf(r) >= 0 ? r : on[0] || null; };
+  const isWr = m => WR.indexOf(m) >= 0;
+  /* the module of a figure made by one of these modes (each pick() marks its figure with its mode: sg.wr, sg.wh, …), or null */
+  const wrOf = sg => { const k = sg && WR.find(m => sg[m]); return k ? KC[k] : null; };
   const on = scope => mode(scope) === "dnd";
   const setOn = (v, scope) => setMode(v ? "dnd" : "sign", scope);
 
-  KC.dnd = { FIG, VAR, ORDER, ALIGN, LIM, AXES, scores, keyOf, pick, alignNum, alignment, on, set: setOn, mode, setMode,
+  KC.dnd = { FIG, VAR, ORDER, ALIGN, LIM, AXES, scores, keyOf, pick, alignNum, alignment, on, set: setOn, mode, setMode, usable, wrTabs, wrLast, isWr, inWrg, wrOf, WR, WRG,
     TYP, devs, CLS, GAP_D, EVEN_D, classes, variant,
     POLES, CL, RACES, RLIM, AXT, AXSD, RACEB, axes, zPoles, race, XP, level, DMG, MON, foes };
 })(window.KC);

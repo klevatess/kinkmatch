@@ -110,8 +110,13 @@
     const stars = P.map((p, i) => ({ x: p[0], y: p[1], bright: bright.indexOf(i) >= 0, s: null }));
     bright.forEach((bi, k) => { stars[bi].s = main[k]; });
     let r = 0; stars.forEach(st => { if (!st.s) st.s = rest[r++] || null; });
-    return { id, stars, lines: L, main, kind: main.length === 1 ? "single" : main.length === 3 ? "even" : "pair" };
+    return { id, stars, lines: L, main, kind: main.length === 1 ? "single" : main.length === 3 ? "even" : "pair", many: manyOf(d) };
   }
+  /* v613 (owner): more than 70 % of the practices answered — "Всё понемногу" under an even sign becomes "Всё и сразу"
+     (only the words; the sign and the modes stay as they are). evenText(sg) is that line. */
+  const MANY = .7;
+  function manyOf(d) { const total = d.sections.reduce((a, s) => a + s.total, 0); return total > 0 && d.answered / total > MANY; }
+  const evenText = sg => KC.i18n.t(sg && sg.many ? "sign.evenAll" : "sign.even");
 
   /* labels next to every star: each label tries 12 sides at three distances and keeps the one that stays
      inside the picture, clear of other labels and stars, nearer to its own star than to any other, as close
@@ -158,5 +163,5 @@
     return { level, shared };
   }
 
-  KC.signs = { closeness, SIGNS, KEY, GROUPS, GAP, EVEN, pick, placeLabels, bbox };
+  KC.signs = { closeness, SIGNS, KEY, GROUPS, GAP, EVEN, MANY, pick, manyOf, evenText, placeLabels, bbox };
 })(window.KC);

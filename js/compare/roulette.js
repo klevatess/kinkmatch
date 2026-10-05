@@ -65,12 +65,17 @@
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
   const ans = (st, id) => (st.items[id] || {}).interest || null;
+  /* v613: "✦ Попробуем новое?" — only practices one of the two marked "Хочу" (extended list) and the other
+     Может / Да / Обожаю; "Bolder" changes nothing there */
+  let TRY = false;
+  const POSM = { maybe: 1, yes: 1, love: 1 }, want = (st, id) => !!(st.items[id] || {}).w;
   /* what both can do (never a No), minus SKIP and sections with weight 0 */
   function pool(A, B, bold) {
     const out = [];
     KC.CATS.forEach(c => { if (!WEIGHT[c.id]) return; c.items.forEach(([, id]) => {
       if (SKIP[id]) return;
       const a = ans(A, id), b = ans(B, id);
+      if (TRY) { if ((want(A, id) && POSM[b]) || (want(B, id) && POSM[a])) out.push(id); return; }
       if ((POS[a] && POS[b]) || (bold && ((POS[a] && b === "maybe") || (a === "maybe" && POS[b])))) out.push(id);
     }); });
     return out;
@@ -83,7 +88,7 @@
     for (const s of list) { r -= WEIGHT[s]; if (r <= 0) return s; }
     return list[list.length - 1];
   }
-  const keyOf = (a, b, bold) => [a.st.uid || a.name, b.st.uid || b.name].sort().join("|") + (bold ? "+" : "");
+  const keyOf = (a, b, bold) => [a.st.uid || a.name, b.st.uid || b.name].sort().join("|") + (bold ? "+" : "") + (TRY ? "~" : "");
   /* n practices for a pair, none repeated until all were shown (then it starts over and says so) */
   function draw(a, b, bold, n) {
     const all = pool(a.st, b.st, bold), k = keyOf(a, b, bold), s = seen[k] || (seen[k] = {});
@@ -145,8 +150,8 @@
     if (S.pair) {
       const a = { name: S.pair.nA, st: S.pair.A }, b = { name: S.pair.nB, st: S.pair.B };
       const r = draw(a, b, bold, OPTIONS);
-      html = '<p class="rl-lead">' + t("rl.leadPair_html", { n: OPTIONS }) + "</p>";
-      if (!r.ids.length) html += '<p class="rl-note">' + esc(t(bold ? "rl.noneBold" : "rl.none")) + "</p>";
+      html = '<p class="rl-lead">' + t(TRY ? "ext.rlLead_html" : "rl.leadPair_html", { n: OPTIONS }) + "</p>";
+      if (!r.ids.length) html += '<p class="rl-note">' + esc(t(TRY ? "ext.tryNone" : bold ? "rl.noneBold" : "rl.none")) + "</p>";
       else { html += pairBlock(a, b, bold, r); names = pool(a.st, b.st, bold); }
     } else if (S.group) {
       const pu = pairUp(S.group, S.pmode === "role", bold);
@@ -172,7 +177,7 @@
   }
 
   KC.roulette = {
-    open() { KC.$("rlH").textContent = t("rl.h"); modal.open(); spin(); },
+    open(o) { TRY = !!(o && o.tryNew); KC.$("rlH").textContent = t(TRY ? "ext.rlTry" : "rl.h"); KC.$("rlBold").closest("label").hidden = TRY; modal.open(); spin(); },
     /* for tests */ pool, draw, pairUp, spin, WEIGHT, SKIP, SEC,
   };
   KC.$("rlAgain").addEventListener("click", spin);

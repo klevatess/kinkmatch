@@ -13,7 +13,13 @@
    breaks old links. Two encodings are built and the shorter one is used (leading tag byte):
      2 = sparse: varint(gap*4 + value)                 — best for few marks
      4 = dense : varint(N) + presence bitmap + 2 bits per marked item — best for many marks
-   Read-only legacy tags: 1 = old 6-bit positional, 3 = dense without N (N was 371). */
+   Read-only legacy tags: 1 = old 6-bit positional, 3 = dense without N (N was 371).
+   v613: 7 = an EXTENDED list (core/ext.js): varint(N), then for every item code 0..N-1 two symbols, Top then Bottom
+     (0 none, 1 No, 2 Maybe, 3 Yes, 4 Love, 5–7 = Maybe/Yes/Love + "Хочу"), packed by an adaptive binary range coder
+     (the LZMA one: 11-bit probabilities, 3-bit symbol trees). Top's context = the class of the previous item's Top
+     answer, Bottom's = the class of this item's Top answer (none / No / yes-ish). Frequent answers cost little,
+     empty roles almost nothing — about 1.3× a plain link when one role is filled, 2.6× with both. Plain lists keep
+     tags 2 / 4 exactly as before. */
 (function (KC) {
   const IV = { limit: 1, maybe: 2, yes: 3, love: 4 }, IREV = [null, "limit", "maybe", "yes", "love"];
   const LEGACY_N = 371;
@@ -60,10 +66,79 @@
       }
       return true;
     }
+    if (tag === 7) { const pos = { i: 1 }; const N = bytes.length > 1 ? readVarint(bytes, pos) : 0; return N >= 1 && N <= 4096; }
     return tag === 1;
   }
   function varint(n, out) { while (n >= 128) { out.push((n & 127) | 128); n >>>= 7; } out.push(n); }
   function readVarint(bytes, pos) { let n = 0, shift = 0, b; do { b = bytes[pos.i++]; n |= (b & 127) << shift; shift += 7; } while ((b & 128) && pos.i < bytes.length); return n; }
+
+  /* ---- v613: the range coder of tag 7 ---- */
+  const TOP = 0x1000000, PB = 11, PM = 5, P0 = 1 << (PB - 1);
+  function rcEncoder() {
+    let low = 0, range = 0xFFFFFFFF, cache = 0, cacheSize = 1; const out = [];
+    const shiftLow = () => {
+      if (low < 0xFF000000 || low >= 0x100000000) {
+        const carry = low >= 0x100000000 ? 1 : 0; let tmp = cache;
+        do { out.push((tmp + carry) & 255); tmp = 255; } while (--cacheSize !== 0);
+        cache = Math.floor(low / TOP) & 255;
+      }
+      cacheSize++; low = (low % TOP) * 256;
+    };
+    return {
+      bit(P, i, b) {
+        const p = P[i], bound = (range >>> PB) * p;
+        if (!b) { range = bound; P[i] = p + (((1 << PB) - p) >> PM); } else { low += bound; range -= bound; P[i] = p - (p >> PM); }
+        while (range < TOP) { range = (range * 256) >>> 0; shiftLow(); }
+      },
+      done() { for (let k = 0; k < 5; k++) shiftLow(); const o = out.slice(1); while (o.length && o[o.length - 1] === 0) o.pop(); return o; },
+    };
+  }
+  function rcDecoder(bytes, start) {
+    let pos = start, range = 0xFFFFFFFF, code = 0;
+    const next = () => (pos < bytes.length ? bytes[pos++] : 0);
+    for (let k = 0; k < 4; k++) code = ((code * 256) + next()) >>> 0;
+    return {
+      bit(P, i) {
+        const p = P[i], bound = (range >>> PB) * p; let b;
+        if (code < bound) { range = bound; P[i] = p + (((1 << PB) - p) >> PM); b = 0; } else { code -= bound; range -= bound; P[i] = p - (p >> PM); b = 1; }
+        while (range < TOP) { range = (range * 256) >>> 0; code = ((code * 256) + next()) >>> 0; }
+        return b;
+      },
+    };
+  }
+  const EXV = { limit: 1, maybe: 2, yes: 3, love: 4 }, EXREV = [null, "limit", "maybe", "yes", "love", "maybe", "yes", "love"];
+  const exSym = (x, r) => { const v = x && EXV[x[r]]; return !v ? 0 : x[r + "w"] && v > 1 ? v + 3 : v; };
+  const exCls = s => (s === 0 ? 0 : s === 1 ? 1 : 2);
+  const models = () => Array.from({ length: 6 }, () => new Array(8).fill(P0));   /* Top ×3 contexts, Bottom ×3 */
+  function packExt(items) {
+    maps();
+    const N = byCode.length, head = [7]; varint(N, head);
+    const enc = rcEncoder(), M = models();
+    const put = (P, s) => { let m = 1; for (let k = 2; k >= 0; k--) { const b = (s >> k) & 1; enc.bit(P, m, b); m = (m << 1) | b; } };
+    let prev = 0;
+    for (let c = 0; c < N; c++) {
+      const id = byCode[c], x = id && items[id], st = exSym(x, "t"), sb = exSym(x, "b");
+      put(M[exCls(prev)], st); put(M[3 + exCls(st)], sb); prev = st;
+    }
+    return b64(head.concat(enc.done()));
+  }
+  function unpackExt(bytes) {
+    maps();
+    const pos = { i: 1 }, N = readVarint(bytes, pos), items = {};
+    if (N < 1 || N > 4096) return items;
+    const dec = rcDecoder(bytes, pos.i), M = models();
+    const get = P => { let m = 1; for (let k = 0; k < 3; k++) m = (m << 1) | dec.bit(P, m); return m - 8; };
+    let prev = 0;
+    for (let c = 0; c < N; c++) {
+      const st = get(M[exCls(prev)]), sb = get(M[3 + exCls(st)]); prev = st;
+      const id = byCode[c]; if (!id || !(st || sb)) continue;
+      const o = {};
+      if (st) { o.t = EXREV[st]; if (st > 4) o.tw = 1; }
+      if (sb) { o.b = EXREV[sb]; if (sb > 4) o.bw = 1; }
+      items[id] = o;
+    }
+    return items;
+  }
 
   function packAnswers(items) {
     maps();
@@ -85,6 +160,7 @@
     maps();
     let bytes; try { bytes = unb64(str); } catch (e) { return {}; }
     const items = {}; if (!bytes.length) return items;
+    if (bytes[0] === 7) return unpackExt(bytes);
     const put = (code, v) => { const id = byCode[code]; if (id && IREV[v]) items[id] = { interest: IREV[v] }; };
     const tag = bytes[0];
     if (tag === 2) {
@@ -171,10 +247,12 @@
   const TEXT = { n: "name", s: "safeword", f: "fantasies", c: "comments", l: "allergies" };
 
   KC.codec = {
-    packAnswers, unpackAnswers, packMeta, unpackMeta, packSet, unpackSet,
+    packAnswers, unpackAnswers, packExt, packMeta,
+    /* v613: the answers part of an extended list (tag 7) */
+    isExtCode(a) { if (!a) return false; try { return unb64(a)[0] === 7; } catch (e) { return false; } }, unpackMeta, packSet, unpackSet,
     /* state -> hash string (no leading #). lang: code of page language, or omit */
     encode(st, lang) {
-      const parts = ["a=" + packAnswers(st.items || {})];
+      const parts = ["a=" + (st.ext ? packExt(st.items || {}) : packAnswers(st.items || {}))];
       Object.keys(TEXT).forEach(k => { const v = st[TEXT[k]]; if (v) parts.push(k + "=" + encodeURIComponent(v)); });
       const m = packMeta(st.meta); if (m) parts.push("m=" + m);
       if (st.uid && UID.test(st.uid)) parts.push("i=" + st.uid);
@@ -196,6 +274,7 @@
       const q = new URLSearchParams(h);
       const st = { items: {}, meta: {}, name: "", safeword: "", fantasies: "", comments: "", allergies: "", lang: null };
       if (q.get("a")) st.items = unpackAnswers(q.get("a"));
+      if (KC.codec.isExtCode(q.get("a"))) st.ext = 1;
       Object.keys(TEXT).forEach(k => { st[TEXT[k]] = q.get(k) || ""; });
       if (q.get("m")) st.meta = unpackMeta(q.get("m"));
       const lg = q.get("lg"); if (lg && KC.i18n && KC.i18n.known(lg)) st.lang = lg;

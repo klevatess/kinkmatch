@@ -156,7 +156,8 @@
   /* sg = a sign or (v591) a DnD figure (KC.dnd.pick: grey stars only shape the drawing); st = the list (for the alignment) */
   function signMini(sg, who, shared, st0) {
     const W = 170, H = 170, box = 120, o = 25, X = st => o + st.x * box / 100, Y = st => o + st.y * box / 100;
-    const name = sg.dnd ? t("dnd.c." + sg.cls) : sg.wod ? t("wod." + sg.line + "." + sg.id) : t("sign." + sg.id);
+    const nm = KC.dnd.wrOf(sg) ? KC.dnd.wrOf(sg).head(sg, true, t) : null;   /* v610 */
+    const name = sg.dnd ? t("dnd.c." + sg.cls) : sg.wod ? t("wod." + sg.line + "." + sg.id) : nm ? nm.name : t("sign." + sg.id);
     let h = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(name) + '">' + dust(W, H, 30, 3);
     h += '<g fill="none" stroke="var(--ink-line)" stroke-width="1.1" stroke-linejoin="round">' + sg.lines.map(l => { const q = l[0] === "d" ? l.slice(1) : l;
       return '<polyline points="' + q.map(i => X(sg.stars[i]).toFixed(1) + "," + Y(sg.stars[i]).toFixed(1)).join(" ") + '"/>'; }).join("") + "</g>";
@@ -167,6 +168,7 @@
     let labels = "";
     sg.stars.forEach((st, i) => {
       const x = pts[i].x, y = pts[i].y;
+      if (st.hid) return;
       if (st.grey) { h += '<circle class="sg-grey" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="1.4" fill="var(--muted)" opacity=".55"/>'; return; }
       if (!st.bright) { h += '<path d="' + spark(x, y, 3) + '" fill="var(--muted)" opacity=".7"/>'; return; }
       const sh = shared.indexOf(st.s.id) >= 0;
@@ -175,11 +177,11 @@
       const b = LB[i];
       labels += '<text x="' + (b.x + b.w / 2).toFixed(1) + '" y="' + (b.y + 11).toFixed(1) + '" text-anchor="middle" font-size="10.5" font-weight="' + (sh ? 700 : 600) + '" font-family="Inter,sans-serif" fill="currentColor" paint-order="stroke" stroke="var(--panel)" stroke-width="3">' + esc(short(st.s.id)) + "</text>";
     });
-    const sub = sg.kind === "even" ? t("sign.even") : sg.main.map(m => short(m.id)).join(" + ");
+    const sub = sg.kind === "even" ? KC.signs.evenText(sg) : sg.main.map(m => short(m.id)).join(" + ");
     const al = sg.dnd ? KC.dnd.alignment(st0, KC.portrait.compute(st0), null) : null;
     const wl = sg.wod ? KC.wod.lines(KC.wod.details(st0, KC.portrait.compute(st0), null, sg.line, sg.id), t) : null;
-    return '<div class="sg-mini' + (sg.dnd ? " sg-dnd" : sg.wod ? " sg-wod" : "") + '"' + (sg.wod ? ' data-id="' + sg.id + '"' : "") + '><div class="who">' + esc(who) + '</div><div class="nm">' + esc(name) + "</div>"
-      + (wl ? '<div class="rl">' + esc(wl.rl) + '</div><div class="grp">' + esc(wl.sub) + '</div><div class="grp">' + esc(sub) + "</div>" : sg.dnd ? '<div class="rl">' + esc(t("dnd.r." + KC.dnd.race(st0, null)) + " · " + t("dnd.lvlShort", { n: KC.dnd.level(st0, null) })) + '</div><div class="grp">' + esc(t("dnd.s." + sg.cls + "." + sg.sub)) + '</div><div class="grp">' + esc(sub) + '</div><div class="al">' + esc(t("dnd.al." + al)) + "</div>" : '<div class="grp">' + esc(sub) + "</div>")
+    return '<div class="sg-mini' + (sg.dnd ? " sg-dnd" : sg.wod ? " sg-wod" : sg.wr ? " sg-wr" : sg.wh ? " sg-wh" : sg.leg ? " sg-leg" : sg.ow ? " sg-ow" : sg.wi ? " sg-wi" : sg.av ? " sg-av" : "") + '"' + (sg.wod || nm ? ' data-id="' + sg.id + '"' : "") + '><div class="who">' + esc(who) + '</div><div class="nm">' + esc(name) + "</div>"
+      + (wl ? '<div class="rl">' + esc(wl.rl) + '</div><div class="grp">' + esc(wl.sub) + '</div><div class="grp">' + esc(sub) + "</div>" : sg.dnd ? '<div class="rl">' + esc(t("dnd.r." + KC.dnd.race(st0, null)) + " · " + t("dnd.lvlShort", { n: KC.dnd.level(st0, null) })) + '</div><div class="grp">' + esc(t("dnd.s." + sg.cls + "." + sg.sub)) + '</div><div class="grp">' + esc(sub) + '</div><div class="al">' + esc(t("dnd.al." + al)) + "</div>" : (nm && nm.rl ? '<div class="rl">' + esc(nm.rl) + "</div>" : "") + '<div class="grp">' + esc(sub) + "</div>")
       + h + labels + "</svg></div>";
   }
   /* v591: the same switch as in the portrait (v597: + World of Darkness); v599: its choice is remembered per view */
@@ -192,6 +194,16 @@
       const ln = KC.wod.lines(KC.wod.details(p.st, d, null, line, sg.id), t);
       return '<li data-id="' + sg.id + '"><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(t("wod." + line + "." + sg.id)) + '</span><span class="al">' + esc(ln.rl) + '</span><span class="sub">' + esc(ln.sub) + "</span></li>"; });
     return '<div class="sp-box sp-party sp-wodgrp">' + head("sp.wod.grp." + line) + '<ul class="dnd-party">' + rows.join("") + "</ul>" + KC.wod.noticeHTML() + "</div>";
+  }
+  /* v610: the group in the new modes — the cult (⚔ Wr), the army (factions), the legions: everyone's figure and its one line */
+  function modeGroupHTML(P, md) {
+    const M = KC[md];
+    const rows = P.map(p => { const d = KC.portrait.compute(p.st), sg = M.pick(d, p.st, null);
+      if (!sg) return '<li><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(t("dnd.al.roll")) + "</span></li>";
+      const h = M.head(sg, true, t), groups = sg.kind === "even" ? KC.signs.evenText(sg) : sg.main.map(m => short(m.id)).join(" + ");
+      return '<li data-id="' + sg.id + '"><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(h.name) + "</span>"
+        + (h.rl ? '<span class="al">' + esc(h.rl) + "</span>" : "") + '<span class="sub">' + esc(groups) + "</span></li>"; });
+    return '<div class="sp-box sp-party sp-' + md + 'grp">' + head("sp." + md + ".grp") + '<ul class="dnd-party">' + rows.join("") + "</ul>" + KC.wr.noticeHTML() + "</div>";
   }
   /* v596: who the party can beat — one monster for each of Medium / Hard / Deadly */
   function foesHTML(levels) {
@@ -218,19 +230,19 @@
   }
   function pairSigns(A, B, nA, nB) {
     if (!KC.signs) return "";
-    const md = KC.dnd && KC.wod ? KC.dnd.mode("pair") : "sign", dn = md === "dnd", wd = md === "wod", line = wd ? KC.wod.sub("pair") : "";
+    const md = KC.dnd && KC.wod ? KC.dnd.mode("pair") : "sign", dn = md === "dnd", wd = md === "wod", wr = KC.dnd.isWr(md), line = wd ? KC.wod.sub("pair") : "";
     const pick = dn ? KC.dnd.pick : wd ? d => KC.wod.pick(d, line) : KC.signs.pick;
-    const a = pick(KC.portrait.compute(A)), b = pick(KC.portrait.compute(B));
+    const a = wr ? KC[md].pick(KC.portrait.compute(A), A, null) : pick(KC.portrait.compute(A)), b = wr ? KC[md].pick(KC.portrait.compute(B), B, null) : pick(KC.portrait.compute(B));
     if (!a || !b) return "";
     const P = dn ? "sp.dnd." : "sp.sg.";
-    const c = dn ? dndCloseness(a, b) : wd ? KC.wod.closeness(a, b) : KC.signs.closeness(a, b), n = { same: 3, mirror: 2, cls: 2, near: 1, far: 0 }[c.level];
+    const c = dn ? dndCloseness(a, b) : wd ? KC.wod.closeness(a, b) : wr ? KC[md].closeness(a, b) : KC.signs.closeness(a, b), n = { same: 3, mirror: 2, cls: 2, near: 1, far: 0 }[c.level];
     /* World of Darkness: the level names per line ("One clan", "One coterie", …), the reasons as in DnD */
-    const lvl = wd ? t("sp.wod." + c.level + "." + line) : t(P + c.level);
-    const why = c.level === "near" ? t((wd ? "sp.dnd." : P) + "nearWhy", { g: c.shared.map(short).join(", ") }) : wd ? t(c.level === "same" ? "sp.wod.sameWhy" : "sp.dnd.farWhy") : t(P + c.level + "Why");
-    return '<div class="sp-box sp-signs' + (dn ? " sp-dnd" : wd ? " sp-wod" : "") + '">' + head(dn ? "sp.dnd.h" : wd ? "sp.wod.h." + line : "sp.sg.h") + (KC.dnd && KC.wod ? modeSwitch("pair") : "")
+    const lvl = wd ? t("sp.wod." + c.level + "." + line) : wr ? t("sp." + md + "." + c.level) : t(P + c.level);
+    const why = c.level === "near" ? t((wd || wr ? "sp.dnd." : P) + "nearWhy", { g: c.shared.map(short).join(", ") }) : wd || wr ? t(c.level === "same" ? "sp.wod.sameWhy" : "sp.dnd.farWhy") : t(P + c.level + "Why");
+    return '<div class="sp-box sp-signs' + (dn ? " sp-dnd" : wd ? " sp-wod" : wr ? " sp-" + md : "") + '">' + head(dn ? "sp.dnd.h" : wd ? "sp.wod.h." + line : wr ? "sp." + md + ".h" : "sp.sg.h") + (KC.dnd && KC.wod ? modeSwitch("pair") : "")
       + '<div class="sg-match"><span class="st">' + "✦".repeat(n) + "<i>" + "✦".repeat(3 - n) + "</i></span>" + esc(lvl) + "</div>"
       + '<div class="sg-why">' + esc(why) + '</div><div class="sg-pair">' + signMini(a, nA, c.shared, A) + signMini(b, nB, c.shared, B) + "</div>"
-      + (dn ? foesHTML([KC.dnd.level(A, null), KC.dnd.level(B, null)]) : wd ? KC.wod.noticeHTML() : "") + "</div>";
+      + (dn ? foesHTML([KC.dnd.level(A, null), KC.dnd.level(B, null)]) : wd ? KC.wod.noticeHTML() : wr ? KC.wr.noticeHTML() : "") + "</div>";
   }
 
   /* ---------- two people: paired planets ---------- */
@@ -247,5 +259,5 @@
     g += '<text x="' + cx + '" y="' + (H - 12) + '" text-anchor="middle" font-size="10.5" font-family="Inter,sans-serif" fill="var(--muted)">' + esc(t("sp.pair.cap")) + "</text></svg>";
     return '<div class="sp-box">' + head("sp.pair.h") + g + pairStars(A, B, nA, nB) + "</div>" + pairSigns(A, B, nA, nB);
   }
-  KC.space = { groupSVG, pairSVG, pairSigns, simMatrix, liked, modeSwitch, partyHTML, foesHTML, wodGroupHTML };
+  KC.space = { groupSVG, pairSVG, pairSigns, simMatrix, liked, modeSwitch, partyHTML, foesHTML, wodGroupHTML, modeGroupHTML };
 })(window.KC);

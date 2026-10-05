@@ -1,0 +1,46 @@
+/* data/starters.js — the starter templates (v617, owner, Oct 5): always there, cannot be renamed or deleted, shown first in
+   "Template…" and in My lists. key -> texts tpl.st.<key> (name) and tpl.stDesc.<key> (the note under "Отметь, что тебе
+   интересно"); tid = the permanent 6-character id carried in template links; link = the Latin name put into a shared link; ids = 30–150 items (owner), overlaps allowed.
+   The lists are a starting point — the owner may change them; never reuse a tid. */
+KC.STARTERS = [
+  { key: "vanilla", link: "Vanilla", tid: "Svanil", ids: ("romance-affection hugging gentle-touch kissing-body kissing-mouth ear-licking spooning dirty-talk foreign-language-talk using-real-names sleepover aftercare shared-bathing lap-pillow-ear-cleaning "
+    + "genital-sex barebacking up-against-walls 69 masturbation mutual-masturbation hand-jobs fingering fellatio cunnilingus-giving cunnilingus-receiving face-sitting breast-fucking tantric-yoni edging petting-over-clothes thigh-sex "
+    + "sex-in-front-of-a-mirror sex-in-total-darkness vibrator-external vibrator-internal dildo-vaginal magic-wand suction-vibrator fingers-in-mouth licking-fingers-clean "
+    + "lingerie-wearing stockings-wearing high-heel-wearing clothed-sex massage pedicures-foot-massage oil-play nuru-massage food-play hand-feeding scent-play ice-cubes teasing tickling biting hickies nipple-play blindfolds "
+    + "erotic-dancing stripping erotic-photos photo-exchange phone-sex cosplay outdoor-sex sex-in-rain mirror-play praise cum-on-body cum-in-mouth swallowing-semen cum-in-vagina creampie squirting session-short session-medium").split(" ") },
+  { key: "rough", link: "Rough sex", tid: "Srough", ids: ("rough-sex rough-fingering rough-grabbing hair-pulling spanking-hand spanking-over-the-knee body-slapping face-slapping biting biting-hard hickies scratching bruising-temporary "
+    + "breath-control-mild breath-control-choking breath-control-facesitting wrestling brutal-treatment dirty-talk verbal-humiliation spitting spitting-in-mouth fingers-in-mouth deep-throating irrumatio fellatio "
+    + "cunnilingus-giving cunnilingus-receiving face-sitting genital-sex up-against-walls anal-sex anal-play anal-plug-small anal-plug-medium clothes-tearing tights-tearing pussy-spanking "
+    + "cum-on-face cum-on-body cum-in-mouth swallowing-semen creampie cum-in-ass forced-orgasm overstimulation orgasm-control edging fantasy-rape-play cnc-single dubcon rough-penetration-before-arousal "
+    + "brat-taming bratting cuffs-leather bondage-light blindfolds gag-ball gag-cloth panty-gag hair-bondage kneeling begging following-orders aftercare session-short session-medium").split(" ") },
+  { key: "light", link: "Light kink", tid: "Slight", ids: ("blindfolds bondage-light cuffs-leather cuffs-handcuff leather-restraints rope-bondage-simple spreader-bars gag-cloth gag-ball collar-in-private leash harness-leather ear-plugs "
+    + "teasing tickling scratching wartenberg-pinwheel ice-cubes wax-play hot-wax-dripping scent-play biting hickies hair-pulling nipple-play nipple-clamps clothespins pain-mild sensory-deprivation "
+    + "spanking-hand spanking-over-the-knee spanking-hairbrush spanking-leather-slappers whipping-flogger riding-crop caning-sensation body-slapping rough-grabbing wrestling "
+    + "following-orders discipline praise kneeling begging chosen-clothing honorifics eye-contact-rules speech-restrictions rituals massage erotic-dancing remote-controlled-toy phone-sex photo-proof "
+    + "edging orgasm-control orgasm-denial forced-orgasm overstimulation vibrator-external magic-wand anal-teasing anal-play anal-plug-small dildo-vaginal strap-on-wearing strap-on-penetrated "
+    + "other-roleplaying bratting brat-taming switching-roles medical-scenes schoolroom-scenes practical-sex-ed puppy-play kitten-play animal-roleplay dirty-talk stripping erotic-photos mirror-play sex-in-front-of-a-mirror "
+    + "lingerie-wearing stockings-wearing high-heel-wearing leather-wearing rubber-latex-wearing corsets masks cosplay foot-worship boot-worship body-writing aftercare session-short session-medium").split(" ") },
+  { key: "smnosex", link: "SM without sex", tid: "Ssmnos", ids: ("spanking-hand spanking-over-the-knee spanking-hairbrush spanking-leather-slappers spanking-wooden-paddles body-slapping face-slapping whipping-belt whipping-flogger whipping-cat-o-nine whipping-single-tail "
+    + "riding-crop rubber-band-snapping caning-english caning-sensation rattan bastinado palm-strikes birching sauna-whisk breast-whipping pussy-spanking ballbusting nettle-play-urtication reducing-to-tears "
+    + "teasing tickling scratching abrasion finger-claws vampire-gloves wartenberg-pinwheel biting biting-hard hair-pulling rough-grabbing ice-cubes cold-shower hot-wax-dripping hot-wax-high-temp wax-play fire-play fire-cupping "
+    + "beating-soft beating-hard kicking strapping pain-mild pain-severe pain-massage pressure-points standing-on-nails spike-mat knife-play clothespins tongue-clothespins nipple-clamps nipple-weights clamps-labia-clit "
+    + "zippers-clothespins zippers-clamps piercing-temporary suction-cups electricity-tens electricity-violet-wand cbt cbt-stretching ball-stretching riding-the-horse figging punishment-scene sensory-deprivation "
+    + "bondage-light bondage-heavy rope-bondage-simple rope-bondage-shibari suspension-upright suspension-horizontal partial-suspension predicament-bondage wall-cross-mounting stocks spreader-bars leather-restraints "
+    + "cuffs-leather cuffs-metal chains manacles-irons mummification hood-full-head gag-ball gag-bit blindfolds collar-in-private metal-collar "
+    + "bruising-temporary impact-bruising body-writing wax-burns kneeling-on-buckwheat corner-kneeler standing-in-corner lecturing discipline kneeling following-orders rituals aftercare session-medium session-long").split(" ") },
+  { key: "humil", link: "Humiliation", tid: "Shumil", ids: ("verbal-humiliation forced-thanking forced-self-degradation humiliation-in-private humiliation-in-public lecturing standing-in-corner kneeling-on-buckwheat corner-kneeler mouth-soaping spitting spitting-in-mouth "
+    + "forced-nudity forced-dressing forced-feminization forced-homosexuality forced-masturbation forced-porn-watching forced-watching-others forced-servitude homage-with-tongue floor-licking forced-floor-eating "
+    + "shaving-head-hair shaving-body-hair forced-unpleasant-food pet-food-eating forced-drinking-beer-cider mindbreak depersonalisation dronification human-ashtray trash-play hair-as-mop "
+    + "dirty-talk forced-begging-acts begging objectification sex-doll-use serving-as-furniture serving-as-art serving-as-a-maid chores bathroom-control chosen-clothing chosen-food eye-contact-rules speech-restrictions no-sounds "
+    + "honorifics name-change humiliating-body-writing body-writing face-slapping face-stepping trampling-barefoot boot-worship foot-worship toe-licking-giving puppy-play pig-play animal-roleplay muzzles leash leash-walk-outside "
+    + "collar-in-public forced-nudity-private forced-nudity-others exhibitionism-friends cuckolding-hotwife voyeurism-your-dom slutty-clothing cross-dressing wearing-partners-underwear underwear-sniffing panty-gag sock-gag-own sock-gag-top "
+    + "cum-on-face bukkake golden-showers reducing-to-tears prostitution-fantasy auctioned freeuse glory-hole used-as-toy-for-other-sub serving-other-doms photo-proof video-of-you aftercare").split(" ") },
+  { key: "extra", link: "Extra", tid: "Sextra", ids: ("outdoor-sex outdoor-bondage chained-outdoors nude-in-snow sex-in-snow sex-in-rain hair-drag-snow hair-drag-rain abandoned-building-sex burial-up-to-the-neck outdoor-scenes leash-walk-outside exhibitionism-strangers "
+    + "anal-plug-public vibro-egg-public humiliation-in-public collar-in-public fake-public-use cold-shower ice-dildo sauna-whisk nettle-play-urtication leeches fire-play fire-cupping hot-wax-high-temp wax-inside-vagina "
+    + "branding scarification tattooing piercing-permanent piercing-temporary labia-sewing-needle labia-stapling medical-stapler zippers-needles blood-play knife-play injections-saline "
+    + "asphyxiation breath-control-choking water-torture sleep-deprivation suspension-inverted suspension-horizontal vacbed mummification bondage-bag fuck-box cages-cells left-tied-unattended bondage-all-day session-day session-multi-day "
+    + "pain-severe beating-hard punching kicking ballbusting pussy-punching pussy-kicking breast-torture cbt-crushing electricity-internal electricity-genitals-external electricity-genital-internal electricity-anal "
+    + "vaginal-electrostimulation cbt-electrical shock-collar figging wasabi-on-genitals menthol-balm-labia menthol-eye-drops fisting-vaginal fisting-anal double-penetration double-penetration-one-hole triple-penetration "
+    + "object-insertion bottle-neck-vaginal bottle-neck-anal irrumatio-to-vomiting mindbreak dronification depersonalisation human-ashtray trash-play golden-showers swallowing-urine funnel-play forced-drinking-beer-cider "
+    + "fantasy-gang-rape kidnapping interrogations fear-play abandonment sex-machines urethral-play catheterization dilation enema-retention riding-the-horse standing-on-nails xenophilia-tentacles egg-laying aftercare").split(" ") },
+];

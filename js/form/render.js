@@ -7,6 +7,38 @@
     favKey: null };  /* someone's list: key of its favourites in KC.store.favs */
   const t = (k, v) => KC.i18n.t(k, v), esc = KC.esc;
   F.SCALE = ["limit", "maybe", "yes", "love"];
+  /* v613: the open list is an extended one (two roles per practice, core/ext.js) */
+  F.isExt = () => KC.ext.isExt(F.state);
+  /* the answer a filter looks at: a plain list's answer; an extended list's answer in the role picked in the
+     header ("Только Верх / Низ"), with both roles the stronger one (Love > Yes > Maybe > No) */
+  F.roleView = () => (F.isExt() && KC.$("roleView") ? KC.$("roleView").value : "both");
+  F.answerOf = id => {
+    const x = F.state.items[id]; if (!x) return null;
+    if (!F.isExt()) return x.interest || null;
+    const r = F.roleView(); if (r === "t" || r === "b") return x[r] || null;
+    const RK = KC.match.RANK; return [x.t, x.b].filter(Boolean).sort((a, b) => RK[a] - RK[b])[0] || null;
+  };
+  const scaleEl = () => { const scale = KC.el("div", "scale"); F.SCALE.forEach(v => { const b = KC.el("button", null, t("scale." + v)); b.type = "button"; b.dataset.v = v; scale.appendChild(b); }); return scale; };
+  /* v613: the two rows of an extended practice: "↑ Верх" and "↓ Низ", each with its answers and "✦ Хочу" */
+  function extRows() {
+    const box = KC.el("div", "ext-rows");
+    KC.ext.R.forEach(r => {
+      const row = KC.el("div", "ext-row"); row.dataset.r = r;
+      row.appendChild(KC.el("span", "rl", t("ext.row." + r)));
+      row.appendChild(scaleEl());
+      const w = KC.el("button", "want", t("ext.want")); w.type = "button"; w.dataset.act = "want"; w.setAttribute("aria-pressed", "false"); w.disabled = true;
+      row.appendChild(w); box.appendChild(row);
+    });
+    return box;
+  }
+  /* paint one practice of an extended list */
+  F.paintExt = function (row, x) {
+    row.querySelectorAll(".ext-row").forEach(er => {
+      const r = er.dataset.r, v = x && x[r], on = !!(x && x[r + "w"]);
+      er.querySelectorAll(".scale button").forEach(b => b.classList.toggle("sel", b.dataset.v === v));
+      const w = er.querySelector(".want"); w.disabled = !KC.ext.WANTS[v]; w.classList.toggle("on", on); w.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  };
 
   /* ---- templates. Two different things:
      bound   = the template a list was CREATED by (own list: state.template; someone's list: F.sharedBy).
@@ -47,6 +79,7 @@
       if (x) { const st = S.normalize(x.data); st.onlyMarked = own.onlyMarked; S.writeOwn(st); M.setActive(x.id); notice.fill = "reuse"; }
       else {
         const st = S.blank(); st.name = own.name; st.meta = S.clone(own.meta); st.onlyMarked = own.onlyMarked;
+        if (own.ext) st.ext = 1;   /* v613: an extended list stays extended */
         Object.keys(own.items).forEach(id => { if (set[id]) st.items[id] = own.items[id]; });
         const fav = (own.fav || []).filter(id => set[id]); if (fav.length) st.fav = fav;
         st.template = { id: tp.id, name: tp.name }; st.uid = S.newUid();
@@ -55,7 +88,7 @@
       }
     }
     try { sessionStorage.setItem("kcNotice", JSON.stringify(notice)); } catch (e) {}
-    location.href = location.pathname + "?lang=" + KC.i18n.lang;
+    location.href = KC.i18n.homeUrl(KC.i18n.lang);
   };
 
   /* ---- favourites (♥): own list -> state.fav; someone's list -> KC.store.favs under F.favKey. Never in links. ---- */
@@ -116,7 +149,7 @@
   };
   /* my own list, reloaded in the language shown now (v600: without ?lang= a visitor who never picked a language
      got the phone's language after "Start a new list") */
-  F.homeUrl = () => location.pathname + "?lang=" + KC.i18n.lang;
+  F.homeUrl = () => KC.i18n.homeUrl(KC.i18n.lang);
 
   /* profile: role block at the top + "About me" */
   F.renderProfile = function () {
@@ -144,7 +177,8 @@
     const list = KC.$("list"), jump = KC.$("jump");
     list.innerHTML = ""; jump.innerHTML = "";
     const ph = KC.el("option", null, t("jump.ph")); ph.value = ""; jump.appendChild(ph);
-    const sub = KC.i18n.lang !== "en";
+    const sub = KC.i18n.lang !== "en", ext = F.isExt();
+    document.body.classList.toggle("is-ext", ext);
     let idx = 0;
     KC.CATS.forEach(cat => {
       const opt = KC.el("option", null, KC.i18n.cat(cat.id)); opt.value = "cat-" + cat.id; jump.appendChild(opt);
@@ -175,9 +209,7 @@
           const help = KC.el("button", "mini help", "?"); help.type = "button"; help.dataset.act = "help";
           help.setAttribute("aria-label", t("item.help")); ctr.appendChild(help);
         }
-        const scale = KC.el("div", "scale");
-        F.SCALE.forEach(v => { const b = KC.el("button", null, t("scale." + v)); b.type = "button"; b.dataset.v = v; scale.appendChild(b); });
-        ctr.appendChild(scale); row.appendChild(ctr);
+        ctr.appendChild(ext ? extRows() : scaleEl()); row.appendChild(ctr);
         if (it.desc) { const d = KC.el("div", "item-desc", it.desc); d.hidden = true; row.appendChild(d); }
         sec.appendChild(row);
       });
@@ -195,10 +227,12 @@
       const on = b.dataset.type === "multi" ? Array.isArray(cur) && cur.indexOf(b.dataset.val) >= 0 : cur === b.dataset.val;
       b.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    const favs = {}; F.favList().forEach(id => { favs[id] = 1; });
+    const favs = {}, ext = F.isExt(); F.favList().forEach(id => { favs[id] = 1; });
+    F.renderExtUI();
     document.querySelectorAll(".item").forEach(row => {
       const s = st.items[row.dataset.id];
-      row.querySelectorAll(".scale button").forEach(b => b.classList.toggle("sel", !!s && b.dataset.v === s.interest));
+      if (ext) F.paintExt(row, s);
+      else row.querySelectorAll(".scale button").forEach(b => b.classList.toggle("sel", !!s && b.dataset.v === s.interest));
       F.paintFav(row, !!favs[row.dataset.id]);
     });
     /* someone else's list: unfold "About me" if they filled it, so it is visible */
@@ -210,8 +244,9 @@
     /* only items that exist in the list: the number always matches what goes into a link */
     /* with a template: only its items */
     let n = 0, total = 0; const set = F.tplSet();
-    KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (set && !set[id]) return; total++; if (F.state.items[id] && F.state.items[id].interest) n++; }));
-    KC.$("progress").textContent = t("progress", { n, total });
+    KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (set && !set[id]) return; total++; if (KC.ext.answered(F.state, id)) n++; }));
+    const pr = KC.$("progress"); pr.textContent = t("progress", { n, total });
+    if (F.isExt()) pr.appendChild(KC.el("span", "ext-badge", t("ext.badge")));   /* v613: "Расширенная" next to the count */
   };
 
   /* search + "Show" filter (all / unanswered / new / answered / Yes-Love-Maybe / only No) + template + "only ♥".
@@ -222,7 +257,7 @@
     const q = KC.$("search").value.trim().toLowerCase(), view = KC.$("view").value, set = F.tplSet();
     const favs = KC.$("onlyFav").checked ? {} : null; if (favs) F.favList().forEach(id => { favs[id] = 1; });
     const sorted = view === "answered" || view === "positive", RANK = KC.match.RANK;
-    const ans = id => (F.state.items[id] || {}).interest || null;
+    const ans = F.answerOf, rv = F.roleView();
     const rank = row => { const a = ans(row.dataset.id); return a ? RANK[a] : 4; };
     let any = false;
     document.querySelectorAll(".cat").forEach(sec => {
@@ -231,6 +266,7 @@
       rows.sort((a, b) => (sorted ? rank(a) - rank(b) : 0) || a.dataset.idx - b.dataset.idx);
       rows.forEach(row => {
         sec.appendChild(row);
+        if (rv !== "both" || row.querySelector(".r-hidden")) row.querySelectorAll(".ext-row").forEach(er => er.classList.toggle("r-hidden", rv !== "both" && er.dataset.r !== rv));
         const id = row.dataset.id, a = ans(id);
         let m = !set || !!set[id]; if (m) inTpl++;
         if (m && q) m = row.dataset.search.indexOf(q) >= 0;
@@ -255,9 +291,12 @@
     const opt = (v, label) => '<option value="' + esc(v) + '">' + esc(label) + "</option>";
     const group = (key, a) => a.length ? '<optgroup label="' + esc(t(key)) + '">' + a.map(x => opt(x.tid, T.label(x) || t("unnamed"))).join("") + "</optgroup>" : "";
     /* the header list: "Template…" when none is applied; with one applied it shows its name and offers "✕ No template" */
-    sel.innerHTML = opt("", t(tp ? "filt.tplOff" : "filt.tplPh")) + group("filt.tplMine", T.own()) + group("filt.tplRec", T.received());
+    sel.innerHTML = opt("", t(tp ? "filt.tplOff" : "filt.tplPh")) + group("filt.tplStart", T.starters()) + group("filt.tplMine", T.own()) + group("filt.tplRec", T.received());
     sel.value = tp ? tp.id : "";
-    sel.hidden = !tp && !T.list().length; /* nothing to pick yet */
+    sel.hidden = !tp && !T.list().length && !T.starters().length; /* nothing to pick yet */
+    /* v617: a starter template applied -> its short description under the intro */
+    const st = tp && T.starter(tp.id), dsc = KC.$("tplDesc");
+    if (dsc) { dsc.hidden = !st; dsc.innerHTML = st ? "<b>" + esc(st.name) + "</b> — " + esc(t("tpl.stDesc." + st.key)) : ""; }
     /* the note above the list: what the list was created by, what is shown now, one button to switch */
     const b = F.bound(), lib = b && T.resolve(b), note = KC.$("tplNote"), btn = KC.$("tplAct");
     const known = {}; KC.CATS.forEach(c => c.items.forEach(([, id]) => { known[id] = 1; }));
@@ -276,6 +315,7 @@
   F.renderFiltDot = function () {
     KC.$("tplSel").classList.toggle("on", !!F.tpl());
     KC.$("view").classList.toggle("on", KC.$("view").value !== "all");
+    KC.$("roleView").classList.toggle("on", F.roleView() !== "both");
     KC.$("onlyFav").closest(".fav-toggle").classList.toggle("on", KC.$("onlyFav").checked);
   };
 
@@ -289,10 +329,21 @@
     KC.$("bannerText").innerHTML = r.status === "damaged" ? t("banner.damaged_html") : t("banner_html", { status });
   };
 
+  /* v613: the header switch "☐ Расширенная", the role filter, the note and the button in the role block */
+  F.renderExtUI = function () {
+    const ext = F.isExt(), shared = F.viewingShared, unlocked = !!(KC.FEATURES && KC.FEATURES.ext);   /* v621: locked = buttons hidden */
+    KC.$("extToggle").checked = ext;
+    KC.$("extToggleBox").hidden = shared || (!unlocked && !ext);   /* someone's list: shown as it is, nothing to switch */
+    KC.$("roleView").hidden = !ext;
+    KC.$("extNote").hidden = !ext;
+    KC.$("roleTop").hidden = ext;                    /* an extended list has both roles: no role to pick */
+    KC.$("extMake").hidden = ext || shared || !unlocked;
+  };
+
   F.renderAll = function () {
     KC.i18n.apply(document);
     if (F.viewingShared) F.renderBanner();
-    KC.$("compareBtn").href = "compare.html?lang=" + KC.i18n.lang;
+    KC.$("compareBtn").href = KC.i18n.root() + "compare.html?lang=" + KC.i18n.lang;
     F.renderProfile(); F.renderList(); F.hydrate(); F.renderTplUI(); F.applySearch();
   };
 })(window.KC);

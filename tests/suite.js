@@ -20,11 +20,11 @@ const S = (title) => console.log("\n## " + title);
   ok(!p.errors.length, "no script errors on load: " + p.errors.join(" | "));
   const ids = [], codes = [];
   KC.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); codes.push(code); }));
-  eq(ids.length, 500, "item count");
+  eq(ids.length, 506, "item count");
   eq(new Set(ids).size, ids.length, "unique ids"); eq(new Set(codes).size, codes.length, "unique codes");
   const byCode = {}; KC.CATS.forEach(c => c.items.forEach(([code, id]) => byCode[code] = id));
   eq(OLD.ORDER.map((id, i) => byCode[i]), OLD.ORDER, "codes 0..370 still mean the same items as in old versions");
-  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(500).keys()], "codes are 0..499 with no gaps or reuse");
+  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(506).keys()], "codes are 0..505 with no gaps or reuse");
   eq(["furry","xenophilia-tentacles","trampling-barefoot","trampling-shoes","rubber-band-snapping","forced-drinking-beer-cider","irrumatio-to-vomiting","bukkake","cum-in-eyes","nerd-hikikomori","humiliating-body-writing","wax-burns","spitting-in-mouth","snowballing","used-as-toy-for-other-sub","bondage-bag"].map(id => ids.indexOf(id) >= 0), Array(16).fill(true), "16 added items present");
   eq(["sleep-sacks", "bondage-bag", "scarification", "electricity-violet-wand"].map(id => KC.i18n.item(id, "ru").name), ["Спальный мешок", "Бондажный мешок", "Шрамирование", "Электро — вайолет-ванд"], "RU names as requested");
   eq(KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "wax-burns"), true, "wax burns under marking");
@@ -65,7 +65,7 @@ const S = (title) => console.log("\n## " + title);
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
   });
-  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 500, "EN names unique");
+  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 506, "EN names unique");
   const enCyr = ids.filter(id => /[а-яё]/i.test(KC.i18n.item(id, "en").desc)); eq(enCyr, [], "EN hints contain no Cyrillic");
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
@@ -121,12 +121,12 @@ const S = (title) => console.log("\n## " + title);
   p = open("form", { navLang: "ru" });
   let { w, d } = p;
   eq(p.KC.i18n.lang, "ru", "RU browser -> RU page");
-  eq(d.querySelectorAll(".item").length, 500, "500 rows rendered");
+  eq(d.querySelectorAll(".item").length, 506, "506 rows rendered");
   ok(d.querySelector(".brand-row #langSw"), "language switcher sits in the title row");
   const dotted = [...d.querySelectorAll(".item .new-dot")].map(x => x.closest(".item").dataset.id).sort();
-  const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 418) newer.push(id); }));
-  eq(dotted, newer.sort(), "green dot on exactly the items added after v533, codes 418+ (" + newer.length + ")");
-  eq(p.KC.NEW_FROM_CODE, 418, "dots start at code 418 (v533 had codes 0–417)");
+  const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 497) newer.push(id); }));
+  eq(dotted, newer.sort(), "green dot on exactly the items after 496 (v615, owner) (" + newer.length + ")");
+  eq(p.KC.NEW_FROM_CODE, 497, "dots start at code 497 (v615, owner)");
   eq(dotted.filter(id => V371ORDER.indexOf(id) >= 0), [], "no dot on items that existed in v371");
   eq(d.querySelector('.item[data-id="bukkake"] .main').textContent, "Буккаке", "dot does not change the name text");
   ok(d.querySelector(".legend .new-dot"), "legend explains the dot");
@@ -150,7 +150,7 @@ const S = (title) => console.log("\n## " + title);
   let saved = JSON.parse(w.localStorage.getItem("practices-checklist-v1"));
   eq(saved.items, { hugging: { interest: "love" }, "spanking-hand": { interest: "maybe" }, "fisting-anal": { interest: "limit" }, "impact-bruising": { interest: "yes" } }, "answers saved (toggle-off removed)");
   eq(saved.meta, { role: "sub", exp: "medium", rel: "poly", attire: ["lace", "leather"] }, "profile saved as keys");
-  eq(d.getElementById("progress").textContent, "Отмечено 4 из 500 практик", "progress text");
+  eq(d.getElementById("progress").textContent, "Отмечено 4 из 506 практик", "progress text");
   const link = p.KC.form.shareLink();
   ok(/[#&]lg=ru(&|$)/.test(link), "share link carries lg=ru");
   ok(/[#&]m=/.test(link), "share link carries profile (m=)");
@@ -172,7 +172,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector('#roleTop .opt[data-val="sub"]').getAttribute("aria-pressed") === "true", "role survived switch");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submissive / Bottom", "role label translated");
   eq(d.getElementById("metaName").value, "Борис", "name survived switch");
-  eq(d.getElementById("progress").textContent, "4 of 500 practices marked", "EN progress");
+  eq(d.getElementById("progress").textContent, "4 of 506 practices marked", "EN progress");
   eq(d.getElementById("shareBtn").textContent, "Share", "header translated");
   eq(d.documentElement.lang, "en", "<html lang> updated");
   ok(/lg=en/.test(p.KC.form.shareLink()), "link now carries lg=en");
@@ -185,7 +185,7 @@ const S = (title) => console.log("\n## " + title);
   ok(row("hugging").querySelector('.scale button[data-v="love"]').classList.contains("sel"), "answer survived switch to PT");
   eq(row("hugging").querySelector('.scale button[data-v="love"]').textContent, "Adoro", "PT scale");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submisso(a) / Bottom", "PT role label");
-  eq(d.getElementById("progress").textContent, "4 de 500 práticas marcadas", "PT progress");
+  eq(d.getElementById("progress").textContent, "4 de 506 práticas marcadas", "PT progress");
   const ptHash = p.KC.form.shareLink().split("#")[1];
   ok(/lg=pt/.test(ptHash), "PT link carries lg=pt");
   eq(open("form", { hash: ptHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "pt", "PT link opens in PT");
@@ -209,9 +209,8 @@ const S = (title) => console.log("\n## " + title);
   ok(!r.w.localStorage.getItem("practices-checklist-v1"), "recipient's own storage untouched");
   eq(JSON.parse(r.w.localStorage.getItem("checklist-saved-profiles-v1")).length, 1, "saved to Received");
   eq(r.w.localStorage.getItem("checklist-lang"), "en", "recipient preference not overwritten");
-  click(r.w, r.d.getElementById("resetBtn")); ok(r.d.getElementById("resetOverlay").classList.contains("show"), "Clear opens a choice window");
-  click(r.w, r.d.getElementById("resetList"));
-  ok(!r.w.localStorage.getItem("practices-checklist-v1"), "Clear while viewing a link does not touch own list");
+  ok(!r.d.getElementById("resetBtn") && !r.d.getElementById("resetOverlay"), "no «Clear» button any more (v615, owner)");
+  ok(!r.w.localStorage.getItem("practices-checklist-v1"), "viewing a link does not touch own list");
   // keep as own
   r = open("form", { hash: ruLink, storage: { local: {}, session: {} } });
   click(r.w, r.d.getElementById("bannerKeep"));
@@ -223,7 +222,8 @@ const S = (title) => console.log("\n## " + title);
   eq(open("form", { hash: enHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "en", "EN link opens EN for RU user");
   const noLg = ruLink.replace(/&?lg=ru/, "");
   eq(open("form", { hash: noLg, storage: { local: { "checklist-lang": "en" }, session: {} } }).KC.i18n.lang, "en", "old link without lg -> recipient preference");
-  eq(open("form", { hash: noLg, navLang: "de" }).KC.i18n.lang, "ru", "no lg, unknown browser lang -> RU default");
+  eq(open("form", { hash: noLg, navLang: "de" }).KC.i18n.lang, "en", "no lg, unknown browser lang -> EN (v608)");
+  eq(["uk-UA", "be-BY", "kk-KZ", "de-DE"].map(nl => open("form", { hash: noLg, navLang: nl }).KC.i18n.lang), ["en", "ru", "ru", "en"], "Ukrainian -> EN; Belarusian, Kazakh -> RU (owner, v608)");
   eq(open("form", { hash: noLg, navLang: "en-US" }).KC.i18n.lang, "en", "no lg, English browser -> EN");
   const es = open("form", { hash: ruLink.replace("lg=ru", "lg=es") });
   eq(es.KC.i18n.lang, "es", "lg=es opens in Spanish");
@@ -351,7 +351,7 @@ const S = (title) => console.log("\n## " + title);
   eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
   ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
   const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
-  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 500 практик", "counter = what is shown");
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 506 практик", "counter = what is shown");
   eq(gLink, gShown, "link contains exactly what the counter says");
   Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
 
@@ -381,7 +381,7 @@ const S = (title) => console.log("\n## " + title);
   const srt = o => Object.entries(o).sort();
   eq(srt(KCn.codec.decode(KCn.codec.encode(withNew)).items), srt(withNew.items), "link with new items round-trips");
   const allNew = {}; KCn.CATS.forEach(c => c.items.forEach(([, id], i) => allNew[id] = { interest: vals[i % 4] }));
-  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 500, "fully filled 500-item link round-trips");
+  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 506, "fully filled 506-item link round-trips");
 
   /* form: "Show" filter */
   S("Show filter");
@@ -390,16 +390,16 @@ const S = (title) => console.log("\n## " + title);
   const vsel = p.d.getElementById("view");
   eq([...vsel.options].map(o => o.textContent), ["Все пункты", "Только без ответа", "Только новые", "Отвеченные, по ответам", "Обожаю / Да / Может", "Только «Нет»"], "Show menu labels (v601: + only No)");
   vsel.value = "unanswered"; vsel.dispatchEvent(new p.w.Event("change"));
-  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [498, -1, -1], "unanswered: answered items hidden");
+  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [504, -1, -1], "unanswered: answered items hidden");
   click(p.w, p.d.querySelector('.item[data-id="chains"] .scale button[data-v="yes"]'));
   ok(vis().indexOf("chains") >= 0, "a row just answered stays visible until the filter is re-applied");
   vsel.dispatchEvent(new p.w.Event("change")); ok(vis().indexOf("chains") < 0, "re-applying hides it");
   vsel.value = "new"; vsel.dispatchEvent(new p.w.Event("change"));
-  const newIds = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 418) newIds.push(id); }));
+  const newIds = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 497) newIds.push(id); }));
   eq(vis().sort(), newIds.sort(), "new: exactly the green-dot items (" + newIds.length + ")");
-  const sb = p.d.getElementById("search"); sb.value = "секс"; sb.dispatchEvent(new p.w.Event("input"));
+  const sb = p.d.getElementById("search"); sb.value = "корм"; sb.dispatchEvent(new p.w.Event("input"));
   ok(vis().length > 0 && vis().every(id => newIds.indexOf(id) >= 0), "search combines with the filter");
-  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 500, "all items again");
+  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 506, "all items again");
 
   /* backup */
   S("Backup");
@@ -448,8 +448,8 @@ const S = (title) => console.log("\n## " + title);
 
   /* damaged links (chat apps eat "__") */
   S("Link integrity");
-  const USER_BAD = ["a=BJ0D7___H-qQWuRSqsEBpalpWgYAUIaUhUBVAVGpEhAFvWjoSIBAAABBAgYGqYGqiVQAUiqpohgoClYVAQAABQwQAAUEopgADOqY-pAAAAKoh4qqApkv-qqqrerWr6lAEAigKQQgoUBAAIhlCVY&n=Lavinial%2FPetrovich&m=AgMAAxY&i=38AxC7&lg=ru",
-    "a=BJ0D____________3_H5WRuqxhJatOZ7UkBWGoIQAAAgKSAAglQ0EEatQfEVAAAgAQAAAA_7T-sxIAPYq-QEJLulqVQAQAAUMcBFAEKCEEA286I8qpGhf_-wAPv5tqUIpWmmWqqqgAXwMQQhRQhAASo-EGg&n=%D0%A5%D0%B0%D0%B2%D0%BA%D0%BE&m=AQMAAw&i=gyJOV2&lg=ru"];
+  const USER_BAD = ["a=BJ0D7___H-qQWuRSqsEBpalpWgYAUIaUhUBVAVGpEhAFvWjoSIBAAABBAgYGqYGqiVQAUiqpohgoClYVAQAABQwQAAUEopgADOqY-pAAAAKoh4qqApkv-qqqrerWr6lAEAigKQQgoUBAAIhlCVY&n=Tester%2FOne&m=AgMAAxY&i=38AxC7&lg=ru",
+    "a=BJ0D____________3_H5WRuqxhJatOZ7UkBWGoIQAAAgKSAAglQ0EEatQfEVAAAgAQAAAA_7T-sxIAPYq-QEJLulqVQAQAAUMcBFAEKCEEA286I8qpGhf_-wAPv5tqUIpWmmWqqqgAXwMQQhRQhAASo-EGg&n=Tester2&m=AQMAAw&i=gyJOV2&lg=ru"];
   eq(USER_BAD.map(l => KCn.codec.decode(l).damaged), [true, true], "the two reported links are recognised as damaged");
   let fp = 0, caught = 0, tries = 0, noUnd = true, oldCaught = 0, oldTries = 0;
   for (let t = 0; t < 150; t++) {
@@ -529,8 +529,8 @@ const S = (title) => console.log("\n## " + title);
   eq(st2.local["checklist-active-mine-id"], ownNameRow.dataset.id, "loaded entry becomes active");
   eq(JSON.parse(st2.local["checklist-my-profiles-v1"]).find(x => x.data.items.orgy).data.items, { orgy: { interest: "love" } }, "list left behind is still saved");
   // Clear = start new, nothing lost
-  p = open("form", { storage: st2 }); click(p.w, p.d.getElementById("resetBtn")); click(p.w, p.d.getElementById("resetList"));
-  eq(JSON.parse(p.w.localStorage.getItem("checklist-my-profiles-v1")).length, 3, "Clear keeps every saved list");
+  p = open("form", { storage: st2 }); click(p.w, p.d.getElementById("mineNew"));
+  eq(JSON.parse(p.w.localStorage.getItem("checklist-my-profiles-v1")).length, 3, "“Start a new list” keeps every saved list");
   // viewing someone's link never touches My lists; "Use as my own" makes a new entry
   const before = p.storage();
   p = open("form", { hash: ruLink, storage: before });
@@ -587,7 +587,7 @@ const S = (title) => console.log("\n## " + title);
   eq(c.d.querySelectorAll(".rrow").length, 4, "results survive language switch (filter kept)");
   ok(/“Yes” from Boris/.test(c.d.querySelector(".cmp-filter").textContent), "filter labels translated");
   eq(c.d.querySelectorAll(".rrow .sub").length, 0, "EN compare: english names only");
-  ok(/index\.html\?lang=en/.test(c.d.getElementById("backLink").href), "back link keeps language");
+  ok(/\/en\/$/.test(c.d.getElementById("backLink").href), "back link keeps language (v608: the English page)");
   // hand-off from form
   const hand = open("form", { storage: own2 });
   hand.KC.form.startCompare("a=Ag", KCn.codec.encode(B), "Me", "Boris");
@@ -682,7 +682,7 @@ const S = (title) => console.log("\n## " + title);
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "ผ้าปิดตา", "TH name");
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "TH page shows English subtitle");
   eq(tp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "ชอบมาก", "TH scale + answer");
-  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 500 รายการ", "TH progress");
+  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 506 รายการ", "TH progress");
   ok(/lg=th/.test(tp.KC.form.shareLink()), "TH link carries lg=th");
   eq(open("form", { hash: tp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "th", "TH link opens in Thai");
   ok(/ลิมิตเด็ดขาด/.test(tp.KC.form.buildSheet().textContent), "TH PDF sheet");
@@ -694,7 +694,7 @@ const S = (title) => console.log("\n## " + title);
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "眼罩", "ZH name");
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "ZH page shows English subtitle");
   eq(zp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "超愛", "ZH scale + answer");
-  eq(zp.d.getElementById("progress").textContent, "已勾選 4／500 項", "ZH progress");
+  eq(zp.d.getElementById("progress").textContent, "已勾選 4／506 項", "ZH progress");
   ok(/lg=zh/.test(zp.KC.form.shareLink()), "ZH link carries lg=zh");
   eq(open("form", { hash: zp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "zh", "ZH link opens in Chinese");
   ok(/硬限制/.test(zp.KC.form.buildSheet().textContent), "ZH PDF sheet");
@@ -706,7 +706,7 @@ const S = (title) => console.log("\n## " + title);
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
   eq(p.d.querySelector('.item[data-id="face-sitting"] .sub').textContent, "Face-sitting", "JA page shows English subtitle");
   eq(p.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "大好き", "JA scale + answer");
-  eq(p.d.getElementById("progress").textContent, "500項目中 4項目にチェック済み", "JA progress");
+  eq(p.d.getElementById("progress").textContent, "506項目中 4項目にチェック済み", "JA progress");
   ok(/lg=ja/.test(p.KC.form.shareLink()), "JA link carries lg=ja");
   ok(/ハードリミット/.test(p.KC.form.buildSheet().textContent), "JA PDF sheet");
   const js = p.d.getElementById("search"); js.value = "鞭"; js.dispatchEvent(new p.w.Event("input"));
@@ -757,12 +757,6 @@ const S = (title) => console.log("\n## " + title);
   sh = p.KC.form.buildSheet().textContent;
   ok(/♥ Избранное/.test(sh) && /♥ Объятия/.test(sh), "PDF: favourites block + ♥ next to names");
   eq(p.KC.form.shown(), p.KC.form.state, "no template: the list leaves the page unchanged");
-  // clear window
-  click(p.w, p.d.getElementById("resetBtn"));
-  eq(p.d.getElementById("resetFav").textContent, "Очистить избранное (2)", "Clear window offers clearing favourites");
-  click(p.w, p.d.getElementById("resetFav"));
-  eq([p.KC.form.favList(), JSON.parse(p.w.localStorage.getItem("practices-checklist-v1")).fav, Object.keys(p.KC.form.state.items).length], [[], undefined, 5], "clearing favourites keeps the answers");
-  click(p.w, p.d.getElementById("resetBtn")); ok(p.d.getElementById("resetFav").disabled, "nothing to clear: button disabled");
   // someone else's list: favourites stored on the device by list id, own list untouched
   const bobLink = p.KC.codec.encode({ uid: "BOB001", name: "Bob", items: { hugging: { interest: "yes" }, "spanking-hand": { interest: "love" } }, meta: {} }, "ru");
   let rb = open("form", { hash: bobLink, storage: { local: { "checklist-lang": "ru" }, session: {} } });
@@ -812,7 +806,7 @@ const S = (title) => console.log("\n## " + title);
   eq([LS(p, TK).length, LS(p, MK).length], [1, 2], "saving again: template updated, no second copy");
   // My lists: templates section
   click(p.w, p.d.getElementById("mineBtn"));
-  eq([...p.d.querySelectorAll('#mineTplList .tpl-row button[data-act]')].map(b => b.dataset.act), ["nebula", "share", "use", "rename", "del"], "template row: nebula, Share, Fill in, Rename, ✕");
+  eq([...p.d.querySelectorAll('#mineTplList .tpl-row:not(.tpl-starter) button[data-act]')].map(b => b.dataset.act), ["nebula", "share", "use", "rename", "del"], "template row: nebula, Share, Fill in, Rename, ✕ (v617: after the starter templates)");
   ok(/по шаблону «Evening»/.test(p.d.getElementById("mineList").textContent), "the copy is marked in My lists");
   ok(!p.d.getElementById("mineTplSave").hidden, "“Save the current list as a template” button");
   let asked = ["Мини", "Mini"]; p.w.prompt = () => asked.length ? asked.shift() : null; let alerts = 0; p.w.alert = () => { alerts++; };
@@ -856,13 +850,13 @@ const S = (title) => console.log("\n## " + title);
   const tact = b3.d.getElementById("tplAct");
   eq(tact.textContent, "Показать все пункты", "note button: show all");
   click(b3.w, tact);
-  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [500, "Только пункты шаблона", ""], "show all: every item, button to go back");
+  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [506, "Только пункты шаблона", ""], "show all: every item, button to go back");
   ok(/создана по шаблону «Evening»\. Показаны все пункты\./.test(b3.d.getElementById("tplNoteText").textContent), "note still says what the list was created by");
   await sleep(300);
   eq(LS(b3, OK_).template.name, "Evening", "showing all does not unbind the list");
   click(b3.w, tact); eq(visP(b3).length, 5, "back to the template's items");
   const bsel = b3.d.getElementById("tplSel"); bsel.value = ""; bsel.dispatchEvent(new b3.w.Event("change"));
-  eq([visP(b3).length, b3.KC.form.state.template.name], [500, "Evening"], "“No template” in Filters: a view choice only");
+  eq([visP(b3).length, b3.KC.form.state.template.name], [506, "Evening"], "“No template” in Filters: a view choice only");
   bsel.value = td.tpl.id; bsel.dispatchEvent(new b3.w.Event("change"));
   const bl = b3.KC.form.shareLink(), bld = b3.KC.codec.decode(bl);
   eq([Object.keys(bld.items), bld.by && bld.by.id, bld.tpl], [["hugging"], td.tpl.id, undefined], "plain link of a list by a template: its answers + fi= mark");
@@ -884,7 +878,7 @@ const S = (title) => console.log("\n## " + title);
   const borisRow = [...b3.d.querySelectorAll("#mineList .saved-row")].find(r => !/по шаблону/.test(r.textContent));
   click(b3.w, borisRow.querySelector('[data-act="load"]'));
   b3 = open("form", { storage: b3.storage() });
-  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 500], "switched to my plain list");
+  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 506], "switched to my plain list");
   r3 = open("form", { hash: tplLink.split("#")[1], storage: b3.storage() });
   b3 = open("form", { storage: r3.storage() });
   eq([b3.KC.form.state.template.name, Object.keys(b3.KC.form.state.items).sort(), LS(b3, MK).length], ["Evening", ["chains", "hugging"], 2], "template link from another list: my list by it is reopened (not a new one)");
@@ -910,7 +904,7 @@ const S = (title) => console.log("\n## " + title);
   S("Templates: someone's list shown by my template");
   const bobPlain = KCn.codec.encode({ uid: "BOB002", name: "Bob", items: { hugging: { interest: "yes" }, "spanking-hand": { interest: "love" }, chains: { interest: "maybe" } }, meta: {} }, "ru");
   rv = open("form", { hash: bobPlain, storage: recStorage });
-  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 500], "plain list: no template, no note");
+  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 506], "plain list: no template, no note");
   click(rv.w, rv.d.getElementById("bannerTpl"));
   ok(!rv.d.getElementById("tplSel").hidden, "“Show by a template…” points at the template list in the header");
   const rsel = rv.d.getElementById("tplSel"); rsel.value = td.tpl.id; rsel.dispatchEvent(new rv.w.Event("change"));
@@ -926,7 +920,7 @@ const S = (title) => console.log("\n## " + title);
   click(dz.w, dz.d.querySelector('#savedTplList button[data-act="del"]'));
   eq([conf, LS(dz, TK).length], [1, 0], "deleting a template asks first");
   dz = open("form", { storage: dz.storage() });
-  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [500, true], "list by a deleted template: opens with all items");
+  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [506, true], "list by a deleted template: opens with all items");
   ok(/создана по шаблону «Evening», но этого шаблона больше нет среди сохранённых\. Показаны все пункты\./.test(dz.d.getElementById("tplNoteText").textContent), "…and still says what it was created by");
   click(dz.w, dz.d.getElementById("mineBtn"));
   ok(/по удалённому шаблону «Evening»/.test(dz.d.getElementById("mineList").textContent), "My lists: “by the deleted template”");
@@ -960,7 +954,7 @@ const S = (title) => console.log("\n## " + title);
   eq(KCn.codec.decode(emptyLink.replace(/&k=\w+/, "")).damaged, false, "…a link without checksum still opens");
   const bigSet = []; KCn.CATS.forEach(c => c.items.forEach(([, id]) => bigSet.push(id)));
   const bigL = KCn.codec.encode(Object.assign(KCn.store.blank(), { tpl: { id: "ABCDEF", name: "All", ids: bigSet } }), "ru"), bigD = KCn.codec.decode(bigL);
-  eq([bigD.tpl.ids.length, bigD.damaged], [500, false], "a template of every item round-trips (bitmap form)");
+  eq([bigD.tpl.ids.length, bigD.damaged], [506, false], "a template of every item round-trips (bitmap form)");
   ok(new URLSearchParams(bigL).get("t").length <= 90, "…in about 80 characters (grows 1 bit per item)");
 
   S("Templates: updates and own template");
@@ -1013,8 +1007,8 @@ const S = (title) => console.log("\n## " + title);
 
   S("Header: search row, ♥ toggle, PDF window");
   let hp = open("form", { storage: own5 });
-  eq([...hp.d.querySelector(".subbar").children].map(x => x.id || x.className), ["search", "jump", "tplSel", "view", "fav-toggle"], "row: search, Section, Template…, All items, ♥");
-  ok(hp.d.getElementById("tplSel").hidden, "no templates yet: the Template list is hidden");
+  eq([...hp.d.querySelector(".subbar").children].map(x => x.id || x.className), ["search", "jump", "tplSel", "view", "fav-toggle", "extToggleBox"], "row: search, Section, Template…, All items, ♥, (v615) ⇅ — the role filter moved to the button row");
+  ok(!hp.d.getElementById("tplSel").hidden && hp.d.querySelectorAll("#tplSel optgroup").length === 1, "no own templates yet: the Template list still offers the starter templates (v617)");
   eq(hp.d.querySelector(".fav-toggle").textContent.trim(), "♥", "favourites toggle is just a heart");
   eq(hp.d.querySelector(".fav-toggle").title, "Только избранное ♥", "…with a title");
   setView(hp, "unanswered"); ok(hp.d.getElementById("view").classList.contains("on"), "“Show” list highlighted while it filters");
@@ -1041,7 +1035,7 @@ const S = (title) => console.log("\n## " + title);
   const fo = K7.CATS.find(c => c.id === "fetishes").items.map(([, id]) => id);
   eq(fo.slice(fo.indexOf("foot-worship"), fo.indexOf("foot-worship") + 5), ["foot-worship", "toe-licking-giving", "toe-licking-receiving", "drinking-from-feet", "forced-drinking-from-feet"], "foot items next to Foot fetish");
   ok(fo.indexOf("latex-sweat") === fo.indexOf("rubber-latex-wearing") + 1 && fo.indexOf("drinking-bathwater") === fo.indexOf("wearing-partners-underwear") + 1, "latex sweat after latex, bathwater after underwear items");
-  ok(Object.keys(NEW7).every(id => code7[id] >= K7.NEW_FROM_CODE), "all 7 get the green “new” dot");
+  ok(Object.keys(NEW7).every(id => code7[id] < K7.NEW_FROM_CODE), "v615: these 7 no longer get the green dot (dots only from 497)");
 
   S("11 practices added in v556");
   const K11 = open("form").KC, W11 = id => (K11.CATS.find(c => c.items.some(([, x]) => x === id)) || {}).id;
@@ -1088,7 +1082,7 @@ const S = (title) => console.log("\n## " + title);
   eq([ts.hidden, ts.value, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [false, td.tpl.id, "Evening", true], "list by a template: the header list shows its name, highlighted");
   eq(ts.options[0].textContent, "✕ Без шаблона", "first option removes it");
   ts.value = ""; ts.dispatchEvent(new hq.w.Event("change"));
-  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [500, "Шаблон…", false], "one pick: no template, the list says “Template…”");
+  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [506, "Шаблон…", false], "one pick: no template, the list says “Template…”");
 
   S("v557: share the current template");
   hq = open("form", { storage: recStorage });
@@ -1137,7 +1131,7 @@ const S = (title) => console.log("\n## " + title);
   eq(cpick.value, "", "…and the picker shows its label again once closed");
 
   S("v560: interface fully translated");
-  const SAME_OK = { pt: ["rl.pair", "profile.orient.bi", "pdf.file", "role.short.dom", "role.short.sub", "help.pdf.h"], es: ["rl.pair", "profile.orient.bi", "pdf.file", "role.short.dom", "role.short.sub", "help.pdf.h", "scale.limit"], ja: ["rl.pair", "card.file", "profile.orient.bi", "help.pdf.h", "pdf.file"], th: ["rl.pair", "card.file", "profile.orient.bi", "help.pdf.h", "pdf.file"], zh: ["rl.pair", "card.file", "help.pdf.h", "pdf.file"] };
+  const SAME_OK = { pt: ["rl.pair", "profile.orient.bi", "pdf.file", "role.short.dom", "role.short.sub", "help.pdf.h", "ext.onlyT", "ext.onlyB", "av.toAv", "tpl.st.extra"], es: ["tpl.st.extra", "av.toAv", "ext.onlyT", "ext.onlyB", "rl.pair", "profile.orient.bi", "pdf.file", "role.short.dom", "role.short.sub", "help.pdf.h", "scale.limit"], ja: ["rl.pair", "card.file", "profile.orient.bi", "help.pdf.h", "pdf.file"], th: ["rl.pair", "card.file", "profile.orient.bi", "help.pdf.h", "pdf.file"], zh: ["rl.pair", "card.file", "help.pdf.h", "pdf.file"] };
   /* v586: words that are the same as in English on purpose (D/s, S/M, Bondage, names of creatures) */
   const SAME586 = { pt: ["sign.caracal", "pt.s.bondage", "sign.flamingo", "sign.kraken", "sign.naga", "sign.kitsune", "sign.kappa", "sign.wyvern"],
     es: ["sign.caracal", "sign.cobra", "pt.s.bondage", "sign.collar", "sign.kraken", "sign.naga", "sign.kitsune", "sign.kappa"], ja: [], th: [], zh: [] };
@@ -1147,9 +1141,9 @@ const S = (title) => console.log("\n## " + title);
       pt: ["dnd.r.drow", "dnd.r.yuanti", "dnd.r.tabaxi", "dnd.r.kenku", "dnd.m.medusa", "dnd.m.balor", "dnd.m.marilith", "dnd.m.kraken", "dnd.m.kobold", "dnd.m.goblin", "dnd.m.lich", "dnd.m.tarrasque"] };
     Object.keys(same).forEach(l => { SAME_OK[l] = SAME_OK[l].concat(same[l]); }); }
   /* v591: the "🎲 DnD" button reads the same everywhere */
-  Object.keys(SAME_OK).forEach(l => { SAME_OK[l].push("dnd.toDnd"); });
+  Object.keys(SAME_OK).forEach(l => { SAME_OK[l].push("dnd.toDnd", "wr.toWr"); });   /* v610: "⚔ Wr" is the same in every language */
   /* v597: World of Darkness proper names (clans, auspices, ranks, the Babylonian house names…) stay as in English */
-  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$)/;
+  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$|wh\.f\.|leg\.l\.|wh\.toWh$|ow\.r\.|ow\.toOw$|wi\.g\.|ext\.(ask[TB]|row\.[tb]|arrow\.[tb])$)/;   /* v610: faction and legion names are proper names (often the same as English) */
   const packsUI = {}; ["en", "ru", "pt", "es", "ja", "th", "zh"].forEach(l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); packsUI[l] = box; });
   ["pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(packsUI.en).filter(k => packsUI[l][k] === packsUI.en[k] && SAME_OK[l].indexOf(k) < 0 && !WOD_SAME.test(k)), [], l + ": no interface string left in English"));
   ok(!/TEMPORARY/.test(["pt", "es", "ja", "th", "zh"].map(l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8")).join("")), "no TEMPORARY markers left");
@@ -1166,7 +1160,7 @@ const S = (title) => console.log("\n## " + title);
   eq([code3["forced-staying-in-sweat-cum"], bf[bf.indexOf("cum-on-body") + 1]], [466, "forced-staying-in-sweat-cum"], "code 466, right after “cum on body”");
   eq(K3.i18n.item("forced-staying-in-sweat-cum", "ru").name, "Принудительное оставление в поту/сперме на какое-то время после практики", "RU name as requested");
   const d3 = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
-  eq(["bukkake", "furry", "clowncore", "tongue-clothespins", "nyotaimori", "latex-sweat", "forced-staying-in-sweat-cum"].map(id => !!d3.querySelector('.item[data-id="' + id + '"] .new-dot')), [false, false, false, false, true, true, true], "no dot on items of v533 (e.g. codes 378, 371, 401, 417); dots on 418+");
+  eq(["bukkake", "furry", "clowncore", "tongue-clothespins", "nyotaimori", "latex-sweat", "forced-staying-in-sweat-cum"].map(id => !!d3.querySelector('.item[data-id="' + id + '"] .new-dot')), [false, false, false, false, false, false, false], "v615: no dot on any of these (dots only from 497)");
 
   S("v564: saved comparisons (3+)");
   {
@@ -1307,7 +1301,7 @@ const S = (title) => console.log("\n## " + title);
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(want).filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": new items translated"));
     eq([K.i18n.item("spanking-leather-slappers", "ru").name, K.i18n.item("spanking-leather-slappers", "en").name], ["Шлепки кожаными паддлами", "Spanking – leather paddles"], "leather slappers renamed to leather paddles (id kept)");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
-    eq(Object.keys(want).filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "all 8 marked as new (green dot)");
+    eq(Object.keys(want).filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dot any more (dots only from 497)");
     _sc.end();
   }
 
@@ -1321,7 +1315,7 @@ const S = (title) => console.log("\n## " + title);
     eq([K.i18n.item("other-sub-serves-you", "ru").name, K.i18n.item("urination-in-front", "ru").name], ["Вас удовлетворяет другой сабмиссив по принуждению", "Мочеиспускание при партнёре / во время сессии"], "RU names");
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(["other-sub-serves-you", "urination-in-front"].filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
-    eq(["other-sub-serves-you", "urination-in-front"].filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "green dots");
+    eq(["other-sub-serves-you", "urination-in-front"].filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dots (only from 497)");
     _sc.end();
   }
 
@@ -1339,7 +1333,7 @@ const S = (title) => console.log("\n## " + title);
     eq([K.i18n.item("dutch-rudder", "ru").name, K.i18n.item("forced-self-degradation", "ru").name], ["Голландский штурвал", "Принуждение называть себя уничижительно"], "RU names (typos fixed)");
     ok(/Спасибо, что вставили в меня фаллоимитатор/.test(K.i18n.item("forced-thanking", "ru").desc) && /Пожалуйста, трахните меня/.test(K.i18n.item("forced-begging-acts", "ru").desc), "owner's examples in the hints");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
-    eq(ids.filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "green dots");
+    eq(ids.filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dots (only from 497)");
     _sc.end();
   }
 
@@ -1355,7 +1349,7 @@ const S = (title) => console.log("\n## " + title);
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(ids.filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && (it.desc === K.i18n.item(id, "en").desc || it.name === K.i18n.item(id, "en").name)); }), [], l + ": translated"));
     eq(ids.map(id => K.i18n.item(id, "ru").name), ["Бастинадо (удары по ступням)", "Удары по ладоням", "Нуру-массаж", "Омораси (терпеть до последнего)", "Фантазия об оплодотворении (breeding)"], "RU names");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
-    eq(ids.filter(id => !dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "green dots");
+    eq(ids.filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dots (only from 497)");
     const st = { name: "N", items: {}, meta: {} }; ids.forEach((id, i) => { st.items[id] = { interest: ["love", "yes", "maybe", "limit", "love"][i] }; });
     const back = K.codec.decode(K.codec.encode(st));
     eq(ids.map(id => (back.items[id] || {}).interest), ["love", "yes", "maybe", "limit", "love"], "answers on the new items survive a link");
@@ -1512,7 +1506,7 @@ const S = (title) => console.log("\n## " + title);
 
     // heavy user stays within safe URL sizes
     const hv = { local: Object.assign({}, oldStore.local, {
-      "checklist-my-profiles-v1": JSON.stringify([...Array(8)].map((_, i) => ({ id: "h" + i, name: "L" + i, data: { name: "L" + i, uid: "HEAVY" + i, items: its(ids.length, 0), meta: { role: "sub" }, fav: ids.slice(0, 100), fantasies: "x".repeat(500) }, ts: i }))),
+      "checklist-my-profiles-v1": JSON.stringify([...Array(8)].map((_, i) => ({ id: "h" + i, name: "L" + i, data: { name: "L" + i, uid: "HEAVY" + i, items: its(ids.length, 0), meta: { role: "sub" }, fav: ids.slice(0, 100), fantasies: "x".repeat(506) }, ts: i }))),
       "checklist-saved-profiles-v1": JSON.stringify([...Array(30)].map((_, i) => ({ id: "r" + i, name: "R" + i, code: K0.codec.encode({ name: "R" + i, uid: "RR" + String(i).padStart(4, "0"), items: its(ids.length, 0), meta: {} }, "ru"), ts: i }))) }), session: {} };
     const hl = oldPage({ storage: hv }).KC.migrate.link();
     ok(hl.length < 120000, "heavy user (8 full lists, 30 received): " + hl.length + " characters — well under browser limits (Chrome/Firefox ≥ 1 MB)");
@@ -1701,7 +1695,7 @@ const S = (title) => console.log("\n## " + title);
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => {
       hp.KC.i18n.set(l); hp.KC.help.open("news");
       const s3 = hp.d.getElementById("helpNews");
-      ok(s3 && !s3.hidden && hp.d.getElementById("helpPane").hidden && s3.querySelectorAll("h5").length === 4 && /29/.test(s3.querySelectorAll("h5")[0].textContent) && /29/.test(s3.querySelectorAll("h5")[1].textContent) && /DnD/.test(s3.querySelectorAll("h5")[1].textContent) && /29/.test(s3.querySelectorAll("h5")[2].textContent) && /27/.test(s3.querySelectorAll("h5")[3].textContent) && [0, 1, 2, 3].map(k => s3.querySelectorAll("ul")[k].querySelectorAll("li").length).join() === "6,8,8,3", l + ": “What's new” tab (v601): World of Darkness (6 points) on top, the DnD update (8) and Kinkosmos (8) dated 29 Sept, 27 Sept (3) below");
+      ok(s3 && !s3.hidden && hp.d.getElementById("helpPane").hidden && s3.querySelectorAll("h5").length === 5 && /5/.test(s3.querySelectorAll("h5")[0].textContent) && s3.querySelectorAll("ul")[0].querySelectorAll("li").length === 8 && /29/.test(s3.querySelectorAll("h5")[1].textContent) && /29/.test(s3.querySelectorAll("h5")[2].textContent) && /DnD/.test(s3.querySelectorAll("h5")[2].textContent) && /29/.test(s3.querySelectorAll("h5")[3].textContent) && /27/.test(s3.querySelectorAll("h5")[4].textContent) && [1, 2, 3, 4].map(k => s3.querySelectorAll("ul")[k].querySelectorAll("li").length).join() === "6,8,8,3", l + ": “What's new” tab (v601): World of Darkness (6 points) on top, the DnD update (8) and Kinkosmos (8) dated 29 Sept, 27 Sept (3) below");
       ok(hp.d.getElementById("helpNewsTab").textContent === hp.KC.i18n.t("help.news.h") && !!hp.d.querySelector("#helpNewsTab .new-dot"), l + ": tab name with a green dot");
     });
     eq([hp.KC.help.SECTIONS.indexOf("news"), !!hp.d.getElementById("help-news"), hp.d.querySelectorAll('#helpToc button[data-go="news"]').length], [-1, false, 0], "“What's new” is not a section of “How to use”");
@@ -1848,7 +1842,7 @@ const S = (title) => console.log("\n## " + title);
     const tpl = [{ id: "t1", tid: "AAAAAA", name: "Evening", ids: ids.bondage.slice(0, 6).concat(ids.intimacy.slice(0, 2)), own: true, ts: 1 }];
     const n = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-templates-v1": JSON.stringify(tpl) }, session: {} } });
     click(n.w, n.d.getElementById("mineBtn"));
-    const th = n.d.querySelector("#mineTplList .nb-thumb");
+    const th = n.d.querySelector("#mineTplList .tpl-row:not(.tpl-starter) .nb-thumb");
     ok(!!th && !!th.querySelector("svg"), "template rows: a nebula thumbnail");
     click(n.w, th);
     const card = n.d.querySelector("#mineTplList .nb-open .nb-card");
@@ -1858,8 +1852,8 @@ const S = (title) => console.log("\n## " + title);
     const html = fs.readFileSync(require("./harness").ROOT + "/index.html", "utf8");
     ok(/<meta name="description"/.test(html) && /og:image" content="https:\/\/klevatess\.github\.io\/kinkmatch\/img\/og\.png"/.test(html) && (html.match(/hreflang=/g) || []).length === 8 && /<meta name="rating" content="adult">/.test(html), "index.html: description, preview image, 7 languages + default, adult rating");
     ok(fs.existsSync(require("./harness").ROOT + "/img/og.png") && fs.existsSync(require("./harness").ROOT + "/img/favicon.svg") && fs.existsSync(require("./harness").ROOT + "/sitemap.xml"), "preview image, icon and sitemap are in the site");
-    ok(/^Kinkosmos · /.test(p.d.title) && p.d.querySelector('meta[name="description"]').getAttribute("content") === tr.en["seo.desc"], "page title starts with Kinkosmos; the description follows the language");
-    ok(/index\.html\?lang=en$/.test(p.d.querySelector('link[rel="canonical"]').href), "canonical address with the page language");
+    ok(p.d.title === tr.en["seo.title"] && /^Kinkosmos — /.test(p.d.title) && p.d.querySelector('meta[name="description"]').getAttribute("content") === tr.en["seo.desc"], "page title = the search title of the language (v608); the description follows the language");
+    eq(p.d.querySelector('link[rel="canonical"]').href, "https://klevatess.github.io/kinkmatch/en/", "the root page points search engines to the English page (v609)");
     ok(!f.errors.length && !p.errors.length && !c.errors.length && !c2.errors.length && !n.errors.length, "no script errors");
     _sc.end();
   }
@@ -1920,8 +1914,8 @@ const S = (title) => console.log("\n## " + title);
     ok(/созвезд/i.test(h.d.getElementById("help-portrait").textContent) && /Что попробуем/.test(h.d.getElementById("help-roulette").textContent), "portrait (with the constellation) and roulette are explained");
     ok(/Система компании/.test(h.d.getElementById("help-compare").textContent) && /туманност/.test(h.d.getElementById("help-tpl").textContent), "compare pictures and template nebulas are explained");
     h.KC.help.open("news");
-    eq(h.d.querySelectorAll("#helpNews h5")[2].textContent, "29 сентября 2026", "what's new: the Kinkosmos entry (under the WoD and DnD updates; dated 29 Sept, owner v601)");
-    ok(!!h.d.querySelector('#portraitSection summary .help-q[data-help="portrait"]'), "“?” next to the portrait");
+    eq(h.d.querySelectorAll("#helpNews h5")[3].textContent, "29 сентября 2026", "what's new: the Kinkosmos entry (under the WoD and DnD updates; dated 29 Sept, owner v601)");
+    ok(!!h.d.querySelector('#portraitSection summary .help-q[data-help="lore"]'), "“?” next to the portrait opens the constellation guide");
     ok(!h.errors.length, "no script errors");
     _sc.end();
   }
@@ -2145,7 +2139,7 @@ const S = (title) => console.log("\n## " + title);
     g.KC.help.open("portrait"); ok(/Раса/.test(g.d.getElementById("help-portrait").textContent) && /Уровень/.test(g.d.getElementById("help-portrait").textContent), "help: race and level are explained");
     g.KC.help.open("news");
     const h5 = g.d.querySelectorAll("#helpNews h5"), uls = g.d.querySelectorAll("#helpNews ul");
-    ok(/DnD-обновление/.test(h5[1].textContent) && /Раса/.test(uls[1].textContent) && /Партия/.test(uls[1].textContent) && !/DnD/.test(uls[2].textContent), "what's new: the DnD update is its own entry (under World of Darkness); the Kinkosmos entry no longer lists DnD");
+    ok(/DnD-обновление/.test(h5[2].textContent) && /Раса/.test(uls[2].textContent) && /Партия/.test(uls[2].textContent) && !/DnD/.test(uls[3].textContent), "what's new: the DnD update is its own entry (under World of Darkness); the Kinkosmos entry no longer lists DnD");
     ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !c4.errors.length, "no script errors");
     _sc.end();
   }
@@ -2206,7 +2200,7 @@ const S = (title) => console.log("\n## " + title);
     const f20 = det(lv20, "fey", "boggan");
     eq([f20.seem, f20.glamour, f20.banality], ["grump", 10, 2], "level 20 Grump who loves everything: Glamour at its cap 10, Banality 1 + Grump 1 = 2 (v603)");
     const allNo = mk(() => "limit"), fNo = det(allNo, "fey", "boggan");
-    eq([fNo.seem, fNo.glamour, fNo.banality], ["childling", 3, 7], "all “No”: a Childling with Glamour 2 + 1 = 3, Banality at its cap 7 (v603)");
+    eq([fNo.seem, fNo.glamour, fNo.banality], ["wilder", 2, 7], "all “No”: a Wilder (v615: never a Childling) with Glamour 2, Banality at its cap 7");
     ok(!/wod\./.test(W.lines(t20, K.i18n.t).sub + W.lines(f20, K.i18n.t).sub) && /Ярость/.test(W.lines(t20, K.i18n.t).sub) && /Банальность/.test(W.lines(f20, K.i18n.t).sub), "the lines show Rage · Gnosis and Glamour · Banality");
     const v20 = det(lv20, "vamp", "brujah");
     ok(v20.sect === "sab" ? Object.keys(W.PATHS).indexOf(v20.path) >= 0 : v20.hum >= 2, "everything even → a path in the Sabbat, Humanity in the Camarilla (v602: no “flat = Humanity” rule; v603)");
@@ -2226,7 +2220,7 @@ const S = (title) => console.log("\n## " + title);
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
     const pv = g.d.querySelector(".pt-wod");
     ok(!!pv && pv.dataset.line === "fey" && /Ваш род/i.test(pv.querySelector(".sg-over").textContent) && !pv.querySelector(".sg-al") && pv.querySelector(".wod-note").textContent === "Не официальный материал World of Darkness." , "portrait: the fey kith, no alignment line, only “not official” under it (the full notice is in the help)");
-    ok(g.d.querySelectorAll(".pt-mode:not(.pt-wod-sub) [data-mode]").length === 3 && g.d.querySelector('.pt-wod-sub [data-wod="fey"]').getAttribute("aria-pressed") === "true", "three modes; the fey button is pressed");
+    ok(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wod-sub):not(.pt-wr-sub) [data-mode]").length === 3 + (g.KC.dnd.wrTabs().length ? 1 : 0) + (g.KC.dnd.usable("wi") ? 1 : 0) + (g.KC.dnd.usable("av") ? 1 : 0) && g.d.querySelector('.pt-wod-sub [data-wod="fey"]').getAttribute("aria-pressed") === "true", "three modes + ⚔ Wr when one of its tabs is switched on (v611); the fey button is pressed");
     click(g.w, g.d.querySelector('.pt-wod-sub [data-wod="vamp"]'));
     ok(g.d.querySelector(".pt-wod").dataset.line === "vamp" && g.w.localStorage.getItem("checklist-wod") === "vamp" && /поколение/.test(g.d.querySelector(".pt-wod .sg-rl").textContent), "→ vampire: sect · generation; the line is remembered");
     click(g.w, g.d.querySelector('.pt-mode [data-mode="dnd"]'));
@@ -2328,14 +2322,14 @@ const S = (title) => console.log("\n## " + title);
     const g = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
     g.KC.help.open("news");
     const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
-    eq(h5, ["29 сентября 2026 · Мир Тьмы", "29 сентября 2026 · DnD-обновление", "29 сентября 2026", "27 сентября 2026"], "what's new: World of Darkness on top, DnD and Kinkosmos dated 29 September (owner)");
-    ok(/Ярость и Гнозис/.test(g.d.querySelectorAll("#helpNews ul")[0].textContent) && /Не официальный материал World of Darkness/.test(g.d.querySelectorAll("#helpNews ul")[0].textContent), "…the WoD entry lists the lines and the notice");
+    eq(h5, ["5 октября 2026 · Расширенная анкета", "29 сентября 2026 · Мир Тьмы", "29 сентября 2026 · DnD-обновление", "29 сентября 2026", "27 сентября 2026"], "what's new: (v613) the extended list on top, then World of Darkness, DnD and Kinkosmos dated 29 September (owner)");
+    ok(/Ярость и Гнозис/.test(g.d.querySelectorAll("#helpNews ul")[1].textContent) && /Не официальный материал World of Darkness/.test(g.d.querySelectorAll("#helpNews ul")[1].textContent), "…the WoD entry lists the lines and the notice");
     const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"], nf = [];
-    LANGS.forEach(l => { g.KC.i18n.set(l); g.KC.help.open("news"); const n = g.d.querySelectorAll("#helpNews h5").length; if (n !== 4 || /28/.test(g.d.querySelectorAll("#helpNews h5")[1].textContent)) nf.push(l + ":" + n); });
-    eq(nf, [], "the same four entries and dates in all 7 languages");
+    LANGS.forEach(l => { g.KC.i18n.set(l); g.KC.help.open("news"); const n = g.d.querySelectorAll("#helpNews h5").length; if (n !== 5 || /28/.test(g.d.querySelectorAll("#helpNews h5")[2].textContent)) nf.push(l + ":" + n); });
+    eq(nf, [], "the same five entries and dates in all 7 languages");
     g.KC.i18n.set("ru");
     // portrait "new" dot, “Only No” filter
-    ok(!!g.d.querySelector("#portraitSection summary .new-dot"), "a green “new” dot next to “My portrait”");
+    ok(!g.d.querySelector("#portraitSection summary .new-dot"), "v615: no green dot next to “My portrait” (owner)");
     const ids = []; g.KC.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     const own = { name: "Ann", uid: "ANN601", items: {}, meta: {} }; own.items[ids[0]] = { interest: "limit" }; own.items[ids[1]] = { interest: "yes" }; own.items[ids[40]] = { interest: "limit" };
     const f = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(own) }, session: {} } });
@@ -2472,7 +2466,7 @@ const S = (title) => console.log("\n## " + title);
     const miss = []; want.forEach(([, id]) => LANGS.forEach(l => { if (!K.i18n.has("items", id, l)) miss.push(l + ":" + id); }));
     eq(miss, [], "every new practice has a name and a hint in all 7 languages");
     eq([K.i18n.item("floor-licking", "ru").name, K.i18n.item("pig-play", "ru").name, K.i18n.item("boot-worship", "ru").name], ["Вылизывание пола", "Пиг-плей (свинья)", "Поклонение обуви (в т.ч. поцелуи)"], "RU names (owner); boot worship now includes kissing");
-    ok(want.every(([, id]) => codeOf[id] >= K.NEW_FROM_CODE), "the new items get the green “new” dot");
+    ok(want.filter(([, id]) => codeOf[id] >= K.NEW_FROM_CODE).map(w => w[1]).join() === "sock-gag-top,cow-play,pig-play", "v615: of these only 497–499 keep the green dot");
     const inCl = {}; Object.keys(DD.CL).forEach(k => DD.CL[k][1].split(" ").forEach(id => { inCl[id] = k; }));
     eq(want.map(([, id]) => inCl[id]), ["words", "object", "wild", "dark", "dark", "pet", "pet"], "the new items count for the race (clusters)");
     // fey: 12 kiths
@@ -2489,7 +2483,7 @@ const S = (title) => console.log("\n## " + title);
     let bad = 0; for (let n = 1; n <= 30; n++) { const st = mk((id, i) => ["limit", "maybe", "yes", "love"][(i * n + n) % 4]);
       const a = DD.race(st, null), b = DD.race({ items: st.items, meta: { attire: ["latex", "leather", "goth"] } }, null); if (a !== b) bad++; }
     eq(bad, 0, "clothing (latex, leather, goth) never changes the race any more");
-    ok(!K.wr && !K.i18n.has("ui", "wr.toWr", "ru"), "the Chaos gods are not in this version (a separate plan)");
+    ok(!!K.wr && K.i18n.has("ui", "wr.toWr", "ru"), "v610: the Chaos gods mode is in (was a separate plan in v604)");
     ok(!f.errors.length, "no script errors");
     _sc.end();
   }
@@ -2538,6 +2532,741 @@ const S = (title) => console.log("\n## " + title);
     eq(bad, [], "Humanity never below 2 or above 8");
     ok(seen.size >= 4, "Humanity still spreads over the scale (" + [...seen].sort((a, b) => a - b).join(",") + ")");
     ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v608: a page for every language (/ru/ /en/ … built by tools/build-lang-pages.js)");
+  {
+    const _sc = scope();
+    const ROOTDIR = require("./harness").ROOT, SITE = "https://klevatess.github.io/kinkmatch/";
+    const B = require(ROOTDIR + "/tools/build-lang-pages.js"), LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const tr = {}; LANGS.forEach(l => { const box = {}; new Function("KC", fs.readFileSync(ROOTDIR + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); tr[l] = box; });
+    const items = {}; LANGS.forEach(l => { const box = {}; new Function("KC", fs.readFileSync(ROOTDIR + "/js/lang/" + l + ".practices.js", "utf8"))({ addLang: (x, part, o) => { if (part === "items") Object.assign(box, o); } }); items[l] = box; });
+    eq(B.LANGS, LANGS, "the tool makes a page for all seven languages");
+    // the files on disk are what the tool makes now (catches "changed index.html or a translation, forgot to rebuild")
+    const out = B.build(ROOTDIR);
+    eq(Object.keys(out).filter(f => !fs.existsSync(ROOTDIR + "/" + f) || fs.readFileSync(ROOTDIR + "/" + f, "utf8") !== out[f]), [], "language pages, index.html hreflang and sitemap.xml are up to date (else: node tools/build-lang-pages.js)");
+    const cluster = LANGS.map(l => [{ pt: "pt-BR", zh: "zh-Hant" }[l] || l, SITE + l + "/"]).concat([["x-default", SITE + "en/"]]);
+    const links = h => [...h.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map(m => [m[1], m[2]]);
+    const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const idx = fs.readFileSync(ROOTDIR + "/index.html", "utf8");
+    eq(links(idx), cluster, "root page: hreflang = the seven language pages + default (= the English page, v609)");
+    ok(/<html lang="en">/.test(idx) && /<link rel="canonical" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/">/.test(idx) && /og:title" content="Kinkosmos — чек-лист BDSM-практик \/ BDSM checklist"/.test(idx), "root page: English head, canonical → /en/ (v609), the preview stays Russian + English");
+    const sm = fs.readFileSync(ROOTDIR + "/sitemap.xml", "utf8");
+    eq([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]), LANGS.map(l => SITE + l + "/"), "sitemap: the seven language pages only (the root points to /en/, v609)");
+    ok((sm.match(/hreflang="x-default" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/"/g) || []).length === 7, "sitemap: every address carries the full language list, default = /en/");
+    LANGS.forEach(l => {
+      const h = fs.readFileSync(ROOTDIR + "/" + l + "/index.html", "utf8"), t = tr[l], url = SITE + l + "/";
+      const bad = [];
+      if (h.indexOf('<html lang="' + (l === "zh" ? "zh-Hant" : l) + '" data-page-lang="' + l + '">') < 0) bad.push("html lang");
+      if (h.indexOf("<title data-i18n=\"seo.title\">" + esc(t["seo.title"]) + "</title>") < 0) bad.push("title");
+      if (h.indexOf('<meta name="description" content="' + esc(t["seo.desc"]).replace(/"/g, "&quot;") + '">') < 0) bad.push("description");
+      if (h.indexOf('<link rel="canonical" href="' + url + '">') < 0) bad.push("canonical");
+      if (h.indexOf('og:url" content="' + url + '"') < 0 || h.indexOf('og:title" content="' + esc(t["seo.title"])) < 0) bad.push("og");
+      if (JSON.stringify(links(h)) !== JSON.stringify(cluster)) bad.push("hreflang");
+      if (/\s(src|href)="(css|img|js)\//.test(h) || h.indexOf('href="../css/style.css') < 0 || h.indexOf('src="../js/boot.js') < 0 || h.indexOf('href="../compare.html"') < 0) bad.push("paths");
+      if (h.indexOf(">" + esc(t["intro.h1"]) + "</h1>") < 0) bad.push("h1");
+      const missing = Object.keys(items[l]).filter(id => h.indexOf(esc(items[l][id][0])) < 0);
+      if (missing.length) bad.push("practices: " + missing.slice(0, 3).join(","));
+      if (/data-i18n(-html)?="[^"]+"[^>]*><\//.test(h)) bad.push("empty text element");
+      eq(bad, [], l + "/: language, title, description, canonical, preview, hreflang, ../ paths, texts and all practices are in the file");
+    });
+    // the page's language wins over the saved choice and the browser
+    const ja = open("form", { file: "ja/index.html", navLang: "en-US", storage: { local: { "checklist-lang": "en" }, session: {} } });
+    eq([ja.KC.i18n.lang, ja.KC.i18n.pageLang, ja.d.documentElement.lang], ["ja", "ja", "ja"], "/ja/ with a saved EN choice and an EN browser: Japanese");
+    eq([ja.d.title, ja.d.querySelector('link[rel="canonical"]').href], [tr.ja["seo.title"], SITE + "ja/"], "/ja/: title and canonical stay as written in the file");
+    ok(!ja.d.querySelector("#list .seo-list") && ja.d.querySelectorAll("#list .item").length === ja.KC.CATS.reduce((n, c) => n + c.items.length, 0), "/ja/: the hidden text list is replaced by the real list");
+    eq([ja.d.getElementById("compareBtn").getAttribute("href"), ja.KC.form.homeUrl()], ["../compare.html?lang=ja", "../ja/"], "/ja/: Compare and “Start a new list” go to the right pages");
+    ok(ja.KC.form.shareLink().indexOf(require("./harness").BASE + "#") === 0, "/ja/: a shared link opens the root page (the language travels in lg=)");
+    let went = null; ja.KC.i18n.navigate = u => { went = u; };
+    click(ja.w, ja.d.querySelector('#langSw button[data-lang="en"]'));
+    eq([went, ja.w.localStorage.getItem("checklist-lang"), ja.KC.i18n.lang], ["../en/", "en", "ja"], "/ja/ → EN: opens the English page and remembers the choice");
+    ok(!ja.errors.length, "/ja/: no script errors");
+    // the root page works as before: in-place switch, ?lang=xx points search engines to /xx/
+    const rt = open("form", { navLang: "ru" }); let rwent = null; rt.KC.i18n.navigate = u => { rwent = u; };
+    click(rt.w, rt.d.querySelector('#langSw button[data-lang="es"]'));
+    eq([rt.KC.i18n.lang, rwent, rt.KC.i18n.pageLang, rt.d.getElementById("compareBtn").getAttribute("href")], ["es", null, null, "compare.html?lang=es"], "root page: the switcher translates in place, links as before");
+    eq(open("form", { search: "?lang=th" }).d.querySelector('link[rel="canonical"]').href, SITE + "th/", "old index.html?lang=th address: canonical → /th/");
+    eq(open("form", { navLang: "ru" }).d.querySelector('link[rel="canonical"]').href, SITE + "en/", "root page shown in Russian: canonical still → /en/ (v609)");
+    eq(open("compare", { search: "?lang=pt" }).d.getElementById("backLink").getAttribute("href"), "pt/", "compare → back to the Portuguese page");
+    // every language page opens in its language, without errors
+    eq(LANGS.map(l => { const pg = open("form", { file: l + "/index.html", navLang: "de" }); return pg.KC.i18n.lang + (pg.errors.length ? "!" : ""); }), LANGS, "all seven pages open in their own language, no script errors");
+    _sc.end();
+  }
+
+  S("v610: Servant of the Chaos gods (⚔ Wr) — the fourth joke mode");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, R = K.wr;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    eq(R.GODS, ["khorne", "nurgle", "tzeentch", "slaanesh", "rat"], "five patrons");
+    const bad = [];
+    R.GODS.forEach(id => { const [P, E, Ln, B] = R.FIG[id], n = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) bad.push(id + ": stars");
+      Ln.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < n)) bad.push(id + ": line " + i); })); });
+    eq(bad, [], "every sign: 9 group stars, 3 bright slots, lines only to existing stars");
+    const ids = new Set(); K.CATS.forEach(c => c.items.forEach(([, id]) => ids.add(id)));
+    const unknown = [];
+    R.GODS.forEach(g => R.ITEMS[g].split(" ").forEach(id => { if (!ids.has(id)) unknown.push(g + ":" + id); }));
+    const CI = K.clusters.ids(); Object.keys(CI).forEach(k => CI[k].forEach(id => { if (!ids.has(id)) unknown.push(k + ":" + id); }));
+    R.GODS.forEach(g => Object.keys(R.K[g]).forEach(k => { if (!CI[k]) unknown.push(g + " → cluster " + k); }));
+    eq(unknown, [], "every item of the gods and of the clusters exists; every attraction points to a cluster");
+    eq(R.GODS.map(g => R.ITEMS[g].split(" ").length), [16, 18, 26, 17, 11], "items with a bonus: 16 / 18 / 26 / 17 / 11 (owner's table)");
+    eq([R.EXCESS.W, R.EXCESS.L0, R.BIAS.slaanesh], [4, 49, -6.05], "Slaanesh: excess weight 4, from 49 % Yes + Love, bias −6.05 (owner, Oct 3)");
+    // every god is reachable: a made-up list that loves that god's items and clusters
+    const all = [...ids];
+    const mk = (fn, meta) => { const it = {}; all.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
+    const fav = g => { const s = new Set(R.ITEMS[g].split(" ")); Object.keys(R.K[g]).forEach(k => { if (R.K[g][k] > 0) K.clusters.ids()[k].forEach(id => s.add(id)); }); return s; };
+    const got = R.GODS.map(g => { const s = fav(g), st = mk((id, i) => s.has(id) ? "love" : i % 2 ? "limit" : "maybe"); return R.choose(st, K.portrait.compute(st, null), null); });
+    eq(got, R.GODS, "each god wins on a list that loves its own items and themes");
+    // the excess only adds: a list of only “No” loses nothing through it
+    const no = mk(() => "limit"), pNo = R.parts(no, K.portrait.compute(no, null), null).slaanesh, sNo = R.scores(no, K.portrait.compute(no, null), null).slaanesh;
+    const base = 5 * (pNo.P / R.S.slaanesh.P + (pNo.I === null ? 0 : (pNo.I - R.I0.slaanesh) / R.S.slaanesh.I) + pNo.Z / R.S.slaanesh.Z + pNo.K / R.S.slaanesh.K) + R.BIAS.slaanesh;
+    ok(Math.abs(sNo - base) < 1e-9, "all “No”: Slaanesh's excess adds nothing (only counts above the usual)");
+    eq(R.choose(mk((id, i) => i < 3 ? "yes" : null), { sections: [] }, null), null, "no portrait → no patron");
+    // texts
+    const need = ["wr.toWr", "wr.mine", "wr.their", "wr.mut", "wr.spawn", "wr.notOfficial", "card.o.wr", "sp.wr.h", "sp.wr.grp", "sp.wr.same", "sp.wr.near", "sp.wr.far", "help.wr_html", "help.compareWr_html"].concat(R.GODS.map(g => "wr.of." + g));
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); }));
+    eq(miss, [], "every Chaos-mode text exists in all 7 languages (" + need.length + " keys)");
+    // the stored mode: a new value, the old ones unchanged, each view its own
+    const m = open("form", { storage: { local: { "checklist-dnd": "wr" }, session: {} } }).KC.dnd;
+    eq([m.mode(), m.mode("pair"), m.mode("group")], ["wr", "sign", "sign"], "“wr” in checklist-dnd → the Chaos mode for the portrait only");
+    eq(["1", "wod"].map(v => open("form", { storage: { local: { "checklist-dnd": v }, session: {} } }).KC.dnd.mode()), ["dnd", "wod"], "old values “1” and “wod” work as before");
+    // the portrait
+    const lov = fav("tzeentch"), own = mk((id, i) => lov.has(id) ? "love" : i % 3 ? "maybe" : "limit", { role: "dom" }); own.name = "Ann";
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(own) }, session: {} } });
+    const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    const row = g.d.querySelector("#portraitBody .pt-mode");
+    eq([...row.querySelectorAll("[data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "v611/v615/v616: one row — ⚔ Wr, 🗡 Witcher and 🌀 Avatar on the left, then ✦ 🎲 🦇");
+    ok(!g.d.querySelector(".pt-wr-sub"), "no ⚔ Wr tabs before ⚔ Wr is chosen");
+    click(g.w, g.d.querySelector('.pt-mode .pt-wrb'));
+    const pv = g.d.querySelector(".pt-wr");
+    ok(!!pv && pv.dataset.god === "tzeentch" && /Ваш покровитель/.test(pv.querySelector(".sg-over").textContent) && /Служитель Тзинча/.test(pv.querySelector(".sg-name").textContent)
+      && /^(Мутации: \d+|Порождение Хаоса — мутации: 10)$/.test(pv.querySelector(".sg-rl").textContent) && +pv.dataset.mut >= 0 && +pv.dataset.mut <= 10 && !pv.querySelector(".sg-al")
+      && pv.querySelector(".wod-note").textContent === "Фанатский неофициальный материал." && g.w.localStorage.getItem("checklist-dnd") === "wr",
+      "portrait: “Your patron · Servant of Tzeentch”, mutations 0–10, the groups, the fan line; remembered as “wr”");
+    const tabs = g.d.querySelector(".pt-wr-sub");
+    ok(!g.d.querySelector(".pt-wod-sub") && !!tabs && [...tabs.querySelectorAll("[data-mode]")].map(b => b.dataset.mode + ":" + b.textContent).join("|") === "wr:Боги Хаоса|wh:🌌 40K|leg:🛡 Легион|ow:🏰 Old World"
+      && tabs.querySelector('[data-mode="wr"]').getAttribute("aria-pressed") === "true" && g.d.querySelector(".pt-mode .pt-wrb").getAttribute("aria-pressed") === "true",
+      "⚔ Wr opens its tabs under it: Chaos gods (open by default) | 🌌 40K | 🛡 Legion | 🏰 Old World (v615: the Witcher is its own button); ⚔ Wr is pressed");
+    g.KC.form.drawCard({ sign: true, bars: true, love: true, limits: false, name: true, role: true, exp: true });
+    ok(!g.errors.length, "the picture card is drawn in the Chaos mode without errors");
+    g.KC.help.open("portrait"); ok(/Служитель богов Хаоса/.test(g.d.getElementById("help-portrait").textContent) && /Games Workshop/.test(g.d.getElementById("help-portrait").textContent), "help (portrait) explains the mode and that it is a fan mode");
+    // the compare page: the pair's patrons, the cult
+    const code = (n, u, s) => { const it = {}; all.forEach((id, i) => { it[id] = { interest: s.has(id) ? "love" : i % 2 ? "limit" : "maybe" }; }); return K.codec.encode({ name: n, uid: u, items: it, meta: {} }, "ru"); };
+    const codes = [code("Ann", "ANN610", fav("khorne")), code("Bob", "BOB610", fav("khorne")), code("Cid", "CID610", fav("nurgle"))];
+    const run = (n, local) => { const cp = open("compare", { storage: { local: Object.assign({ "checklist-lang": "ru" }, local), session: {} } });
+      for (let i = 2; i < n; i++) click(cp.w, cp.d.getElementById("addPart"));
+      cp.d.querySelectorAll("#parts textarea").forEach((ta, i) => { ta.value = codes[i]; }); click(cp.w, cp.d.getElementById("cmpBtn")); return cp; };
+    const c2 = run(2, { "checklist-dnd-pair": "wr", "checklist-folds": '{"pair":true}' });
+    const box = c2.d.querySelector(".sp-signs.sp-wr");
+    ok(!!box && /Покровители пары/.test(box.textContent) && box.querySelectorAll(".sg-wr").length === 2 && /Один бог/.test(box.querySelector(".sg-match").textContent) && /Фанатский/.test(box.textContent),
+      "pair: “The pair's patrons”, two signs, the same god (both Khorne)");
+    const c3 = run(3, { "checklist-dnd-group": "wr", "checklist-folds": '{"group":true}' });
+    const gf = c3.d.querySelector('details.sp-fold[data-fold="group"]');
+    ok(!!gf.querySelector(".sp-wrgrp") && /Культ/.test(gf.textContent) && gf.querySelectorAll(".sp-wrgrp li").length === 3 && /Служитель Нургла/.test(gf.textContent) && !gf.querySelector("[data-planet]"),
+      "group: the cult, everyone's patron, no system");
+    click(c3.w, gf.querySelector('.pt-mode [data-mode="sign"]'));
+    ok(!!gf.querySelector("[data-planet]") && c3.w.localStorage.getItem("checklist-dnd-group") === null && c3.w.localStorage.getItem("checklist-dnd-pair") === null, "→ the solar system again; the pair's choice untouched");
+    c3.KC.help.open("compare"); ok(/⚔ Wr/.test(c3.d.getElementById("help-compare").textContent), "help (compare) explains the mode");
+    ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length, "no script errors");
+    _sc.end();
+  }
+
+
+  S("v610: Warhammer factions (🌌 40K) and legions (🛡) — two more modes; switches for the new modes");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, H = K.wh, L = K.leg, R = K.wr, C = K.clusters;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    eq([H.FACTIONS.length, L.LEGIONS.length, Object.keys(C.USUAL).length], [14, 18, 42], "14 factions, 18 legions, 42 clusters");
+    const bad = [];
+    Object.keys(H.FIG).concat(Object.keys(L.FIG).map(k => "L" + k)).forEach(key => { const F = key[0] === "L" && L.FIG[key.slice(1)] ? L.FIG[key.slice(1)] : H.FIG[key];
+      const [P, E, Ln, B] = F, n = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) bad.push(key + ": stars");
+      Ln.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < n)) bad.push(key + ": line " + i); })); });
+    eq(bad, [], "every faction and legion sign: 9 group stars, 3 bright slots, lines only to existing stars");
+    eq([H.FACTIONS.filter(x => !H.FIG[x]), L.LEGIONS.concat(["ii", "xi"]).filter(x => !L.FIG[x])], [[], []], "every faction and legion (and the lost II / XI) has a sign");
+    const parseK = s2 => s2.split(" ").map(t => t.match(/^([a-z]+)/)[1]);
+    eq(H.FACTIONS.concat(L.LEGIONS).filter(x => (H.PROF[x] || L.PROF[x]) && parseK(H.PROF[x] || L.PROF[x]).some(k => !C.USUAL[k])), [], "every profile uses known clusters");
+    // each faction / legion wins on a list that loves its main cluster and its helpers (no rules in the way)
+    const all = []; K.CATS.forEach(c => c.items.forEach(([, id]) => all.push(id)));
+    const mk = (fn, meta) => { const it = {}; all.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
+    const lover = prof => { const w = {}; prof.split(" ").forEach(t => { const m = t.match(/^([a-z]+)(-?[\d.]+)$/); w[m[1]] = +m[2]; });
+      const top = Object.keys(w).filter(k => w[k] >= .5), off = Object.keys(w).filter(k => w[k] < 0);
+      const like = new Set(), hate = new Set(); top.forEach(k => C.ids()[k].forEach(id => like.add(id))); off.forEach(k => C.ids()[k].forEach(id => hate.add(id)));
+      return mk((id, i) => like.has(id) ? "love" : hate.has(id) ? "limit" : i % 3 === 0 ? "maybe" : i % 3 === 1 ? "limit" : null); };
+    const winsF = H.FACTIONS.filter(x => { const st = lover(H.PROF[x]); return H.choose(st, K.portrait.compute(st, null), null) === x; });
+    ok(winsF.length >= 11, "most factions win on a list that loves their own themes (" + winsF.length + "/14: " + H.FACTIONS.filter(x => winsF.indexOf(x) < 0).join(", ") + " overlap others)");
+    const winsL = L.LEGIONS.filter(x => { const st = lover(L.PROF[x]); return L.choose(st, K.portrait.compute(st, null), null) === x; });
+    ok(winsL.length >= 13, "most legions win on a list that loves their own themes (" + winsL.length + "/18)");
+    // the Great Devourer
+    const eater = mk((id, i) => i % 3 ? "love" : "yes");
+    eq(H.choose(eater, K.portrait.compute(eater, null), null), "tyranids", "a list that eats everything (all answered, no “No”, lots of Love) → Tyranids");
+    // WAAAGH
+    const quiet = mk((id, i) => i % 2 ? "maybe" : "limit"), loud = mk(() => "love");
+    eq([H.waaagh(quiet, null), H.waaagh(loud, null), H.waaaghText(1), H.waaaghText(4)], [1, 12, "WAGH!", "WAAAAGH!"], "WAAAGH: 1 A without Love, 12 at most; the text");
+    // mutations
+    eq(R.GODS.map(g => R.mutations(loud, g, null)).every(n => n >= 0 && n <= 10) && R.GODS.map(g => R.mutations(quiet, g, null)).every(n => n >= 0 && n <= 10), true, "mutations always 0–10");
+    eq([R.mutLine(10, K.i18n.t), R.mutLine(3, K.i18n.t)], ["Порождение Хаоса — мутации: 10", "Мутации: 3"].map(x => K.i18n.lang === "ru" ? x : K.i18n.t(x === "Мутации: 3" ? "wr.mut" : "wr.spawn", { n: 3 })), "10 = a Chaos spawn; no “of 10” (owner, Oct 3)");
+    // texts
+    const need = ["wh.toWh", "wh.mine", "wh.their", "wh.waaagh", "card.o.wh", "sp.wh.h", "sp.wh.grp", "sp.wh.same", "sp.wh.near", "sp.wh.far", "help.compareWh_html", "wr.gods", "wr.switch",
+      "leg.toLeg", "leg.mine", "leg.their", "leg.lost", "leg.expunged", "card.o.leg", "sp.leg.h", "sp.leg.grp", "sp.leg.same", "sp.leg.near", "sp.leg.far", "help.leg_html", "help.compareLeg_html"]
+      .concat(H.FACTIONS.map(x => "wh.f." + x), L.LEGIONS.map(x => "leg.l." + x));
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); }));
+    eq(miss, [], "every faction / legion text exists in all 7 languages (" + need.length + " keys)");
+    // the portrait in both modes
+    const ork = lover(H.PROF.orks); ork.name = "Ann";
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ork) }, session: {} } });
+    const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    eq(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub) [data-mode]").length, 6, "six buttons in the mode row while every switch is on (⚔ Wr + 🗡 Witcher + 🌀 Avatar + three)");
+    click(g.w, g.d.querySelector('.pt-mode .pt-wrb')); click(g.w, g.d.querySelector('.pt-wr-sub [data-mode="wh"]'));
+    const pw = g.d.querySelector(".pt-wh");
+    ok(!!pw && pw.dataset.faction === "orks" && /Ваша фракция/.test(pw.querySelector(".sg-over").textContent) && pw.querySelector(".sg-name").textContent === "Орки"
+      && /^Ваш WAAAGH: WA+GH!$/.test(pw.querySelector(".sg-rl").textContent) && !!pw.querySelector(".wod-note") && g.w.localStorage.getItem("checklist-dnd") === "wh",
+      "factions: “Your faction · Orks · Your WAAAGH: WA…GH!”, remembered as “wh”");
+    click(g.w, g.d.querySelector('.pt-wr-sub [data-mode="leg"]'));
+    const pl = g.d.querySelector(".pt-leg");
+    ok(!!pl && /Ваш легион/.test(pl.querySelector(".sg-over").textContent) && /^(I|V|VI|VII|IX|X|XIII|XVIII|XIX|III|IV|VIII|XII|XIV|XV|XVI|XVII|XX) /.test(pl.querySelector(".sg-name").textContent) || /Легион (II|XI)/.test(pl.querySelector(".sg-name").textContent),
+      "legions: “Your legion · <number> <name>”");
+    ok(!g.d.querySelector(".pt-wh"), "the factions and the legions are separate modes");
+    click(g.w, g.d.querySelector('.pt-mode [data-mode="sign"]')); ok(!g.d.querySelector(".pt-wr-sub") && g.d.querySelector(".pt-mode .pt-wrb").dataset.mode === "leg", "back to the constellation: the tabs close, ⚔ Wr remembers the legion tab");
+    click(g.w, g.d.querySelector('.pt-mode .pt-wrb')); ok(!!g.d.querySelector(".pt-leg") && g.w.localStorage.getItem("checklist-wr") === "leg", "⚔ Wr reopens the tab chosen last (checklist-wr)");
+    g.KC.form.drawCard({ sign: true, bars: true, love: true, limits: false, name: true, role: true, exp: true });
+    g.KC.help.open("portrait"); ok(!/14 фракций/.test(g.d.getElementById("help-portrait").textContent) && /18 легионов/.test(g.d.getElementById("help-portrait").textContent), "help: the legions are explained; the factions have no paragraph of their own (owner, v611)");
+    // the lost legions: the record is expunged
+    const lostFig = L.FIG.ii; ok(lostFig[0].length === 9, "the expunged record has a sign too");
+    // the compare page
+    const code = (n, u, st) => K.codec.encode(Object.assign({ name: n, uid: u }, st), "ru");
+    const codes = [code("Ann", "ANN611", lover(H.PROF.orks)), code("Bob", "BOB611", lover(H.PROF.orks)), code("Cid", "CID611", lover(H.PROF.necrons))];
+    const run = (n, local) => { const cp = open("compare", { storage: { local: Object.assign({ "checklist-lang": "ru" }, local), session: {} } });
+      for (let i = 2; i < n; i++) click(cp.w, cp.d.getElementById("addPart"));
+      cp.d.querySelectorAll("#parts textarea").forEach((ta, i) => { ta.value = codes[i]; }); click(cp.w, cp.d.getElementById("cmpBtn")); return cp; };
+    const c2 = run(2, { "checklist-dnd-pair": "wh", "checklist-folds": '{"pair":true}' });
+    const box = c2.d.querySelector(".sp-signs.sp-wh");
+    ok(!!box && /Фракции пары/.test(box.textContent) && /Одна фракция/.test(box.textContent) && box.querySelectorAll(".sg-wh").length === 2 && /WAAAGH/.test(box.textContent), "pair: “The pair's factions”, one faction (both Orks), their WAAAGH");
+    const c3 = run(3, { "checklist-dnd-group": "leg", "checklist-folds": '{"group":true}' });
+    const gf = c3.d.querySelector('details.sp-fold[data-fold="group"]');
+    ok(!!gf.querySelector(".sp-leggrp") && /Легионы компании/.test(gf.textContent) && gf.querySelectorAll(".sp-leggrp li").length === 3, "group: everyone's legion");
+    // switches: a mode switched off disappears everywhere and a device that chose it sees the constellation
+    const off = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": "wh", "practices-checklist-v1": JSON.stringify(ork) }, session: {} },
+      patch: { "core/kc.js": src => src.replace("KC.FEATURES = { wr: true, wh: true, leg: true, ow: true, wi: true, av: true };", "KC.FEATURES = { wr: true, wh: false, leg: false, ow: false, wi: false, av: false };") } });
+    const so = off.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new off.w.Event("toggle"));
+    ok(off.KC.dnd.mode() === "sign" && !off.d.querySelector('.pt-mode [data-mode="wh"], .pt-mode [data-mode="leg"]') && off.d.querySelector('.pt-mode .pt-wrb').dataset.mode === "wr" && !off.d.querySelector(".pt-wr-sub") && !off.d.querySelector(".pt-wh"),
+      "factions + legions switched off: no tabs (one tab left → ⚔ Wr opens the gods directly), a device that chose factions sees the constellation");
+    off.KC.help.open("portrait"); ok(!/18 легионов/.test(off.d.getElementById("help-portrait").textContent) && /Служитель богов Хаоса/.test(off.d.getElementById("help-portrait").textContent), "…and their help paragraphs are hidden");
+    const none = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ork) }, session: {} }, patch: { "core/kc.js": src => src.replace("KC.FEATURES = { wr: true, wh: true, leg: true, ow: true, wi: true, av: true };", "KC.FEATURES = { wr: false, wh: false, leg: false, ow: false, wi: false, av: false };") } });
+    none.KC.dnd.setMode("wr"); eq(none.KC.dnd.mode(), "sign", "all new modes off: choosing one stores nothing (the constellation stays)");
+    const ns = none.d.getElementById("portraitSection"); ns.open = true; ns.dispatchEvent(new none.w.Event("toggle")); ok(!!none.d.querySelector("#portraitBody .pt-mode") && !none.d.querySelector(".pt-wrb"), "…and there is no ⚔ Wr button");
+    ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !off.errors.length && !none.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v612: Warhammer: The Old World races (🏰) and Witcher schools (🗡) — two more tabs under ⚔ Wr");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, O = K.ow, V = K.wi, C = K.clusters;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    eq([O.RACES.length, V.SCHOOLS.length, V.SIGNS.length], [17, 6, 5], "17 races (with Kislev, Cathay and the Warriors of Chaos), 6 schools, 5 signs");
+    const bad = [];
+    [[O, O.RACES], [V, V.SCHOOLS]].forEach(([M, keys]) => keys.forEach(k => { const F = M.FIG[k]; if (!F) { bad.push(k + ": no sign"); return; } const [P, E, Ln, B] = F, n = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) bad.push(k + ": stars");
+      Ln.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < n)) bad.push(k + ": line " + i); })); }));
+    eq(bad, [], "every race and school has a sign: 9 group stars, 3 bright slots, lines only to existing stars");
+    const parseK = s2 => s2.split(" ").map(t => t.match(/^([a-z]+)/)[1]);
+    eq(O.RACES.filter(r => parseK(O.PROF[r]).some(k => !C.USUAL[k])).concat(V.SIGNS.filter(g => parseK(V.SPROF[g]).some(k => !C.USUAL[k]))), [], "races and signs use only known clusters (owner: races by clusters, not by groups)");
+    eq(V.SCHOOLS.filter(x => parseK(V.PROF[x]).some(k => !K.signs.KEY[k])), [], "schools use only the groups (as the World of Darkness clans)");
+    const all = []; K.CATS.forEach(c => c.items.forEach(([, id]) => all.push(id)));
+    const mk = (fn, meta) => { const it = {}; all.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
+    const lover = prof => { const w = {}; prof.split(" ").forEach(t => { const m = t.match(/^([a-z]+)(-?[\d.]+)$/); w[m[1]] = +m[2]; });
+      const top = Object.keys(w).filter(k => w[k] >= .5), off = Object.keys(w).filter(k => w[k] < 0);
+      const like = new Set(), hate = new Set(); top.forEach(k => C.ids()[k].forEach(id => like.add(id))); off.forEach(k => C.ids()[k].forEach(id => hate.add(id)));
+      return mk((id, i) => like.has(id) ? "love" : hate.has(id) ? "limit" : i % 3 === 0 ? "maybe" : i % 3 === 1 ? "limit" : null); };
+    const wins = O.RACES.filter(r => { const st = lover(O.PROF[r]); return O.choose(st, K.portrait.compute(st, null), null) === r; });
+    ok(wins.length >= 14, "most races win on a list that loves their themes (" + wins.length + " / 17)");
+    eq(V.SIGNS.filter(g => V.chooseSign(lover(V.SPROF[g]), null) === g), V.SIGNS, "each sign wins on a list that loves its themes");
+    eq(O.grudges(mk((id, i) => i % 4 === 0 ? "limit" : i % 4 === 1 ? "yes" : null), null), Math.ceil(all.length / 4), "the Dwarfs' Book of Grudges: one page per “No”");
+    const need = ["ow.toOw", "ow.mine", "ow.their", "ow.grudges", "card.o.ow", "sp.ow.h", "sp.ow.grp", "sp.ow.same", "sp.ow.near", "sp.ow.far",
+      "wi.toWi", "wi.mine", "wi.their", "wi.sign", "card.o.wi", "sp.wi.h", "sp.wi.grp", "sp.wi.same", "sp.wi.near", "sp.wi.far"]
+      .concat(O.RACES.map(x => "ow.r." + x), V.SCHOOLS.map(x => "wi.s." + x), V.SIGNS.map(x => "wi.g." + x));
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); }));
+    eq(miss, [], "every Old World / Witcher text exists in all 7 languages (" + need.length + " keys)");
+    // the portrait: the Dwarfs with their Book of Grudges; a school with its sign
+    const dw = lover(O.PROF.dwarf); dw.name = "Ann";
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(dw) }, session: {} } });
+    const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    click(g.w, g.d.querySelector(".pt-mode .pt-wrb")); click(g.w, g.d.querySelector('.pt-wr-sub [data-mode="ow"]'));
+    const po = g.d.querySelector(".pt-ow");
+    ok(!!po && po.dataset.race === "dwarf" && /Ваша раса/.test(po.querySelector(".sg-over").textContent) && po.querySelector(".sg-name").textContent === "Дворфы"
+      && po.querySelector(".sg-rl").textContent === "Страниц в книге обид: " + Object.keys(dw.items).filter(id => dw.items[id].interest === "limit").length && !!po.querySelector(".wod-note") && g.w.localStorage.getItem("checklist-dnd") === "ow",
+      "Old World: “Your race · Дворфы (v615) · Pages in the Book of Grudges: N = the number of “No””, remembered as “ow”");
+    ok(!g.d.querySelector('.pt-wr-sub [data-mode="wi"]') && !!g.d.querySelector('.pt-mode .pt-wib[data-mode="wi"]'), "v615: the Witcher is a button in the main row, not a Wr tab");
+    click(g.w, g.d.querySelector('.pt-mode .pt-wib'));
+    const pw = g.d.querySelector(".pt-wi");
+    ok(!!pw && V.SCHOOLS.indexOf(pw.dataset.school) >= 0 && V.SIGNS.indexOf(pw.dataset.wsign) >= 0 && /Ваша школа/.test(pw.querySelector(".sg-over").textContent)
+      && /^Школа /.test(pw.querySelector(".sg-name").textContent) && /^Знак: (Аард|Игни|Ирден|Квен|Аксий)$/.test(pw.querySelector(".sg-rl").textContent),
+      "Witcher: “Your school · School of the … · Sign: …”");
+    g.KC.form.drawCard({ sign: true, bars: true, love: true, limits: false, name: true, role: true, exp: true });
+    // the compare page
+    const code = (n, u, st) => K.codec.encode(Object.assign({ name: n, uid: u }, st), "ru");
+    const codes = [code("Ann", "ANN612", lover(O.PROF.dwarf)), code("Bob", "BOB612", lover(O.PROF.dwarf)), code("Cid", "CID612", lover(O.PROF.vamp))];
+    const run = (n, local) => { const cp = open("compare", { storage: { local: Object.assign({ "checklist-lang": "ru" }, local), session: {} } });
+      for (let i = 2; i < n; i++) click(cp.w, cp.d.getElementById("addPart"));
+      cp.d.querySelectorAll("#parts textarea").forEach((ta, i) => { ta.value = codes[i]; }); click(cp.w, cp.d.getElementById("cmpBtn")); return cp; };
+    const c2 = run(2, { "checklist-dnd-pair": "ow", "checklist-folds": '{"pair":true}' });
+    const box = c2.d.querySelector(".sp-signs.sp-ow");
+    ok(!!box && /Расы пары/.test(box.textContent) && /Одна раса/.test(box.textContent) && box.querySelectorAll(".sg-ow").length === 2 && /книге обид/.test(box.textContent), "pair: “The pair's races”, one race (both Dwarfs), their Book of Grudges");
+    const c3 = run(3, { "checklist-dnd-group": "wi", "checklist-folds": '{"group":true}' });
+    const gf = c3.d.querySelector('details.sp-fold[data-fold="group"]');
+    ok(!!gf.querySelector(".sp-wigrp") && /Школы компании/.test(gf.textContent) && gf.querySelectorAll(".sp-wigrp li").length === 3 && /Знак:/.test(gf.textContent), "group: everyone's school and sign");
+    // switches
+    const off = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": "ow", "practices-checklist-v1": JSON.stringify(dw) }, session: {} },
+      patch: { "core/kc.js": src => src.replace("ow: true, wi: true", "ow: false, wi: false") } });
+    const so = off.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new off.w.Event("toggle"));
+    ok(off.KC.dnd.mode() === "sign" && !off.d.querySelector('.pt-mode [data-mode="ow"], .pt-mode [data-mode="wi"]') && !off.d.querySelector(".pt-ow"), "Old World + Witcher switched off: no tabs, a device that chose Old World sees the constellation");
+    ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !off.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v613: the extended list — two roles per practice, «✦ Хочу», links, My lists, portrait, compare");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, X = K.ext;
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const V = ["limit", "maybe", "yes", "love"];
+    // links: random extended lists survive a link exactly; plain links keep their old format
+    let seed = 13; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const so = o => JSON.stringify(Object.keys(o).sort().map(k => [k, o[k]]));
+    let badRt = 0;
+    for (let n = 0; n < 60; n++) {
+      const st = { ext: 1, items: {}, meta: {} }, pf = rnd(), pb = rnd();
+      ids.forEach(id => { const o = {}; if (rnd() < pf) { o.t = V[Math.floor(rnd() * 4)]; if (rnd() < .3) o.tw = 1; } if (rnd() < pb) { o.b = V[Math.floor(rnd() * 4)]; if (rnd() < .3) o.bw = 1; } if (o.t || o.b) st.items[id] = o; });
+      const norm = K.store.normalize(st), d = K.codec.decode(K.codec.encode(norm, "ru"));
+      if (so(norm.items) !== so(K.store.normalize(d).items) || d.damaged || !d.ext) badRt++;
+    }
+    eq(badRt, 0, "60 random extended lists come back from a link exactly (answers of both roles and «Хочу»)");
+    eq(X.cleanItem({ t: "limit", tw: 1, b: "yes", bw: 1 }), { t: "limit", b: "yes", bw: 1 }, "«Хочу» only next to Может / Да / Обожаю");
+    const plain = { items: {}, meta: { role: "dom" }, name: "P" }; ids.forEach((id, i) => { if (i % 3) plain.items[id] = { interest: V[i % 4] }; });
+    const pc = K.codec.encode(K.store.normalize(plain)), tag = K.codec.unpackAnswers ? atob(pc.split("&")[0].slice(2).replace(/-/g, "+").replace(/\./g, "/").padEnd(Math.ceil((pc.split("&")[0].length - 2) / 4) * 4, "=")).charCodeAt(0) : 0;
+    ok(tag === 2 || tag === 4, "a plain list still makes a link of the old format (tag " + tag + ")");
+    const one = X.fromPlain(K.store.normalize(plain), "dom");
+    ok(one.ext === 1 && one.items[ids[1]].t === plain.items[ids[1]].interest && !one.items[ids[1]].b && !one.meta.role, "an extended copy puts the answers into the role the list was filled for");
+    const L = s2 => K.codec.encode(s2).split("&")[0].length;
+    ok(L(one) <= L(K.store.normalize(plain)) * 1.35, "an extended list with one role filled: its link is about as short as a plain one (" + L(one) + " vs " + L(K.store.normalize(plain)) + ")");
+    const both = X.fromPlain(K.store.normalize(plain), "both");
+    ok(ids.filter(id => both.items[id]).every(id => both.items[id].t === both.items[id].b), "“Обе”: the answers go to both roles");
+    // the form: the switch makes the extended copy (asks the role when the list has none), both lists in My lists
+    const st0 = { name: "Ann", uid: "ANNUID", meta: {}, items: {} }; ids.forEach((id, i) => { if (i % 2) st0.items[id] = { interest: V[i % 4] }; });
+    st0.items.chains = { interest: "love" };
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(st0) }, session: {} } });
+    ok(!g.d.getElementById("extToggleBox").hidden && g.d.getElementById("roleView").hidden && !g.d.getElementById("extMake").hidden && !g.d.querySelector(".ext-row"), "a plain list: the switch «☐ Расширенная» and «Сделать расширенную», no role filter, plain rows");
+    const LS = (pg, k) => JSON.parse(pg.w.localStorage.getItem(k)), LSx = pg => LS(pg, "practices-checklist-v1") || {};
+    click(g.w, g.d.getElementById("extToggle"));
+    ok(g.d.getElementById("extOverlay").classList.contains("show") && !LSx(g).ext, "no role in the list → the window asks «Верх, Низ или Обе?» (nothing made yet)");
+    click(g.w, g.d.querySelector('[data-ext-role="sub"]'));
+    const ownX = LS(g, "practices-checklist-v1"), mine = LS(g, "checklist-my-profiles-v1");
+    ok(ownX.ext === 1 && ownX.items.chains.b === "love" && !ownX.items.chains.t && ownX.pair === "ANNUID" && mine.length === 2 && mine.some(x => x.data.uid === "ANNUID" && x.data.pair === ownX.uid),
+      "→ Bottom: an extended copy with the answers in «↓ Низ»; the plain list stays in My lists; they point at each other");
+    const store2 = { local: {}, session: {} }; for (let i = 0; i < g.w.localStorage.length; i++) store2.local[g.w.localStorage.key(i)] = g.w.localStorage.getItem(g.w.localStorage.key(i));
+    const h = open("form", { storage: store2 });
+    const row = h.d.querySelector('.item[data-id="chains"]');
+    ok(h.KC.form.isExt() && row.querySelectorAll(".ext-row").length === 2 && /Расширенная/.test(h.d.getElementById("progress").textContent) && h.d.getElementById("extToggle").checked && !h.d.getElementById("roleView").hidden && h.d.getElementById("roleTop").hidden,
+      "the extended list: two rows «↑ Верх / ↓ Низ», «Расширенная» next to the count, the switch ticked, the role filter, no role picker");
+    ok(row.querySelector('.ext-row[data-r="t"] .want').disabled && !row.querySelector('.ext-row[data-r="b"] .want').disabled, "«✦ Хочу» is off without an answer (or with «Нет»)");
+    click(h.w, row.querySelector('.ext-row[data-r="t"] [data-v="yes"]')); click(h.w, row.querySelector('.ext-row[data-r="t"] .want'));
+    eq(h.KC.form.state.items.chains, { b: "love", t: "yes", tw: 1 }, "an answer and «Хочу» in «↑ Верх»");
+    click(h.w, row.querySelector('.ext-row[data-r="t"] [data-v="limit"]'));
+    eq(h.KC.form.state.items.chains, { b: "love", t: "limit" }, "«Нет» takes «Хочу» away");
+    h.d.getElementById("roleView").value = "t"; h.d.getElementById("roleView").dispatchEvent(new h.w.Event("change"));
+    h.d.getElementById("view").value = "answered"; h.d.getElementById("view").dispatchEvent(new h.w.Event("change"));
+    const vis = [...h.d.querySelectorAll(".item:not(.filtered-out)")].map(r => r.dataset.id);
+    ok(vis.length === 1 && vis[0] === "chains" && row.querySelector('.ext-row[data-r="b"]').classList.contains("r-hidden"), "«↑ Только Верх» + «Отвеченные»: only the answers of that role, the other row hidden");
+    h.KC.form.saveNow();
+    click(h.w, h.d.querySelector("#mineBtn"));
+    const mt = h.d.getElementById("mineList").textContent;
+    ok(/Расширенная/.test(mt) && /Обычная · роль не указана/.test(mt), "My lists says which list is extended and which is plain (with its role or «роль не указана»)");
+    // the backup keeps the extended list (and the link between the two lists)
+    const bk = JSON.parse(JSON.stringify(h.KC.store.exportAll()));
+    const fresh = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
+    const imp = fresh.KC.store.importAll(bk), m2 = fresh.KC.store.mine.list(), xe = m2.find(x => x.data.ext), xp = m2.find(x => !x.data.ext);
+    ok(imp && imp.mine === 2 && !!xe && xe.data.items.chains.b === "love" && xe.data.items.chains.t === "limit" && xe.data.pair === xp.data.uid && xp.data.pair === xe.data.uid && bk.own.ext === 1,
+      "a backup carries the extended list with both roles; restoring it keeps both lists and their link");
+    fresh.KC.help.open("answer"); ok(/Расширенная анкета/.test(fresh.d.getElementById("help-answer").textContent) && /Новое вместе/.test(fresh.KC.i18n.t("help.news_html").slice(0, 1300)), "help explains the extended list; «Что нового» has the entry of Oct 4");
+    // the portrait: one per role, a card per role; the PDF: both roles
+    const sec = h.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new h.w.Event("toggle"));
+    ok(h.d.querySelectorAll(".pt-role").length === 2 && !!h.d.querySelector('.pt-role[data-r="b"] .pt-sign') && /↑ Верх/.test(h.d.querySelector('.pt-role[data-r="t"] .pt-role-h').textContent) && !!h.d.querySelector('.pt-role[data-r="b"] [data-card="b"]'),
+      "the portrait: «↑ Верх» and «↓ Низ», each with its own sign and picture card");
+    h.KC.form.drawCard({ sign: true, bars: true, love: true, limits: false, name: true, role: true, exp: true });
+    const sh = h.KC.form.buildSheet(), ps = [].concat(h.KC.form.buildPortraitSheet());
+    ok(/↓/.test(sh.innerHTML) && ps.length >= 1 && !h.errors.length, "the PDF shows the roles; the portrait pages are made per role; no errors");
+    // the compare page
+    const extA = { ext: 1, name: "Ann", uid: "ANNEXT", meta: {}, items: {} }, extB = { ext: 1, name: "Bob", uid: "BOBEXT", meta: {}, items: {} };
+    ids.forEach((id, i) => { extA.items[id] = { t: V[1 + i % 3], b: V[1 + (i + 1) % 3] }; if (i % 4 === 0) { extA.items[id].tw = 1; } if (i % 6 === 0) extA.items[id].bw = 1;
+      extB.items[id] = { t: V[1 + (i + 2) % 3], b: V[1 + i % 3] }; if (i % 4 === 0) extB.items[id].bw = 1; if (i % 5 === 0) extB.items[id].tw = 1; });
+    const cid = { name: "Cid", uid: "CIDPLN", meta: {}, items: {} }; ids.forEach((id, i) => { cid.items[id] = { interest: V[(i * 7 + 1) % 4] }; });
+    const code = s2 => K.codec.encode(K.store.normalize(s2), "ru");
+    const run = (codes) => { const cp = open("compare", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
+      for (let i = 2; i < codes.length; i++) click(cp.w, cp.d.getElementById("addPart"));
+      cp.d.querySelectorAll("#parts textarea").forEach((ta, i) => { ta.value = codes[i] || ""; ta.dispatchEvent(new cp.w.Event("input", { bubbles: true })); });
+      click(cp.w, cp.d.getElementById("cmpBtn")); return cp; };
+    let c = run([code(extA), code(cid)]);
+    ok(!!c.d.querySelector(".cmp-role.role-need") && /противоположной ролью Ann/.test(c.d.querySelector(".role-hint:not(.ext-hint)").textContent) && !c.d.getElementById("resBody").textContent
+      && /Расширенная анкета/.test(c.d.querySelector(".ext-hint").textContent), "extended + plain without a role: the plain list's role picker asks, nothing is compared yet");
+    c.d.querySelectorAll(".cmp-role")[1].value = "sub"; click(c.w, c.d.getElementById("cmpBtn"));
+    const st = c.KC.cmpState().pair;
+    ok(!!st && st.A.meta.role === "dom" && /Ann ↑/.test(st.nA) && st.B.meta.role === "sub", "→ Bottom: Ann's Top role is compared with Cid (crosswise)");
+    ok(!!c.d.querySelector('[data-act="roulette-try"]') && !!c.d.querySelector('[data-f="try"]') && !c.d.querySelector(".cmp-dir"), "«✦ Попробуем новое?» and the filter «✦ Что попробуем?»; no direction switch with a plain list");
+    click(c.w, c.d.querySelector('[data-f="try"]'));
+    ok(/Что попробуем/.test(c.d.querySelector("#resBody h3").textContent) && /Хочу/.test(c.d.querySelector("#resBody .rrow .who").textContent), "the «Что попробуем» list: one marked «Хочу», the other likes it");
+    c = run([code(extA), code(extB)]);
+    const body = c.d.getElementById("resBody");
+    ok(!!c.d.querySelector(".cmp-dir") && /Новое вместе/.test(body.textContent), "two extended lists: «Сравниваем: Ann ↑ · Bob ↓ | Ann ↓ · Bob ↑» and «✦ Новое вместе»");
+    const nb = [...body.querySelectorAll(".result-group")].find(x => /Новое вместе/.test(x.textContent));
+    ok(!!nb && !nb.querySelector(".badge") && nb.querySelectorAll(".want-tag").length === 2 * nb.querySelectorAll(".rrow").length, "«Новое вместе» shows only «✦ Хочу», not the answers (owner)");
+    const a0 = c.KC.cmpState().pair.nA; click(c.w, c.d.querySelector('[data-dir="bt"]'));
+    ok(/Ann ↓/.test(c.KC.cmpState().pair.nA) && /Ann ↑/.test(a0) && c.d.querySelector('[data-dir="bt"]').classList.contains("on"), "the direction switch swaps the roles");
+    c.KC.roulette.open({ tryNew: true });
+    ok(c.d.getElementById("rlH").textContent === "✦ Попробуем новое?" && c.KC.roulette.pool(c.KC.cmpState().pair.A, c.KC.cmpState().pair.B, false).every(id => (c.KC.cmpState().pair.A.items[id] || {}).w || (c.KC.cmpState().pair.B.items[id] || {}).w), "the roulette «✦ Попробуем новое?» picks only from practices with «Хочу»");
+    c = run([code(extA), code(extB), code(cid)]);
+    ok(!!c.d.querySelector(".cmp-role.role-need") && !c.d.getElementById("resBody").textContent, "a company: an extended list needs a role picked");
+    c.d.querySelectorAll(".cmp-role")[0].value = "dom"; c.d.querySelectorAll(".cmp-role")[1].value = "sub"; click(c.w, c.d.getElementById("cmpBtn"));
+    ok(c.d.querySelectorAll(".cmp-profile").length >= 2 && !c.errors.length, "…then the company is compared by those roles");
+    const need = ["ext.roleView", "ext.both", "ext.onlyT", "ext.onlyB", "ext.toggle", "ext.toggleTitle", "ext.note", "ext.make", "ext.askH", "ext.ask", "ext.askT", "ext.askB", "ext.askBoth", "ext.row.t", "ext.row.b", "ext.want", "ext.badge",
+      "ext.kindExt", "ext.kindPlain", "ext.noRole", "ext.noPlain", "ext.arrow.t", "ext.arrow.b", "ext.card.t", "ext.card.b", "ext.ptEmpty", "ext.rlTry", "ext.rlLead_html", "ext.fTry", "ext.tryTitle", "ext.trySub", "ext.tryNone",
+      "ext.newTitle", "ext.newSub", "ext.dir", "ext.needRole", "ext.needRoleToast", "ext.needRoleGroup"];
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); }));
+    eq(miss, [], "every text of the extended list exists in all 7 languages (" + need.length + " keys)");
+    ok(!f.errors.length && !g.errors.length && !h.errors.length && !c.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v614: six new practices, «Всё и сразу», the «Описание созвездий» tab");
+  {
+    const _sc = scope();
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const f = open("form"), K = f.KC;
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    // 1. practices
+    const NEWP = { "forced-floor-eating": 500, "sucking-cum-from-vagina": 501, "foreign-language-talk": 502, "pet-food-eating": 503, "dressage-training": 504, "double-penetration-one-hole": 505 };
+    const code = {}; K.CATS.forEach(c => c.items.forEach(([cd, id]) => { code[id] = cd; }));
+    eq(Object.keys(NEWP).filter(id => code[id] !== NEWP[id]), [], "six new practices: codes 500–505");
+    eq(LANGS.map(l => Object.keys(NEWP).filter(id => { const it = K.i18n.item(id, l); return !it || !it.name || it.name === id || !it.desc; }).length), [0, 0, 0, 0, 0, 0, 0], "…named and described in all 7 languages");
+    const inCl = id => Object.keys(K.clusters.ids()).filter(k => K.clusters.ids()[k].indexOf(id) >= 0).sort();
+    eq([inCl("forced-floor-eating"), inCl("sucking-cum-from-vagina"), inCl("foreign-language-talk"), inCl("pet-food-eating"), inCl("dressage-training"), inCl("double-penetration-one-hole")],
+      [["feast", "filth"], ["cum", "devour"], ["words"], ["filth", "pet"], ["pet"], ["size"]], "…each is in the clusters it fits");
+    eq(Object.keys(K.clusters.ids()).every(k => K.clusters.ids()[k].every(id => code[id] !== undefined)), true, "every cluster item exists");
+    // 2. «Всё и сразу»: more than 70 % answered
+    const V = ["limit", "maybe", "yes", "love"], mk = n => { const o = { items: {}, meta: {} }; ids.slice(0, n).forEach((id, i) => { o.items[id] = { interest: V[i % 4] }; }); return o; };
+    const pd = n => K.portrait.compute(Object.assign(K.store.blank(), mk(n)), null);
+    eq([K.signs.manyOf(pd(Math.ceil(ids.length * .75))), K.signs.manyOf(pd(Math.floor(ids.length * .65)))], [true, false], "more than 70 % answered → many; fewer → not");
+    eq(LANGS.map(l => [K.i18n.has("ui", "sign.evenAll", l), K.i18n.has("ui", "sign.even", l)].join()), LANGS.map(() => "true,true"), "«Всё и сразу» exists in 7 languages");
+    K.i18n.set("ru"); eq([K.signs.evenText({ many: true }), K.signs.evenText({ many: false }), K.signs.evenText(null)], ["Всё и сразу", "Всё понемногу", "Всё понемногу"], "the words change, nothing else");
+    const full = mk(ids.length), sgA = K.signs.pick(K.portrait.compute(Object.assign(K.store.blank(), full), null)), sgB = K.signs.pick(K.portrait.compute(Object.assign(K.store.blank(), mk(120)), null));
+    ok(!sgA || sgA.many === true, "a full list's sign carries many"); ok(!sgB || sgB.many === false, "a short list's sign does not");
+    // 3. the lore files: the same keys in every language, every key is an interface key, nothing empty
+    const fsx = require("fs"), L = {};
+    LANGS.forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(o, d) }); L[l] = o; });
+    const rk = Object.keys(L.ru).sort();
+    eq(LANGS.map(l => Object.keys(L[l]).sort().join("|") === rk.join("|")), LANGS.map(() => true), "lore: the same " + rk.length + " keys in all 7 languages");
+    eq(LANGS.map(l => rk.filter(k => !L[l][k] || L[l][k].length < 40).length), [0, 0, 0, 0, 0, 0, 0], "lore: no empty or tiny text");
+    eq(rk.filter(k => !K.i18n.has("ui", k, "ru")).slice(0, 5), [], "lore: every key is an interface key");
+    ok(Object.keys(L.ru).every(k => (L.ru[k].match(/[.!?…]/g) || []).length >= 2), "lore: at least two sentences each");
+    const needL = ["lore.h", "lore.none", "lore.loading", "lore.offline", "lore.lead", "lore.note"], missL = [];
+    LANGS.forEach(l => needL.forEach(k => { if (!K.i18n.has("ui", k, l)) missL.push(l + ":" + k); })); eq(missL, [], "lore: interface texts in 7 languages");
+    // 4. the tab: only what the portrait shows, loaded when opened
+    const loreSrc = l => fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8");
+    const st = Object.assign(K.store.blank(), mk(300)); st.name = "Ann";
+    const rawSt = JSON.stringify(st);
+    const mkp = (mode, extra) => open("form", Object.assign({ storage: { local: { "checklist-lang": "ru", "checklist-dnd": mode, "practices-checklist-v1": rawSt }, session: {} } }, extra || {}));
+    const g = mkp("1"); const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    ok(!g.KC.lore.has("ru"), "the texts are not loaded with the page");
+    const gr = g.KC.lore.provider();
+    ok(gr.length === 1 && gr[0].items.length >= 3 && gr[0].items.every(it => L.ru[it.key] !== undefined), "DnD: the provider lists class, subclass, race, alignment — each has a text");
+    g.w.eval(loreSrc("ru")); g.KC.help.open("lore");
+    const box = g.d.getElementById("helpLore");
+    ok(!box.hidden && box.querySelectorAll(".lore-item").length === gr[0].items.length && g.d.getElementById("helpLoreTab").classList.contains("on") && g.d.getElementById("helpPane").hidden, "the tab shows exactly those items");
+    ok(/Не официальн|не официаль/i.test(box.querySelector(".lore-note").textContent), "…with the note that it is not official");
+    g.d.querySelector('.help-tab[data-tab="help"]').click(); ok(box.hidden && !g.d.getElementById("helpPane").hidden, "…and the other tabs still work");
+    const wod = mkp("wod"); wod.w.eval(loreSrc("ru")); const sw = wod.d.getElementById("portraitSection"); sw.open = true; sw.dispatchEvent(new wod.w.Event("toggle"));
+    const wp = wod.KC.lore.provider(); ok(wp.length === 1 && wp[0].items.every(it => L.ru[it.key] !== undefined) && wp[0].items.length >= 3, "World of Darkness: its own items only, each with a text");
+    wod.KC.help.open("lore"); ok(wod.d.querySelectorAll("#helpLore .lore-item").length === wp[0].items.length, "…shown in the tab");
+    // an extended list: one group per role
+    const ex = { ext: 1, items: {}, meta: {}, name: "Ann" }; ids.slice(0, 300).forEach((id, i) => { ex.items[id] = { t: V[i % 4], b: V[(i + 1) % 4] }; });
+    const xp = open("form", { storage: { local: { "checklist-lang": "en", "practices-checklist-v1": JSON.stringify(ex) }, session: {} } });
+    const xg = xp.KC.lore.provider(); ok(xg.length === 2 && xg[0].title && xg[0].title !== xg[1].title, "an extended list: a group for each role");
+    // switches: hidden modes are never described
+    const off = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": "wh", "practices-checklist-v1": rawSt }, session: {} },
+      patch: { "core/kc.js": src => src.replace("KC.FEATURES = { wr: true, wh: true, leg: true, ow: true, wi: true, av: true };", "KC.FEATURES = { wr: true, wh: false, leg: false, ow: false, wi: false, av: false };") } });
+    const so = off.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new off.w.Event("toggle"));
+    ok(off.KC.dnd.mode() === "sign" && off.KC.lore.provider().every(gx => !gx.items.some(it => /^(wh|leg|ow|wi)\./.test(it.key))), "factions switched off: nothing of Warhammer is described");
+    ok(!g.errors.length && !wod.errors.length && !xp.errors.length && !off.errors.length && !f.errors.length, "no script errors: " + [g, wod, xp, off, f].map(x => x.errors.join()).join(" | "));
+    _sc.end();
+  }
+
+
+  S("v615: header without «Clear», role filter in the button row, ⇅ next to ♥; dots from 497; Witcher button; lore mode buttons");
+  {
+    const _sc = scope();
+    const f = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }), K = f.KC, d = f.d;
+    ok(!d.getElementById("resetBtn") && !d.getElementById("resetOverlay"), "no «Очистить» button or window");
+    ok(d.getElementById("roleView").parentElement.classList.contains("top-actions") && d.getElementById("roleView").hidden, "the role filter sits in the button row, hidden for a plain list");
+    const box = d.getElementById("extToggleBox");
+    ok(box.parentElement.classList.contains("subbar") && box.previousElementSibling.querySelector("#onlyFav") && box.textContent.indexOf("⇅") === 0 && !!box.title, "⇅ (plain ⇄ extended) is a square button right after ♥, with a tooltip");
+    eq(K.NEW_FROM_CODE, 497, "green dots only from code 497");
+    ok(!d.querySelector("#portraitSection summary .new-dot"), "no green dot next to «Мой портрет»");
+    // an extended list: the role filter shows, its active choice is a dot (class on), not a filled field
+    const V = ["limit", "maybe", "yes", "love"], ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const ex = { ext: 1, items: {}, meta: {}, name: "Ann" }; ids.slice(0, 300).forEach((id, i) => { ex.items[id] = { t: V[i % 4], b: V[(i + 1) % 4] }; });
+    const x = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ex) }, session: {} } });
+    const rv = x.d.getElementById("roleView");
+    ok(!rv.hidden && !rv.classList.contains("on") && x.d.getElementById("extToggle").checked, "extended list: the role filter is shown, ⇅ is on");
+    rv.value = "t"; rv.dispatchEvent(new x.w.Event("change"));
+    ok(rv.classList.contains("on"), "a chosen role marks the list with the dot (class on)");
+    eq([...rv.options].map(o => o.textContent), ["Обе роли", "↑ Верх", "↓ Низ"], "short labels so it fits the phone row");
+    // the Witcher: its own button, not a Wr tab
+    const sw = K.wod.switchHTML();
+    ok(/pt-wib/.test(sw) && !/pt-wr-sub[^]*data-mode="wi"/.test(sw), "🗡 Witcher is its own button next to ⚔ Wr");
+    eq(K.dnd.wrTabs(), ["wr", "wh", "leg", "ow"], "⚔ Wr tabs: gods, 40K, legions, Old World");
+    // the constellation guide: the same mode buttons; a click switches the portrait mode
+    const st = Object.assign(K.store.blank(), { items: {} }); ids.slice(0, 300).forEach((id, i) => { st.items[id] = { interest: V[i % 4] }; }); st.name = "Ann";
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": "wod", "checklist-wod": "fey", "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
+    g.w.eval(require("fs").readFileSync(__dirname + "/../js/lore/ru.lore.js", "utf8"));
+    const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    g.KC.help.open("lore");
+    const lb = g.d.getElementById("helpLore");
+    ok(!!lb.querySelector('.lore-sw .pt-mode [data-mode="dnd"]') && !!lb.querySelector('.lore-sw .pt-wod-sub [data-wod="vamp"]'), "the guide has the portrait's mode buttons (and the WoD lines)");
+    click(g.w, lb.querySelector('[data-wod="vamp"]'));
+    ok(g.KC.wod.sub() === "vamp" && [...lb.querySelectorAll(".lore-item")].some(it => /^wod\.vamp\./.test(it.dataset.key)), "a line button in the guide switches to vampires and redraws it");
+    click(g.w, lb.querySelector('[data-mode="wi"]'));
+    ok(g.KC.dnd.mode() === "wi" && [...lb.querySelectorAll(".lore-item")].every(it => /^wi\./.test(it.dataset.key)), "…the Witcher button too (the portrait follows)");
+    // no Childling ever
+    const W = g.KC.wod, low = Object.assign(K.store.blank(), { items: {} }); ids.forEach(id => { low.items[id] = { interest: "limit" }; });
+    eq(W.details(low, K.portrait.compute(low, null), null, "fey", "boggan").seem, "wilder", "the lowest level fey is a Wilder, never a Childling");
+    ok(!f.errors.length && !x.errors.length && !g.errors.length, "no script errors: " + [f, x, g].map(p => p.errors.join()).join(" | "));
+    _sc.end();
+  }
+
+  S("v616: 🌀 Avatar — elements, types, spirit energy, the Avatar; fix: ⚔ Wr modes with a template");
+  {
+    const _sc = scope();
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const f = open("form"), K = f.KC, A = K.av;
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    // figures: 9 group stars, valid lines, bright slots among the 9; the Avatar: the centre + two in the native symbol
+    const bad = []; Object.keys(A.FIG).forEach(k => { const [P, E, L, B] = A.FIG[k], n = P.length + E.length;
+      if (P.length !== 9 || B.length !== 3 || B.some(b => b < 0 || b > 8) || new Set(B).size !== 3) bad.push(k + ":slots");
+      L.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < n)) bad.push(k + ":line"); })); });
+    eq(bad, [], "8 figures (4 elements + 4 Avatars by native element): 9 group stars, 3 bright slots, lines to existing stars");
+    eq(["water", "earth", "fire", "air"].map(e => A.FIG["avatar_" + e][3][0]), [0, 0, 0, 0], "the Avatar's first bright star is the centre");
+    // types: ranks, Air has none
+    eq(Object.keys(A.RANK).sort().join(), "blood,combustion,healing,lava,lightning,metal,sand,spirit,vines", "nine types");
+    const V = ["limit", "maybe", "yes", "love"];
+    const mk = fn => { const st = K.store.blank(); ids.forEach((id, i) => { const v = fn(id, i); if (v) st.items[id] = { interest: v }; }); return st; };
+    const varied = mk((id, i) => V[(i * 7 + 3) % 4]);
+    const dv = K.portrait.compute(varied, null), el = A.choose(dv, varied, null);
+    ok(A.ELEMENTS.indexOf(el) >= 0, "a varied list gets an element");
+    eq(A.typeOf("air", dv, varied, null), A.spirit(varied, null) ? "spirit" : null, "Air has no types (only the very rare spirit energy)");
+    // spirit energy: the spirit items Yes / Love
+    const sp = mk((id, i) => A.SPIRIT.indexOf(id) >= 0 ? "love" : V[(i * 7 + 3) % 4]);
+    ok(A.spirit(sp, null) && A.typeOf("earth", K.portrait.compute(sp, null), sp, null) === "spirit", "spirit energy beats the element's types");
+    const sp2 = mk((id, i) => A.SPIRIT.indexOf(id) >= 0 ? (A.SPIRIT.indexOf(id) < 4 ? "love" : "limit") : V[(i * 7 + 3) % 4]);
+    ok(!A.spirit(sp2, null), "…not when many of them are “No”");
+    // the Avatar: 90 % of ALL practices Yes / Love
+    const n90 = Math.ceil(ids.length * .9), av = mk((id, i) => i < n90 ? (i % 2 ? "yes" : "love") : null), av2 = mk((id, i) => i < n90 - 2 ? "love" : null);
+    eq([A.avatar(av, null), A.avatar(av2, null)], [true, false], "the Avatar: Yes or Love on ≥ 90 % of all practices (unanswered do not count)");
+    const pa = A.pick(K.portrait.compute(av, null), av, null);
+    ok(pa && pa.avatar && pa.type === null && pa.stars[0].bright, "the Avatar's figure: the four symbols, the centre bright, no type");
+    K.i18n.set("ru");
+    eq(A.head(pa, false, K.i18n.t).name, "Аватар", "…named «Аватар»");
+    ok(/^Все четыре стихии · родная: (Вода|Земля|Огонь|Воздух)$/.test(A.head(pa, false, K.i18n.t).rl), "…with the native element");
+    eq([A.head({ id: "earth", type: "metal" }, false, K.i18n.t).rl, A.head({ id: "fire", type: "combustion" }, false, K.i18n.t).rl, A.head({ id: "water", type: "vines" }, false, K.i18n.t).rl, A.head({ id: "air", type: null }, false, K.i18n.t).rl],
+      ["Особый тип: Металл", "Редкий тип: Взрыв", "Обычный тип: Лозы", "Без особого типа"], "the type line");
+    // texts in 7 languages
+    const need = ["av.toAv", "av.mine", "av.their", "av.avMine", "av.avTheir", "av.avatar", "av.native", "av.none", "av.rank.common", "av.rank.special", "av.rank.rare", "card.o.av", "sp.av.h", "sp.av.grp", "sp.av.same", "sp.av.near", "sp.av.far", "help.av_html", "help.compareAv_html"]
+      .concat(A.ELEMENTS.map(e => "av.e." + e), Object.keys(A.RANK).map(t2 => "av.t." + t2));
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); }));
+    eq(miss, [], "every Avatar text exists in all 7 languages (" + need.length + " keys)");
+    const fsx = require("fs"), L = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/ru.lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(L, d) });
+    eq(A.ELEMENTS.map(e => "av.e." + e).concat(Object.keys(A.RANK).map(t2 => "av.t." + t2), ["av.avatar"]).filter(k => !L[k]), [], "the constellation guide describes every element, type and the Avatar");
+    // the portrait: 🌀 Avatar is its own button next to 🗡 Witcher
+    const st = mk((id, i) => i < 320 ? V[(i * 7 + 3) % 4] : null); st.name = "Ann";
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
+    const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+    eq([...g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub):not(.pt-wod-sub) [data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "mode row: ⚔ Wr, 🗡 Witcher, 🌀 Avatar on the left");
+    click(g.w, g.d.querySelector(".pt-mode .pt-avb"));
+    const pv = g.d.querySelector(".pt-av");
+    ok(!!pv && A.ELEMENTS.indexOf(pv.dataset.el) >= 0 && /Ваша стихия/.test(pv.querySelector(".sg-over").textContent) && /^(Обычный тип|Особый тип|Редкий тип|Без особого типа)/.test(pv.querySelector(".sg-rl").textContent)
+      && pv.querySelector(".wod-note").textContent === "Фанатский неофициальный материал." && g.w.localStorage.getItem("checklist-dnd") === "av", "portrait: «Ваша стихия · element · type line», the fan line; remembered as “av”");
+    g.KC.form.drawCard({ sign: true, bars: true, love: true, limits: false, name: true, role: true, exp: true });
+    // the lore tab follows
+    g.w.eval(fsx.readFileSync(__dirname + "/../js/lore/ru.lore.js", "utf8")); g.KC.help.open("lore");
+    ok([...g.d.querySelectorAll("#helpLore .lore-item")].some(it => it.dataset.key === "av.e." + pv.dataset.el), "the constellation guide describes the element");
+    // fix: a ⚔ Wr-family mode with a template applied used to throw (set.has)
+    g.KC.form.setTpl({ id: "tt1616", tid: "tt1616", name: "T", ids: ids.slice(0, 250) });
+    g.KC.form.renderPortrait();
+    ok(!!g.d.querySelector(".pt-av") && !g.errors.length, "with a template applied the Avatar (and ⚔ Wr) portrait still draws: " + g.errors.join());
+    // compare: the pair's elements, Team Avatar
+    const code = (n, u, s2) => K.codec.encode(Object.assign({ name: n, uid: u }, s2), "ru");
+    const codes = [code("Ann", "ANN616", st), code("Bob", "BOB616", varied), code("Cid", "CID616", sp)];
+    const run = (n, local) => { const cp = open("compare", { storage: { local: Object.assign({ "checklist-lang": "ru" }, local), session: {} } });
+      for (let i = 2; i < n; i++) click(cp.w, cp.d.getElementById("addPart"));
+      cp.d.querySelectorAll("#parts textarea").forEach((ta, i) => { ta.value = codes[i]; }); click(cp.w, cp.d.getElementById("cmpBtn")); return cp; };
+    const c2 = run(2, { "checklist-dnd-pair": "av", "checklist-folds": '{"pair":true}' });
+    ok(/Стихии пары/.test(c2.d.getElementById("resHead").textContent) && c2.d.querySelectorAll(".sg-mini.sg-av").length === 2, "pair: «Стихии пары», two element figures");
+    const c3 = run(3, { "checklist-dnd-group": "av", "checklist-folds": '{"group":true}' });
+    const gf = c3.d.querySelector('details.sp-fold[data-fold="group"]');
+    ok(!!gf.querySelector(".sp-avgrp") && /Команда Аватара/.test(gf.textContent) && gf.querySelectorAll(".sp-avgrp li").length === 3, "group: «Команда Аватара», everyone's element");
+    // switched off
+    const off = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(st) }, session: {} },
+      patch: { "core/kc.js": src => src.replace("wi: true, av: true };", "wi: true, av: false };") } });
+    const so = off.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new off.w.Event("toggle"));
+    ok(off.KC.dnd.mode() === "sign" && !off.d.querySelector(".pt-avb") && !off.d.querySelector(".pt-av"), "switched off: no button, a device that chose it sees the constellation");
+    off.KC.help.open("portrait"); ok(!/🌀/.test(off.d.getElementById("help-portrait").textContent), "…and no help paragraph");
+    ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !off.errors.length, "no script errors: " + [f, g, c2, c3, off].map(p => p.errors.join()).join(" | "));
+    _sc.end();
+  }
+
+  S("v617: starter templates; labels of every figure the same size; Avatar types more often");
+  {
+    const _sc = scope();
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const f = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }), K = f.KC, T = K.store.tpl;
+    const ids = new Set(); K.CATS.forEach(c => c.items.forEach(([, id]) => ids.add(id)));
+    eq(K.STARTERS.map(x => x.key), ["vanilla", "rough", "light", "smnosex", "humil", "extra"], "six starter templates (owner's five + Extra)");
+    eq(K.STARTERS.filter(x => x.ids.length < 30 || x.ids.length > 150 || x.ids.some(id => !ids.has(id)) || new Set(x.ids).size !== x.ids.length || !/^[A-Za-z0-9]{6}$/.test(x.tid)).map(x => x.key), [], "each: 30–150 real items, no repeats, a 6-character id");
+    ok(K.STARTERS.find(x => x.key === "rough").ids.indexOf("anal-sex") >= 0, "Rough sex includes anal sex (owner)");
+    ok(["outdoor-sex", "sex-in-snow", "abandoned-building-sex"].every(id => K.STARTERS.find(x => x.key === "extra").ids.indexOf(id) >= 0), "Extra includes sex outdoors (owner: «секс в лесу»)");
+    const need = ["filt.tplStart", "tpl.starter", "help.tplStart_html"].concat(...K.STARTERS.map(x => ["tpl.st." + x.key, "tpl.stDesc." + x.key]));
+    const miss = []; LANGS.forEach(l => need.forEach(k => { if (!K.i18n.has("ui", k, l)) miss.push(l + ":" + k); })); eq(miss, [], "names and descriptions in 7 languages");
+    // the header list: starters first, even with no own templates; nothing stored
+    const sel = f.d.getElementById("tplSel");
+    ok(!sel.hidden && sel.querySelector("optgroup").label === "Стартовые шаблоны" && sel.querySelectorAll("optgroup")[0].querySelectorAll("option").length === 6 && T.list().length === 0, "«Шаблон…» shows the 6 starters first; they are not stored");
+    sel.value = "Srough"; sel.dispatchEvent(new f.w.Event("change"));
+    const vis = () => [...f.d.querySelectorAll("#list .item")].filter(x => x.style.display !== "none" && !x.hidden && !x.closest(".cat[hidden]")).length;
+    const desc = f.d.getElementById("tplDesc");
+    ok(K.form.tpl() && K.form.tpl().id === "Srough" && !desc.hidden && /^Грубый секс — страстный/.test(desc.textContent), "choosing one applies it and shows its description under the intro");
+    sel.value = ""; sel.dispatchEvent(new f.w.Event("change")); ok(desc.hidden && !K.form.tpl(), "«✕ Без шаблона» hides the description");
+    // My lists: starters first, only Share / Use; never deleted
+    click(f.w, f.d.getElementById("mineBtn"));
+    const rows = [...f.d.querySelectorAll("#mineTplList .tpl-starter")];
+    ok(rows.length === 6 && rows.every(r => !r.querySelector('[data-act="del"]') && !r.querySelector('[data-act="rename"]') && r.querySelector('[data-act="use"]') && r.querySelector('[data-act="share"]')), "My lists: the six starters with Use and Share only");
+    ok(/Стартовый/.test(rows[0].textContent) && !/1970/.test(rows[0].textContent), "…marked «Стартовый», no date");
+    click(f.w, rows[1].querySelector('[data-act="share"]'));
+    const link = f.d.getElementById("shareLink").value || f.d.getElementById("shareLink").textContent, dec = K.codec.decode(link.split("#")[1] || link);
+    ok(dec.tpl && dec.tpl.id === "Srough" && dec.tpl.name === "Rough sex" && dec.tpl.ids.length === 67, "sharing a starter: an empty template link with its id and the Latin name");
+    const r2 = open("form", { hash: link.split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } });
+    const r3 = open("form", { storage: r2.storage() });
+    ok(r3.KC.store.tpl.list().length === 0 && r3.KC.form.tpl() && r3.KC.form.tpl().id === "Srough" && /Грубый секс/.test(r3.d.getElementById("tplDesc").textContent), "the recipient's list opens by it (with its description), without a stored copy — the starter is already there");
+    // labels: one size in every mode (the figure shrinks, not the text)
+    const st = K.store.blank(); [...ids].slice(0, 330).forEach((id, i) => { st.items[id] = { interest: ["limit", "maybe", "yes", "love"][(i * 7 + 3) % 4] }; }); st.name = "Ann";
+    const fsz = {}; ["wi", "av", "1", "wh", "wod"].forEach(m => {
+      const g = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": m, "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
+      const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+      const sv = g.d.querySelector(".pt-sign svg"), vb = sv.getAttribute("viewBox").split(" ").map(Number), mm = (sv.getAttribute("style") || "").match(/\* ([\d.]+)\)/);
+      fsz[m] = mm ? +(+mm[1] / vb[2]).toFixed(5) : null; });
+    ok(Object.values(fsz).every(v => v && Math.abs(v - fsz.wi) < 1e-4), "the same pixels per unit (so the same label size) in every mode: " + JSON.stringify(fsz));
+    // Avatar: special ≈ 35 %, rare ≈ 7–8 % (thresholds)
+    eq([K.av.T.healing, K.av.T.metal, K.av.T.lightning, K.av.T.blood, K.av.T.lava, K.av.T.combustion], [.35, .3, 58, .55, 20, 1.1], "Avatar type thresholds (v620: re-fitted to the owner's known people; lava = sex + fluids)");
+    ok(!f.errors.length && !r2.errors.length && !r3.errors.length, "no script errors: " + f.errors.concat(r2.errors, r3.errors).join(" | "));
+    _sc.end();
+  }
+
+  S("v618: the portrait judges the whole list (not the template); the guide without «Созвездие»; lore from English");
+  {
+    const _sc = scope();
+    const V = ["limit", "maybe", "yes", "love"], ids = [];
+    const f0 = open("form"); f0.KC.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const st = f0.KC.store.blank(); ids.forEach((id, i) => { st.items[id] = { interest: V[(i * 7 + 3) % 4] }; }); st.name = "Ann";
+    const sig = {};
+    ["sign", "1", "wod", "wh", "wi", "av"].forEach(m => {
+      const g = open("form", { storage: { local: { "checklist-lang": "ru", "checklist-dnd": m, "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
+      const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
+      const read = () => { const p = g.d.querySelector(".pt-sign"); return p ? p.querySelector(".sg-name").textContent + "|" + ((p.querySelector(".sg-rl") || {}).textContent || "") + "|" + p.querySelector(".sg-sub").textContent : ""; };
+      const bars = () => [...g.d.querySelectorAll("#portraitBody .pt-row")].map(x => x.textContent).join("/");
+      const before = read(), b0 = bars();
+      g.KC.form.setTpl({ id: "Srough", name: "R", ids: g.KC.STARTERS[1].ids.slice() }); g.KC.form.renderPortrait();
+      const v = g.d.getElementById("view"); v.value = "positive"; v.dispatchEvent(new g.w.Event("change")); g.KC.form.renderPortrait();
+      sig[m] = before && before === read() && b0 === bars();
+      if (m === "av") {
+        g.w.eval(require("fs").readFileSync(__dirname + "/../js/lore/ru.lore.js", "utf8")); g.KC.help.open("lore");
+        const lb = g.d.getElementById("helpLore");
+        ok(!lb.querySelector('[data-mode="sign"]') && !!lb.querySelector('[data-mode="dnd"]'), "the constellation guide has no «✦ Созвездие» button (nothing to describe there)");
+      }
+    });
+    eq(sig, { sign: true, "1": true, wod: true, wh: true, wi: true, av: true }, "with a template applied and an answer filter on, the portrait stays the same in every mode");
+    // lore files: English is the source, every language complete, the Avatar's spirit energy without a note about the site
+    const fsx = require("fs"), L = {};
+    ["en", "ru"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(o, d) }); L[l] = o; });
+    ok(/written in English first/.test(fsx.readFileSync(__dirname + "/../js/lore/ru.lore.js", "utf8")) && !/this site/i.test(JSON.stringify(L.en)), "lore: English first, no remarks about the site inside the texts");
+    _sc.end();
+  }
+
+  S("v619: Avatar re-fitted (owner's known people): Vines = ropes, Sand = darkness, Lava = raw sex, Metal = iron over darkness");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, A = K.av, ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const base = () => { const st = K.store.blank(); ids.forEach((id, i) => { st.items[id] = { interest: ["limit", "maybe", "yes", "love"][(i * 7 + 3) % 4] }; }); return st; };
+    const set = (st, list, v) => { list.forEach(id => { st.items[id] = { interest: v }; }); return st; };
+    const CI = k => K.clusters.ids()[k];
+    const sand = set(set(base(), CI("dark"), "love"), CI("iron"), "maybe");
+    ok(A.typeOf("earth", K.portrait.compute(sand, null), sand, null) === "sand", "Earth with darkness loved (and iron not above it) → Sand");
+    const metal = set(set(base(), CI("iron"), "love"), CI("dark"), "limit");
+    ok(A.typeOf("earth", K.portrait.compute(metal, null), metal, null) === "metal", "Earth with iron loved over darkness → Metal");
+    const vines = set(set(base(), CI("rope"), "love"), CI("home"), "limit");
+    ok(A.typeOf("water", K.portrait.compute(vines, null), vines, null) === "vines", "Water with ropes loved → Vines");
+    const sexIds = K.CATS.find(c => c.id === "sex-penetration").items.map(x => x[1]);
+    const lava = set(set(set(base(), ids, "maybe"), sexIds, "love"), CI("dark"), "limit");
+    ok(A.typeOf("earth", K.portrait.compute(lava, null), lava, null) === "lava", "Earth with sex far above the rest → Lava");
+    eq(Object.keys(A.PROF).join(), "water,earth,fire,air", "four profiles");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v620: Avatar re-fit: hunt cluster in Earth, Lava = sex + fluids deviations ≥ 20");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, A = K.av, ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const set = (st, list, v) => { list.forEach(id => { st.items[id] = { interest: v }; }); return st; };
+    const grp = g => K.CATS.find(c => c.id === g).items.map(x => x[1]);
+    ok(/hunt1/.test(A.CPROF.earth) && !/hunt/.test(A.CPROF.air), "hunt cluster counts for Earth");
+    eq(A.T.lava, 20, "lava threshold 20");
+    const st = set(set(set(K.store.blank(), ids, "maybe"), grp("sex-penetration").slice(0, Math.ceil(grp("sex-penetration").length * .6)), "love"), grp("bodily-fluids"), "yes");
+    const d = K.portrait.compute(st, null), dv = K.dnd.devs(d).dev;
+    eq(A.typeOf("earth", d, st, null), (dv["sex-penetration"] || 0) + (dv["bodily-fluids"] || 0) >= 20 ? "lava" : A.typeOf("earth", d, st, null), "Lava follows sex + fluids");
+    ok((dv["sex-penetration"] || 0) < 20 || A.typeOf("earth", d, st, null) === "lava", "lava reachable without the sex group alone being ≥ 20");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v621: shipped with new things locked (KC.FEATURES): extended list buttons, ⚔ Wr, 🗡 Witcher, 🌀 Avatar");
+  {
+    const _sc = scope();
+    const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
+    open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
+    const f = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), [], "every new switch is off in the shipped build");
+    ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
+    const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
+    ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wrb, .pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no ⚔ Wr / 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
+    K.dnd.setMode("wi"); eq(K.dnd.mode(), "sign", "choosing a locked mode stores nothing");
+    ok(!/data-mode="(wr|wh|leg|ow|wi|av)"/.test(K.lore.switchHTML()), "constellation guide: no locked mode buttons");
+    const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wr|wh|leg|ow|wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
+    K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
+    ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb) && !/⚔ Wr/.test(hb), "help: no extended-list, Wr or Avatar paragraphs");
+    ok(!hn.querySelector("[data-feat]") && !/Расширенная анкета|✦ Хочу|Обе роли/.test(hn.textContent) && /Кнопки «Очистить» больше нет/.test(hn.textContent) && /Стартовые шаблоны/.test(hn.textContent) && /^5 октября 2026$/.test(hn.querySelector("h5").textContent),
+      "What's new: the 5 Oct entry without the extended list (its lines stay in the code), the Clear line and starter templates shown");
+    ok(/data-feat=\\"ext/.test(require("fs").readFileSync(__dirname + "/../js/lang/ru.ui.js", "utf8")), "…the extended-list lines are kept in the texts");
+    const e0 = open("form", { locked: true }); e0.KC.help.open("lore"); ok(!/Wr/.test(e0.d.getElementById("helpLore").textContent) && /Мир Тьмы\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names no ⚔ Wr");
+    f.KC.store.mine.sync(f.KC.form.state); f.d.getElementById("mineBtn").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true }));
+    ok(f.d.getElementById("mineList").textContent.length > 0 && !/Обычная/.test(f.d.getElementById("mineList").textContent), "My lists: no «Обычная» mark while the extended list is locked");
+    // an extended list made before the lock still opens and keeps its switch (way back to the plain list)
+    const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
+    const g = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    ok(!g.d.getElementById("extToggleBox").hidden && !g.d.getElementById("roleView").hidden, "an extended list keeps ⇅ and the role filter");
+    const c = open("compare", { locked: true }); ok(!c.errors.length && !/data-mode="(wr|av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
+    const u = open("form"); u.KC.help.open("news"); ok(/Расширенная анкета/.test(u.d.getElementById("helpNews").textContent) && !/Кнопки «Очистить» больше нет/.test(u.d.getElementById("helpNews").textContent), "unlocked: the extended-list lines come back, the stand-in line goes");
+    ok(!f.errors.length && !g.errors.length && !u.errors.length, "no script errors");
     _sc.end();
   }
 

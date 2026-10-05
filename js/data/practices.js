@@ -14,6 +14,7 @@ KC.CATS = [
    [457,"ear-licking"],
    [4,"spooning"],
    [5,"dirty-talk"],
+   [502,"foreign-language-talk"],
    [6,"using-real-names"],
    [7,"sleepover"],
    [8,"aftercare"],
@@ -201,6 +202,7 @@ KC.CATS = [
    [130,"erotic-dancing"],
    [131,"eye-contact-rules"],
    [132,"gor-training"],
+   [504,"dressage-training"],
    [133,"harems"],
    [134,"chauffeuring"],
    [135,"manicures"],
@@ -374,9 +376,11 @@ KC.CATS = [
    [254,"forced-servitude"],
    [255,"homage-with-tongue"],
    [493,"floor-licking"],
+   [500,"forced-floor-eating"],
    [256,"shaving-head-hair"],
    [257,"shaving-body-hair"],
    [258,"forced-unpleasant-food"],
+   [503,"pet-food-eating"],
    [376,"forced-drinking-beer-cider"],
    [259,"mindbreak"],
    [260,"depersonalisation"],
@@ -418,6 +422,7 @@ KC.CATS = [
    [290,"anal-plug-large"],
    [291,"anal-plug-public"],
    [292,"double-penetration"],
+   [505,"double-penetration-one-hole"],
    [293,"triple-penetration"],
    [294,"object-insertion"],
    [473,"bottle-neck-vaginal"],
@@ -504,6 +509,7 @@ KC.CATS = [
    [354,"cum-in-vagina"],
    [355,"cum-in-ass"],
    [356,"creampie"],
+   [501,"sucking-cum-from-vagina"],
    [357,"rimming"],
    [476,"urination-in-front"],
    [491,"omorashi"],
@@ -536,9 +542,9 @@ KC.CATS = [
 ];
 
 /* Items with code >= NEW_FROM_CODE get a green "new" dot in the form.
-   418 = everything added after v533 (codes 0–417); earlier it was 371 (after the v371 release).
+   497 (v615, owner): only the items after 496; earlier 418 (everything added after v533) and 371.
    Raise it to retire the dots. */
-KC.NEW_FROM_CODE = 418;
+KC.NEW_FROM_CODE = 497;
 
 /* Item ids used by the earliest versions (before v371), when ids were made from the English name.
    Answers saved under these ids in browsers are moved to the current item on load. */

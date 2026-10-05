@@ -7,14 +7,23 @@
    DnD mode (v591, KC.dnd): a switch above the picture shows a D&D class, subclass and joke alignment instead of
    the sign; the picture card follows the mode shown. Grey stars of a class figure only shape the drawing.
    World of Darkness mode (v597, KC.wod): the third button; a second row picks the line (vampire, werewolf, fey,
-   demon); the figure is the clan / tribe / kith / house, the lines under it come from KC.wod.details. */
+   demon); the figure is the clan / tribe / kith / house, the lines under it come from KC.wod.details.
+   Servant of the Chaos gods (v610, KC.wr): the fourth button; the figure is the patron's sign, under it only
+   "Servant of <god>", the main groups and the "unofficial fan-made material" line. */
 (function (KC) {
   const F = KC.form, t = (k, v) => KC.i18n.t(k, v), esc = KC.esc;
   const SITE = (KC.migrate ? KC.migrate.NEW_URL : "").replace(/^https?:\/\//, "").replace(/\/$/, "");
   const sec = KC.$("portraitSection"), body = KC.$("portraitBody");
   let ptLang = null;   /* the language the open portrait was drawn in */
 
-  const data = () => KC.portrait.compute(F.shown(), F.tplSet());
+  /* v613: an extended list has a portrait per role — PTR is the role being drawn ("t" | "b"); everything below reads
+     the list through shownR(), the plain list of that role (core/ext.js). A plain list: PTR is ignored. */
+  let PTR = null, CARD_R = "t";
+  /* v618 (owner): the portrait (every mode, the card, the PDF page, the constellation guide) judges the WHOLE list — never
+     only the items of an applied template or of a filter */
+  const whole = () => F.state;
+  const shownR = () => { const s = whole(); return KC.ext.isExt(s) ? KC.ext.view(s, PTR || "t") : s; };
+  const data = () => KC.portrait.compute(shownR(), null);
   const pctText = p => (p === null ? "—" : p + "%");
   const metaBits = st => ["role", "exp"].map(f => st.meta[f] ? KC.i18n.optLabel(f, st.meta[f]) : "").filter(Boolean);
 
@@ -23,19 +32,23 @@
   const short = id => t("pt.s." + id);
   const spark = (x, y, r) => "M" + x + " " + (y - r) + "Q" + x + " " + y + " " + (x + r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y + r) + "Q" + x + " " + y + " " + (x - r) + " " + y + "Q" + x + " " + y + " " + x + " " + (y - r) + "Z";
   const seeded = n => { let x = n; return () => (x = (x * 16807) % 2147483647) / 2147483647; };
-  const signSub = sg => sg.kind === "even" ? t("sign.even") : sg.main.map(m => short(m.id)).join(" + ");
+  const signSub = sg => sg.kind === "even" ? KC.signs.evenText(sg) : sg.main.map(m => short(m.id)).join(" + ");
   /* the figure shown: the DnD class or the World of Darkness subtype when that mode is on, else the sign */
   const mode = () => KC.dnd ? KC.dnd.mode() : "sign";
   const dndOn = () => mode() === "dnd";
-  const figOf = d => mode() === "dnd" ? KC.dnd.pick(d) : mode() === "wod" ? KC.wod.pick(d) : KC.signs.pick(d);
+  /* v610: the modes that need the list itself, not only the portrait (KC.dnd.WR) */
+  /* v616: the ⚔ Wr / Witcher / Avatar modules take the template as a Set; since v618 the portrait never applies one (null) */
+  const figOf = d => mode() === "dnd" ? KC.dnd.pick(d) : mode() === "wod" ? KC.wod.pick(d) : KC.dnd.isWr(mode()) ? KC[mode()].pick(d, shownR(), null) : KC.signs.pick(d);
   /* the title lines of a figure: over-title, name, sub-line and (DnD) the alignment line */
   function headOf(sg) {
+    if (KC.dnd.wrOf(sg)) { const h = KC.dnd.wrOf(sg).head(sg, F.viewingShared, t);
+      return { over: h.over, name: h.name, rl: h.rl, sub: signSub(sg), al: null }; }
     if (sg.wod) {
-      const dt = KC.wod.details(F.shown(), data(), F.tplSet(), sg.line, sg.id), ln = KC.wod.lines(dt, t);
+      const dt = KC.wod.details(shownR(), data(), null, sg.line, sg.id), ln = KC.wod.lines(dt, t);
       return { over: t((F.viewingShared ? "wod.of." : "wod.mine.") + sg.line), name: t("wod." + sg.line + "." + sg.id), sub: ln.sub + " · " + signSub(sg), rl: ln.rl, al: null, dt };
     }
     if (!sg.dnd) return { over: t(F.viewingShared ? "sign.of" : "sign.mine"), name: t("sign." + sg.id), sub: signSub(sg), al: null };
-    const st = F.shown(), set = F.tplSet(), al = KC.dnd.alignment(st, data(), set), race = KC.dnd.race(st, set), lv = KC.dnd.level(st, set);
+    const st = shownR(), set = null, al = KC.dnd.alignment(st, data(), set), race = KC.dnd.race(st, set), lv = KC.dnd.level(st, set);
     return { over: t(F.viewingShared ? "dnd.of" : "dnd.mine"), name: t("dnd.c." + sg.cls), sub: t("dnd.s." + sg.cls + "." + sg.sub) + " · " + signSub(sg),
       rl: t("dnd.r." + race) + " · " + t("dnd.lvl", { n: lv }), race, lv,
       al: { name: t("dnd.al." + al), quip: t("dnd.aq." + al) }, alKey: al };
@@ -50,22 +63,33 @@
   function signSVG(d) {
     const sg = figOf(d); if (!sg) return "";
     const hd = headOf(sg);
-    const W = 320, H = 320, box = 196, ox = (W - box) / 2, oy = (H - box) / 2, k = box / 100, rnd = seeded(9);
-    const X = st => ox + st.x * k, Y = st => oy + st.y * k;
+    const W = 320, H = 320, rnd = seeded(9);
     /* label width: CJK characters are about twice as wide as Latin, Cyrillic or Thai ones */
     const textW = s2 => Array.from(s2).reduce((a, ch) => a + (/[⺀-鿿가-힯＀-￯]/.test(ch) ? 13 : /[ัิ-ฺ็-๎]/.test(ch) ? 0 : 7.3), 0);
-    const pts = sg.stars.map(st => ({ x: X(st), y: Y(st), r: starR(st, 10), bright: st.bright }));
     const sizes = sg.stars.map(st => st.s ? { w: Math.max(textW(short(st.s.id)), 30) + 2, h: 30 } : { w: 1, h: 1 });
-    const L = KC.signs.placeLabels(pts, segsOf(sg, X, Y), sizes, W, H);
-    /* only the part of the sky the figure uses: no empty band above and below */
-    const bb = KC.signs.bbox(pts.map(p => ({ x: p.x, y: p.y, r: p.bright ? 15 : p.r })), L, 10);
-    let g = '<svg viewBox="' + bb.x.toFixed(1) + " " + bb.y.toFixed(1) + " " + bb.w.toFixed(1) + " " + bb.h.toFixed(1) + '" style="width:' + Math.min(100, bb.w / W * 118).toFixed(1) + '%" role="img" aria-label="' + esc(hd.name) + '">';
+    /* v617 (owner): the labels are always the same size; when the figure with its labels is too wide for the box, the
+       FIGURE is drawn smaller and the labels placed again (before, the whole picture shrank, labels included, so some
+       modes had smaller text than others). The picture's width = its share of the widest allowed figure (W / 1.18) of
+       min(100 %, 420 px), so one unit of the drawing is the same number of pixels in every mode. */
+    let box = 196, ox, oy, k, X, Y, pts, L, bb;
+    for (let pass = 0; pass < 4; pass++) {
+      ox = (W - box) / 2; oy = (H - box) / 2; k = box / 100;
+      X = st => ox + st.x * k; Y = st => oy + st.y * k;
+      pts = sg.stars.map(st => ({ x: X(st), y: Y(st), r: starR(st, 10), bright: st.bright }));
+      L = KC.signs.placeLabels(pts, segsOf(sg, X, Y), sizes, W, H);
+      /* only the part of the sky the figure uses: no empty band above and below */
+      bb = KC.signs.bbox(pts.map(p => ({ x: p.x, y: p.y, r: p.bright ? 15 : p.r })), L, 10);
+      const over = bb.w / W * 118 / 100; if (over <= 1.001) break;
+      box = Math.max(110, box - (bb.w - W / 1.18) - 2);
+    }
+    let g = '<svg viewBox="' + bb.x.toFixed(1) + " " + bb.y.toFixed(1) + " " + bb.w.toFixed(1) + " " + bb.h.toFixed(1) + '" style="width:calc(min(100%, 420px) * ' + Math.min(1, bb.w / (W / 1.18)).toFixed(3) + ')" role="img" aria-label="' + esc(hd.name) + '">';
     let dust = ""; for (let i = 0; i < 50; i++) dust += '<circle cx="' + (bb.x + rnd() * bb.w).toFixed(1) + '" cy="' + (bb.y + rnd() * bb.h).toFixed(1) + '" r="' + (rnd() * .9 + .3).toFixed(2) + '"/>';
     g += '<g fill="var(--dust)">' + dust + "</g>";
     g += '<g fill="none" stroke="var(--ink-line)" stroke-width="1.1" stroke-linejoin="round">' + sg.lines.map(l => { const dash = l[0] === "d", q = dash ? l.slice(1) : l;
       return '<polyline points="' + q.map(i => X(sg.stars[i]).toFixed(1) + "," + Y(sg.stars[i]).toFixed(1)).join(" ") + '"' + (dash ? ' stroke-dasharray="3 4"' : "") + "/>"; }).join("") + "</g>";
     sg.stars.forEach((st, i) => {
       const x = pts[i].x, y = pts[i].y, v = st.s ? st.s.pct : null;
+      if (st.hid) return;   /* v616: a hidden vertex (only shapes a line) */
       if (st.grey) g += '<circle class="sg-grey" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2" fill="var(--muted)" opacity=".55"/>';
       else if (st.bright) g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="15" fill="var(--star)" opacity=".16"/><path d="' + spark(x, y, 10) + '" fill="var(--star)"/>';
       else if (v === null) g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="none" stroke="var(--muted)" stroke-width="1"/>';
@@ -79,12 +103,55 @@
         + '<tspan x="' + cx + '" dy="15" font-weight="700" fill="' + (st.bright ? "var(--star)" : v === null ? "var(--muted)" : "var(--accent)") + '">' + pctText(v) + "</tspan></text>";
     });
     const attrs = sg.dnd ? ' data-cls="' + sg.cls + '" data-al="' + hd.alKey + '" data-race="' + hd.race + '" data-lv="' + hd.lv + '"'
-      : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : "";
-    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
+      : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : sg.wr ? ' data-god="' + sg.id + '" data-mut="' + sg.mut + '"'
+      : sg.wh ? ' data-faction="' + sg.id + '"' : sg.leg ? ' data-legion="' + sg.id + '"' : sg.ow ? ' data-race="' + sg.id + '"' : sg.wi ? ' data-school="' + sg.id + '" data-wsign="' + sg.wsign + '"'
+      : sg.av ? ' data-el="' + sg.id + '" data-type="' + (sg.type || "") + '"' + (sg.avatar ? ' data-avatar="1"' : "") : "";
+    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
       + (hd.rl ? '<div class="sg-rl">' + esc(hd.rl) + "</div>" : "") + '<div class="sg-sub">' + esc(hd.sub) + "</div>"
-      + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : "") + "</div>";
+      + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : KC.dnd.wrOf(sg) ? KC.wr.noticeHTML() : "") + "</div>";
   }
   F.signOf = () => KC.signs.pick(data());
+
+  /* v613: what the "Описание созвездий" tab describes (core/lore.js) — the items of the figure on the portrait now,
+     in the mode on now; an extended list: one group per role. Keys = the interface keys of the names. */
+  const AL9 = { LG: 1, NG: 1, CG: 1, LN: 1, NN: 1, CN: 1, LE: 1, NE: 1, CE: 1 };
+  function loreOf(sg) {
+    const hd = headOf(sg), k = key => ({ key }), kv = (key, n) => ({ key, vars: { n } });
+    if (sg.dnd) return [k("dnd.c." + sg.cls), k("dnd.s." + sg.cls + "." + sg.sub), k("dnd.r." + hd.race)].concat(AL9[hd.alKey] ? [k("dnd.al." + hd.alKey)] : []);
+    if (sg.wod) {
+      const d = hd.dt, out = [k("wod." + sg.line + "." + sg.id)];
+      if (sg.line === "vamp") return out.concat(d.sect ? [k("wod.sect." + d.sect)] : [], [kv("wod.gen", d.gen), k("wod.path." + (d.hum !== undefined ? "humanity" : d.path))]);
+      if (sg.line === "wolf") return out.concat([k("wod.breed." + d.breed), k("wod.aus." + d.aus), k("wod.rank." + d.rank), kv("wod.rage", d.rage), kv("wod.gnosis", d.gnosis)]);
+      if (sg.line === "fey") return out.concat(d.court ? [k("wod.court." + d.court), k("wod.house." + d.house)] : [], [k("wod.seem." + d.seem), kv("wod.glamour", d.glamour), kv("wod.banality", d.banality)]);
+      return out.concat([k("wod.demon.a." + sg.id)], d.fac ? [k("wod.fac." + d.fac)] : [], [k("wod.lore." + d.lore), kv("wod.faith", d.faith)]);
+    }
+    if (sg.wr) return [k("wr.of." + sg.id), kv("wr.mut", sg.mut)];
+    if (sg.wh) return [k("wh.f." + sg.id)].concat(sg.waaagh ? [{ key: "wh.waaagh", vars: { w: KC.wh.waaaghText(sg.waaagh) } }] : []);
+    if (sg.leg) return KC.leg.LEGIONS.indexOf(sg.id) >= 0 ? [k("leg.l." + sg.id)] : [{ key: "leg.lost", vars: { n: KC.leg.NUM[sg.id] } }];
+    if (sg.ow) return [k("ow.r." + sg.id)].concat(sg.grudges !== null && sg.grudges !== undefined ? [kv("ow.grudges", sg.grudges)] : []);
+    if (sg.wi) return [k("wi.s." + sg.id), k("wi.g." + sg.wsign)];
+    if (sg.av) return sg.avatar ? [k("av.avatar"), k("av.e." + sg.id)] : [k("av.e." + sg.id)].concat(sg.type ? [k("av.t." + sg.type)] : []);
+    return [];   /* the constellation itself: our own signs, nothing to look up */
+  }
+  KC.lore.provider = function () {
+    const s = whole(), out = [];
+    (KC.ext.isExt(s) ? KC.ext.R : [null]).forEach(r => {
+      PTR = r; const d = data(); const sg = d.answered ? figOf(d) : null;
+      if (sg) out.push({ title: r ? t("ext.row." + r) : "", items: loreOf(sg) });
+    });
+    PTR = null; return out;
+  };
+  /* v615 (owner): the mode buttons inside the guide — the same switch, the same storage (the portrait's choice) */
+  /* v618 (owner): without «✦ Созвездие» — our own signs have nothing to describe */
+  KC.lore.switchHTML = () => (KC.dnd && KC.wod && Object.keys((whole() || {}).items || {}).length
+    ? KC.wod.switchHTML().replace(/<button[^>]*data-mode="sign"[^>]*>[^<]*<\/button>/, "") : "");
+  KC.lore.click = function (e) {
+    const m = e.target.closest(".pt-mode [data-mode]");
+    if (m) { const want = m.dataset.mode; if (want !== mode()) { KC.dnd.setMode(want); if (want !== "sign") KC.stats.event(want); F.renderPortrait(); } return true; }
+    const w = e.target.closest(".pt-mode [data-wod]");
+    if (w) { if (w.dataset.wod !== KC.wod.sub()) { KC.wod.setSub(w.dataset.wod); F.renderPortrait(); } return true; }
+    return false;
+  };
 
   /* the "✦ Constellation | 🎲 DnD | 🦇 World of Darkness" switch above the picture (only when there is a picture) */
   function modeSwitch(d) {
@@ -100,23 +167,41 @@
   F.renderPortrait = function () {
     title(); ptLang = KC.i18n.lang;
     if (!sec.open) return;                      /* drawn when opened: nothing to compute while folded */
-    const d = data(), st = F.shown();
+    if (KC.ext.isExt(whole())) { renderExt(); return; }
+    const d = data(), st = whole();
     if (!d.answered) { body.innerHTML = '<p class="pt-empty">' + esc(t("pt.empty")) + "</p>"; return; }
     const meta = metaBits(st);
-    let h = (meta.length ? '<div class="pt-meta">' + esc(meta.join(" · ")) + "</div>" : "")
-      + modeSwitch(d)
-      + signSVG(d)
+    body.innerHTML = (meta.length ? '<div class="pt-meta">' + esc(meta.join(" · ")) + "</div>" : "") + modeSwitch(d) + one(d, st, "")
+      + '<button class="btn ghost" id="ptCard" type="button">' + esc(t("pt.card")) + "</button>";
+  };
+  /* v613: an extended list — the mode switch once, then "↑ Верх" and "↓ Низ", each with its own sign, bars and
+     favourites, and its own picture card */
+  function renderExt() {
+    let h = "", sw = "";
+    KC.ext.R.forEach(r => {
+      PTR = r; const d = data(), st = shownR();
+      if (!sw && d.answered) sw = modeSwitch(d);
+      h += '<div class="pt-role" data-r="' + r + '"><h4 class="pt-role-h">' + esc(t("ext.row." + r)) + "</h4>"
+        + (d.answered ? one(d, st, r) + '<button class="btn ghost pt-card-r" type="button" data-card="' + r + '">' + esc(t("ext.card." + r)) + "</button>"
+          : '<p class="pt-empty">' + esc(t("ext.ptEmpty")) + "</p>") + "</div>";
+    });
+    PTR = null;
+    body.innerHTML = sw + h;
+  }
+  /* the sign, the bars and the favourites of one portrait */
+  function one(d, st, r) {
+    let h = signSVG(d)
       + '<div class="pt-bars">' + d.sections.map(s => '<div class="pt-row"><span class="pt-name">' + esc(KC.portrait.label(s.id)) + "</span>"
         + '<span class="pt-bar"><i style="width:' + (s.pct || 0) + '%"></i></span><span class="pt-pct">' + pctText(s.pct) + "</span></div>").join("") + "</div>"
       + '<p class="pt-how">' + esc(t("pt.how")) + "</p>";
     if (d.love.length) h += '<h4 class="pt-h">' + esc(t("pt.love", { n: d.love.length })) + '</h4><div class="pt-chips">'
       + d.love.map(id => "<span>" + esc(KC.i18n.item(id).name) + "</span>").join("") + "</div>";
-    h += '<button class="btn ghost" id="ptCard" type="button">' + esc(t("pt.card")) + "</button>";
-    body.innerHTML = h;
-  };
+    return h;
+  }
   sec.addEventListener("toggle", () => { if (sec.open) { KC.stats.event("portrait"); F.renderPortrait(); } });
   body.addEventListener("click", e => {
-    if (e.target.closest("#ptCard")) { openCard(); return; }
+    if (e.target.closest("#ptCard")) { CARD_R = "t"; openCard(); return; }
+    const cr = e.target.closest("[data-card]"); if (cr) { CARD_R = cr.dataset.card; openCard(); return; }
     const m = e.target.closest(".pt-mode [data-mode]");
     if (m) { const want = m.dataset.mode; if (want !== mode()) { KC.dnd.setMode(want); if (want !== "sign") KC.stats.event(want); F.renderPortrait(); } return; }
     const w = e.target.closest(".pt-mode [data-wod]");
@@ -155,7 +240,10 @@
   /* the sign on the card: name, groups, the drawing with a label at every star; returns the new y */
   function cardSign(ctx, sg, C, y, W, M, SANS, SERIF, big) {
     const hd = headOf(sg);
-    ctx.textAlign = "center"; ctx.fillStyle = C.star; ctx.font = "600 92px " + SERIF; ctx.fillText(fit(ctx, hd.name, W - 2 * M), W / 2, y + 70);
+    /* v610: a long name ("Servant of the Horned Rat") gets a smaller font before it is cut with "…" */
+    let fs = 92; ctx.font = "600 " + fs + "px " + SERIF;
+    while (fs > 60 && ctx.measureText(hd.name).width > W - 2 * M) { fs -= 4; ctx.font = "600 " + fs + "px " + SERIF; }
+    ctx.textAlign = "center"; ctx.fillStyle = C.star; ctx.fillText(fit(ctx, hd.name, W - 2 * M), W / 2, y + 70);
     if (hd.rl) {   /* DnD: race · level, the subclass, the alignment and its joke */
       ctx.fillStyle = C.ink; ctx.font = "600 40px " + SANS; ctx.fillText(fit(ctx, hd.rl, W - 2 * M), W / 2, y + 124);
       ctx.font = "500 32px " + SANS; ctx.fillText(fit(ctx, hd.sub, W - 2 * M), W / 2, y + 172);
@@ -180,6 +268,7 @@
     const spk = (x, yy, r) => { ctx.beginPath(); ctx.moveTo(x, yy - r); ctx.quadraticCurveTo(x, yy, x + r, yy); ctx.quadraticCurveTo(x, yy, x, yy + r); ctx.quadraticCurveTo(x, yy, x - r, yy); ctx.quadraticCurveTo(x, yy, x, yy - r); ctx.fill(); };
     sg.stars.forEach((st, i) => {
       const x = X(st), yy = Y(st), v = st.s ? st.s.pct : null;
+      if (st.hid) return;
       if (st.grey) { ctx.globalAlpha = .55; ctx.fillStyle = C.muted; ctx.beginPath(); ctx.arc(x, yy, 6, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
       else if (st.bright) { ctx.globalAlpha = .18; ctx.fillStyle = C.star; ctx.beginPath(); ctx.arc(x, yy, 44, 0, 7); ctx.fill(); ctx.globalAlpha = 1; spk(x, yy, 30); }
       else if (v === null) { ctx.strokeStyle = C.muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, yy, 8, 0, 7); ctx.stroke(); }
@@ -200,7 +289,7 @@
     const W = 1080, H = 1920, M = 70, IW = W - M * 2;
     const c = document.createElement("canvas"); c.width = W; c.height = H;
     const ctx = c.getContext("2d"); if (!ctx) return c;
-    const d = data(), st = F.shown();
+    const d = data(), st = shownR();
     const SANS = 'Inter, "PingFang TC", "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans Thai", system-ui, sans-serif';
     const SERIF = 'Fraunces, Georgia, "Noto Serif CJK JP", serif';
     const root = document.documentElement.dataset.theme;
@@ -224,7 +313,7 @@
     let bottom = H - 150;
     /* the sign and the percentages can be switched on and off separately (v587, owner) */
     const sg = o.sign ? figOf(d) : null;   /* the mode shown on the page: sign, DnD class or World of Darkness */
-    if (sg && sg.wod) bottom -= 40;   /* room for the "not official" line */
+    if (sg && (sg.wod || KC.dnd.wrOf(sg))) bottom -= 40;   /* room for the "not official" line */
     if (sg) y = cardSign(ctx, sg, C, y, W, M, SANS, SERIF, !o.bars);
     if (o.bars) {
       const rows = d.sections, rh = sg ? 44 : 52, nameW = 470, barX = M + nameW + 20, barW = IW - nameW - 20 - 110;
@@ -270,13 +359,15 @@
       });
       y += 24;
     });
-    if (sg && sg.wod) {   /* "not official World of Darkness material", small, above the footer */
+    if (sg && (sg.wod || KC.dnd.wrOf(sg))) {   /* "not official … material", small, above the footer */
       ctx.fillStyle = C.muted; ctx.font = "500 22px " + SANS; ctx.textAlign = "center";
-      ctx.fillText(fit(ctx, t("wod.notOfficial"), IW), W / 2, H - 130); ctx.textAlign = "left";
+      ctx.fillText(fit(ctx, t(sg.wod ? "wod.notOfficial" : "wr.notOfficial"), IW), W / 2, H - 130); ctx.textAlign = "left";
     }
     ctx.fillStyle = C.muted; ctx.font = "500 32px " + SANS; ctx.textAlign = "center"; ctx.fillText("✦ " + KC.BRAND + (SITE ? " · " + SITE : ""), W / 2, H - 70); ctx.textAlign = "left";
     return c;
   };
+  /* v613: the card of an extended list is drawn for the role whose button was pressed */
+  { const draw = F.drawCard; F.drawCard = function (o) { const keep = PTR; PTR = CARD_R; try { return draw(o); } finally { PTR = keep; } }; }
 
   let previewUrl = null;
   function preview() {
@@ -312,8 +403,14 @@
   });
 
   /* ---------- the PDF page (first page when "Add the portrait" is ticked) ---------- */
+  /* v613: an extended list gives two pages, one per role */
   F.buildPortraitSheet = function () {
-    const d = data(), st = F.shown(), meta = metaBits(st);
+    if (!KC.ext.isExt(whole())) return sheet("");
+    const out = KC.ext.R.map(r => { PTR = r; const s2 = data().answered ? sheet(r) : null; return s2; }).filter(Boolean);
+    PTR = null; return out;
+  };
+  function sheet(r) {
+    const d = data(), st = shownR(), meta = r ? [t("ext.row." + r)] : metaBits(st);
     const w = document.createElement("div");
     w.style.cssText = "position:fixed;left:-10000px;top:0;width:760px;padding:30px;background:#f5f1ec;color:#241c22;font-family:Inter,Arial,sans-serif;font-size:14px;line-height:1.5;";
     const card = "background:#fffdfb;border:1px solid #e6ddd6;border-radius:12px;padding:18px 20px;margin-bottom:14px;";
@@ -327,5 +424,5 @@
     if (d.love.length) h += '<div style="' + card + '"><div style="' + serif + 'font-size:16px;color:#9d2f68;margin-bottom:6px;">' + esc(t("pt.love", { n: d.love.length })) + "</div>"
       + '<div style="font-size:13px;line-height:1.7;">' + d.love.map(id => esc(KC.i18n.item(id).name)).join("&nbsp;·&nbsp;") + "</div></div>";
     w.innerHTML = h; return w;
-  };
+  }
 })(window.KC);

@@ -6,7 +6,10 @@
 
    To ENABLE a prepared language: fill its lang files, add it to LANGS in js/boot.js, then set enabled:true
    below. Until then it is never shown and links carrying it open in English.
-   v600: a page loads only its own language (js/boot.js); loadLang() fetches another one when the user switches. */
+   v600: a page loads only its own language (js/boot.js); loadLang() fetches another one when the user switches.
+   v608: every language also has its own page, /<lang>/index.html, made by tools/build-lang-pages.js from index.html
+   (texts written into the HTML for search engines). Such a page is marked <html data-page-lang="xx">: its language
+   always wins, the switcher goes to the other language's page, links to the root pages start with "../". */
 (function (KC) {
   const LANGS = {
     ru: { label: "RU", name: "Русский",   locale: "ru-RU", enabled: true  },
@@ -17,7 +20,7 @@
     th: { label: "TH", name: "ไทย",       locale: "th-TH", enabled: true  },
     zh: { label: "ZH", name: "繁體中文",   locale: "zh-TW", enabled: true, html: "zh-Hant" },  // html: <html lang> so browsers pick Traditional glyphs
   };
-  const DEFAULT = "ru";          // for visitors whose browser language is not enabled
+  const DEFAULT = "en";          // for visitors whose browser language is not enabled (boot.js fallback() has the exceptions)
   const FALLBACK = ["en", "ru"]; // missing text -> try these packs
 
   const packs = {};
@@ -32,6 +35,8 @@
       if (x.status === 200) (0, eval)(x.responseText); } catch (e) {} });
   }
   const chain = () => [cur].concat(FALLBACK.filter(x => x !== cur));
+  /* the language of a /<lang>/ page, null on the root pages */
+  const pageLang = () => { const l = document.documentElement.getAttribute("data-page-lang"); return l && LANGS[l] && LANGS[l].enabled ? l : null; };
 
   const I = KC.i18n = {
     LANGS,
@@ -56,14 +61,22 @@
         document.body.appendChild(s); });
     },
     persist(l) { KC.ls.setRaw(KC.KEYS.lang, l); },
+    get pageLang() { return pageLang(); },
+    /* prefix for links to files in the site root (compare.html, …): "../" from a /<lang>/ page */
+    root: () => (pageLang() ? "../" : ""),
+    /* the form page in language l: its own page from a /<lang>/ page, else this page with ?lang= */
+    homeUrl: l => (pageLang() ? "../" + l + "/" : location.pathname + "?lang=" + l),
+    navigate(url) { location.href = url; },   /* one place, so the tests can catch it */
 
-    /* order: link language -> ?lang= -> saved choice -> browser -> default */
+    /* order: the page's language -> link language -> ?lang= -> saved choice -> browser -> fallback */
     detect(hashLang) {
+      if (pageLang()) return pageLang();
       let q = null; try { q = new URLSearchParams(location.search).get("lang"); } catch (e) {}
       const nav = (navigator.language || "").slice(0, 2).toLowerCase();
       const cands = [hashLang, q, KC.ls.raw(KC.KEYS.lang), nav];
       for (const c of cands) { if (c && I.known(c)) return I.usable(c) ? c : "en"; }
-      return DEFAULT;
+      const M = window.KC_MANIFEST;
+      return M && M.fallback ? M.fallback(nav) : DEFAULT;
     },
 
     /* interface string; {name} placeholders filled from vars */
@@ -98,13 +111,21 @@
       root.querySelectorAll("[data-i18n-html]").forEach(e => { e.innerHTML = I.t(e.dataset.i18nHtml); });
       root.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = I.t(e.dataset.i18nPh); });
       root.querySelectorAll("[data-i18n-title]").forEach(e => { e.title = I.t(e.dataset.i18nTitle); e.setAttribute("aria-label", e.title); });
-      const tt = document.querySelector("title[data-i18n]"); if (tt) document.title = (KC.BRAND ? KC.BRAND + " · " : "") + I.t(tt.dataset.i18n);
+      /* the search title (seo.title, v608) already starts with the brand */
+      const tt = document.querySelector("title[data-i18n]");
+      if (tt) document.title = (KC.BRAND && tt.dataset.i18n.indexOf("seo.") !== 0 ? KC.BRAND + " · " : "") + I.t(tt.dataset.i18n);
       /* search engines: the description and the canonical address follow the page language (v586) */
       const md = document.querySelector('meta[name="description"]'); if (md) md.setAttribute("content", I.t("seo.desc"));
-      if (KC.migrate && KC.migrate.NEW_URL && document.head) {
+      /* canonical (v608): a /<lang>/ page keeps the one written in its HTML; the root form page points to /en/ (v609:
+         Google sees it in English anyway, and links to the root then count for the language pages), an old
+         index.html?lang=xx address to the /xx/ page; compare.html (not indexed) as before */
+      if (KC.migrate && KC.migrate.NEW_URL && document.head && !pageLang()) {
+        const file = location.pathname.split("/").pop() || "index.html";
+        let q = null; try { q = new URLSearchParams(location.search).get("lang"); } catch (e) {}
         let cl = document.querySelector('link[rel="canonical"]');
         if (!cl) { cl = document.createElement("link"); cl.rel = "canonical"; document.head.appendChild(cl); }
-        cl.href = KC.migrate.NEW_URL + (location.pathname.split("/").pop() || "index.html") + "?lang=" + cur;
+        cl.href = file !== "index.html" ? KC.migrate.NEW_URL + file + "?lang=" + cur
+          : KC.migrate.NEW_URL + (q && I.usable(q) ? q : "en") + "/";
       }
     },
 
@@ -122,6 +143,8 @@
       box.addEventListener("click", e => {
         const b = e.target.closest("button[data-lang]"); if (!b || b.dataset.lang === cur || box.classList.contains("loading")) return;
         const want = b.dataset.lang;
+        /* on a /<lang>/ page: open the other language's page (the choice is remembered, the list is on this device) */
+        if (pageLang()) { I.persist(want); I.navigate("../" + want + "/" + location.hash); return; }
         const go = () => {
           I.set(want); I.persist(cur); draw();
           /* drop a ?lang= left by page-to-page navigation so the new choice sticks on reload */

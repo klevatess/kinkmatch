@@ -5,7 +5,9 @@
                   template?:{id, name}             template this list was CREATED by (a reference by template id).
                                                    Opening the list applies that template while it exists in the
                                                    device's templates; if it was deleted, the list still says so
-                                                   but opens with all items. } */
+                                                   but opens with all items.
+                  ext?:1                           v613: an EXTENDED list — items:{id:{t, b, tw, bw}} (core/ext.js)
+                  pair?:uid                        v613: the list id of its plain / extended counterpart } */
 (function (KC) {
   const VALID = { limit: 1, maybe: 1, yes: 1, love: 1 };
   const TID = /^[A-Za-z0-9]{6}$/;
@@ -36,9 +38,15 @@
       if (typeof src.uid === "string" && /^[A-Za-z0-9_-]{6}$/.test(src.uid)) st.uid = src.uid;
       st.meta = KC.normalizeMeta(src.meta);
       const items = src.items || {}, AL = KC.ID_ALIASES || {};
+      if (src.ext) {   /* v613: an extended list (two roles per practice) */
+        st.ext = 1;
+        Object.keys(items).forEach(id => { const x = KC.ext.cleanItem(items[id]); if (!x) return; if (!AL[id]) st.items[id] = x; else if (!items[AL[id]]) st.items[AL[id]] = x; });
+      } else {
       Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; if (VALID[v] && !AL[id]) st.items[id] = { interest: v }; });
       /* answers saved under ids of the earliest versions go to the current item (current answer wins) */
       Object.keys(items).forEach(id => { const v = items[id] && items[id].interest; const to = AL[id]; if (to && VALID[v] && !st.items[to]) st.items[to] = { interest: v }; });
+      }
+      if (typeof src.pair === "string" && /^[A-Za-z0-9_-]{6}$/.test(src.pair)) st.pair = src.pair;
       /* favourites and the template are kept only when present, so older states stay unchanged */
       if (Array.isArray(src.fav)) { const f = S.cleanIds(src.fav); if (f.length) st.fav = f; }
       const tp = S.cleanTpl(src.template); if (tp) st.template = tp;
@@ -67,7 +75,7 @@
     /* answered items in list order, optionally only those inside ids -> contents of a new template */
     answeredIds(st, ids) {
       const set = ids ? {} : null; if (ids) ids.forEach(id => { set[id] = 1; });
-      const out = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (st.items[id] && st.items[id].interest && (!set || set[id])) out.push(id); }));
+      const out = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (KC.ext.answered(st, id) && (!set || set[id])) out.push(id); }));
       return out;
     },
     clone: st => JSON.parse(JSON.stringify(st)),
@@ -245,7 +253,13 @@
       own()      { return this.list().filter(x => x.own); },
       received() { return this.list().filter(x => !x.own); },
       label(x)   { return (x && (x.label || x.name)) || ""; },
-      byTid(tid) { const a = this.list(); return a.find(x => x.own && x.tid === tid) || a.find(x => x.tid === tid) || null; },
+      byTid(tid) { const a = this.list(); return a.find(x => x.own && x.tid === tid) || a.find(x => x.tid === tid) || this.starter(tid); },
+      /* v617: the starter templates (data/starters.js) — never stored, never renamed or deleted; the name in the page's
+         language (tpl.st.<key>), the Latin name for links (linkName), the note under the intro (tpl.stDesc.<key>) */
+      starters() {
+        return (KC.STARTERS || []).map(x => ({ id: "st-" + x.key, tid: x.tid, key: x.key, name: KC.i18n.t("tpl.st." + x.key), linkName: x.link, ids: x.ids.slice(), starter: true, own: false, ts: 0 }));
+      },
+      starter(tid) { return this.starters().find(x => x.tid === tid) || null; },
       /* the template to apply for a reference {id, name} (a list's template): {id, name, ids} or null when
          it is not among the device's templates (deleted, or never received here) */
       resolve(ref) { const x = ref && this.byTid(ref.id); return x ? this.use(x) : null; },
@@ -268,6 +282,7 @@
       /* template opened from a link -> {status: added | exists | updated | own | none, item} */
       addReceived(tid, name, ids) {
         if (!TID.test(tid || "") || !ids.length) return { status: "none" };
+        const st = this.starter(tid); if (st) return { status: "exists", item: st };   /* v617: a starter template is always here */
         const a = this.list(), mine = a.find(x => x.own && x.tid === tid);
         if (mine) return { status: "own", item: mine };
         const i = a.findIndex(x => !x.own && x.tid === tid);

@@ -11,7 +11,8 @@
 (function (KC) {
   const F = KC.form, t = (k, v) => KC.i18n.t(k, v), T = KC.store.tpl, S = KC.store;
   const modal = KC.modal("overlay", "overlayClose");
-  const base = () => location.origin + location.pathname + "#";
+  /* links always open the root form page (v608: also when shared from a /<lang>/ page); the language travels in lg= */
+  const base = () => (KC.i18n.pageLang ? new URL("../", location.href).href : location.origin + location.pathname) + "#";
 
   F.shareLink = () => {
     if (!F.viewingShared && !F.state.uid) F.saveNow(); /* gives the list its id */

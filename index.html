@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <!-- index.html — the checklist form. Markup only: texts come from js/lang/*.ui.js via
-     data-i18n* attributes, logic from js/form/*.js (loaded by js/boot.js). -->
-<html lang="ru">
+     data-i18n* attributes, logic from js/form/*.js (loaded by js/boot.js).
+     v608: this file is also the source of the language pages ru/ en/ es/ pt/ ja/ th/ zh/ — after changing it (or a
+     translation) run `node tools/build-lang-pages.js`; the tests fail while those pages are out of date.
+     v609: for search engines this page is the same as /en/ (canonical, x-default); people still get their language here. -->
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title data-i18n="app.title">Kinkosmos · Чек-лист практик</title>
-<meta name="description" content="Анонимный чек-лист BDSM-практик: отметьте, что нравится, поделитесь ссылкой и сравните ответы с партнёром. Без регистрации, данные не уходят на сервер. 18+.">
+<title data-i18n="seo.title">Kinkosmos — BDSM &amp; Kink Checklist: Compare Answers with a Partner</title>
+<meta name="description" content="An anonymous BDSM checklist: mark what you like, share a link and compare answers with a partner. No sign-up, nothing is sent to a server. 18+.">
+<link rel="canonical" href="https://klevatess.github.io/kinkmatch/en/">
 <meta name="rating" content="adult">
-<link rel="alternate" hreflang="ru" href="https://klevatess.github.io/kinkmatch/index.html?lang=ru">
-<link rel="alternate" hreflang="en" href="https://klevatess.github.io/kinkmatch/index.html?lang=en">
-<link rel="alternate" hreflang="es" href="https://klevatess.github.io/kinkmatch/index.html?lang=es">
-<link rel="alternate" hreflang="pt-BR" href="https://klevatess.github.io/kinkmatch/index.html?lang=pt">
-<link rel="alternate" hreflang="ja" href="https://klevatess.github.io/kinkmatch/index.html?lang=ja">
-<link rel="alternate" hreflang="th" href="https://klevatess.github.io/kinkmatch/index.html?lang=th">
-<link rel="alternate" hreflang="zh-Hant" href="https://klevatess.github.io/kinkmatch/index.html?lang=zh">
-<link rel="alternate" hreflang="x-default" href="https://klevatess.github.io/kinkmatch/">
+<!-- hreflang:start (written by tools/build-lang-pages.js) -->
+<link rel="alternate" hreflang="ru" href="https://klevatess.github.io/kinkmatch/ru/">
+<link rel="alternate" hreflang="en" href="https://klevatess.github.io/kinkmatch/en/">
+<link rel="alternate" hreflang="es" href="https://klevatess.github.io/kinkmatch/es/">
+<link rel="alternate" hreflang="pt-BR" href="https://klevatess.github.io/kinkmatch/pt/">
+<link rel="alternate" hreflang="ja" href="https://klevatess.github.io/kinkmatch/ja/">
+<link rel="alternate" hreflang="th" href="https://klevatess.github.io/kinkmatch/th/">
+<link rel="alternate" hreflang="zh-Hant" href="https://klevatess.github.io/kinkmatch/zh/">
+<link rel="alternate" hreflang="x-default" href="https://klevatess.github.io/kinkmatch/en/">
+<!-- hreflang:end -->
 <meta name="theme-color" content="#f5f1ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161114" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
@@ -42,7 +48,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=606">
+<link rel="stylesheet" href="css/style.css?v=621">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -64,7 +70,13 @@
       <button class="btn ghost" id="mineBtn" data-i18n="hdr.mine" data-i18n-title="hdr.mineTitle"></button>
       <button class="btn ghost" id="shareBtn" data-i18n="hdr.share" data-i18n-title="hdr.shareTitle"></button>
       <button class="btn ghost" id="pdfBtn" data-i18n="hdr.pdf"></button>
-      <button class="btn ghost" id="resetBtn" data-i18n="hdr.reset" data-i18n-title="hdr.resetTitle"></button>
+      <!-- v615 (owner): "Clear" is gone (a new list: My lists → Start a new list; delete there). Its place: the role filter of an
+           extended list; empty for a plain list -->
+      <select class="jump role-view" id="roleView" data-i18n-title="ext.roleView" hidden>
+        <option value="both" data-i18n="ext.both"></option>
+        <option value="t" data-i18n="ext.onlyT"></option>
+        <option value="b" data-i18n="ext.onlyB"></option>
+      </select>
     </div>
   </div>
   <div class="subbar">
@@ -83,6 +95,7 @@
       <option value="no" data-i18n="view.no"></option>
     </select>
     <label class="fav-toggle" data-i18n-title="filt.onlyFav"><input type="checkbox" id="onlyFav"><span aria-hidden="true">♥</span></label>
+    <label class="fav-toggle ext-tg" id="extToggleBox" data-i18n-title="ext.toggleTitle"><input type="checkbox" id="extToggle"><span aria-hidden="true">⇅</span><span class="vh" data-i18n="ext.toggle"></span></label>
   </div>
 </header>
 
@@ -117,6 +130,7 @@
     <h1 data-i18n="intro.h1"></h1>
     <p data-i18n-html="intro.p1_html"></p>
     <p data-i18n="intro.p2"></p>
+    <p class="tpl-desc" id="tplDesc" hidden></p>
     <div class="idfields">
       <label><span data-i18n="name.label"></span> <span class="hint" data-i18n="name.hint"></span><input type="text" id="metaName" autocomplete="off" data-i18n-ph="name.ph" disabled></label>
     </div>
@@ -125,6 +139,8 @@
   <section class="role-top">
     <div class="role-explain" data-i18n-html="role.explain_html"></div>
     <div class="role-pick" id="roleTop"></div>
+    <div class="ext-note" id="extNote" data-i18n="ext.note" hidden></div>
+    <button class="btn ghost ext-make" id="extMake" type="button" data-i18n="ext.make" hidden></button>
   </section>
 
   <div class="legend">
@@ -141,7 +157,7 @@
   </details>
 
   <details class="about portrait" id="portraitSection">
-    <summary><span id="portraitTitle"></span> <span class="new-dot pt-new" data-i18n-title="item.new"></span> <button class="help-q" type="button" data-help="portrait" data-i18n-title="help.open">?</button></summary>
+    <summary><span id="portraitTitle"></span> <button class="help-q" type="button" data-help="lore" data-i18n-title="help.open">?</button></summary>
     <div class="portrait-body" id="portraitBody"></div>
   </details>
 
@@ -177,7 +193,7 @@
       </div>
       <button class="btn ghost mini" id="shareBack" type="button" data-i18n="tplShare.back" hidden></button>
     </div>
-    <button class="btn ghost" id="overlayClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+    <div class="modal-foot"><button class="btn ghost" id="overlayClose" style="width:100%" data-i18n="close"></button></div>
   </div>
 </div>
 
@@ -189,7 +205,7 @@
     <h4 class="sub-h"><span data-i18n="saved.tplH"></span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open">?</button></h4>
     <p class="sub-p" data-i18n="saved.tplP"></p>
     <div id="savedTplList"></div>
-    <button class="btn ghost" id="savedClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+    <div class="modal-foot"><button class="btn ghost" id="savedClose" style="width:100%" data-i18n="close"></button></div>
   </div>
 </div>
 
@@ -216,7 +232,7 @@
         <input type="file" id="backupFile" accept=".json,application/json" hidden>
       </div>
     </div>
-    <button class="btn ghost" id="mineClose" style="margin-top:14px;width:100%" data-i18n="close"></button>
+    <div class="modal-foot"><button class="btn ghost" id="mineClose" style="width:100%" data-i18n="close"></button></div>
   </div>
 </div>
 
@@ -228,17 +244,18 @@
     <label class="only-toggle"><input type="checkbox" id="pdfFavLimits"> <span data-i18n="pdf.favLimits"></span></label>
     <label class="only-toggle"><input type="checkbox" id="pdfPortrait"> <span data-i18n="pdf.portrait"></span></label>
     <button class="btn primary" id="pdfGo" type="button" style="width:100%;margin-top:16px" data-i18n="pdf.go"></button>
-    <button class="btn ghost" id="pdfClose" type="button" style="margin-top:8px;width:100%" data-i18n="cancel"></button>
+    <div class="modal-foot"><button class="btn ghost" id="pdfClose" type="button" style="width:100%" data-i18n="cancel"></button></div>
   </div>
 </div>
 
-<div class="overlay" id="resetOverlay">
+<div class="overlay" id="extOverlay">
   <div class="modal">
-    <h3 data-i18n="reset.h"></h3>
-    <p id="resetText"></p>
-    <button class="btn primary" id="resetList" type="button" style="width:100%;margin-bottom:8px" data-i18n="reset.list"></button>
-    <button class="btn ghost" id="resetFav" type="button" style="width:100%"></button>
-    <button class="btn ghost" id="resetClose" type="button" style="margin-top:14px;width:100%" data-i18n="cancel"></button>
+    <h3 data-i18n="ext.askH"></h3>
+    <p data-i18n="ext.ask"></p>
+    <button class="btn primary" type="button" data-ext-role="dom" style="width:100%;margin-bottom:8px" data-i18n="ext.askT"></button>
+    <button class="btn primary" type="button" data-ext-role="sub" style="width:100%;margin-bottom:8px" data-i18n="ext.askB"></button>
+    <button class="btn ghost" type="button" data-ext-role="both" style="width:100%" data-i18n="ext.askBoth"></button>
+    <div class="modal-foot"><button class="btn ghost" id="extClose" type="button" style="width:100%" data-i18n="cancel"></button></div>
   </div>
 </div>
 
@@ -250,7 +267,7 @@
     <img class="card-preview" id="cardPreview" alt="">
     <button class="btn primary" id="cardSave" type="button" style="width:100%;margin-bottom:8px" data-i18n="card.save"></button>
     <button class="btn ghost" id="cardShare" type="button" style="width:100%;margin-bottom:8px" data-i18n="card.share" hidden></button>
-    <button class="btn ghost" id="cardClose" type="button" style="width:100%" data-i18n="close"></button>
+    <div class="modal-foot"><button class="btn ghost" id="cardClose" type="button" style="width:100%" data-i18n="close"></button></div>
   </div>
 </div>
 
@@ -259,10 +276,10 @@
     <h3 id="migrateH"></h3>
     <p id="migrateText"></p>
     <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes"></button>
-    <button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel"></button>
+    <div class="modal-foot"><button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel"></button></div>
   </div>
 </div>
 
-<script src="js/boot.js?v=606" data-page="form" data-v="606"></script>
+<script src="js/boot.js?v=621" data-page="form" data-v="621"></script>
 </body>
 </html>

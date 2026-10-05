@@ -5,6 +5,14 @@ window.KC = window.KC || {};
   KC.$ = id => document.getElementById(id);
   /* the site's name: not translated (header, page title, QR frame, picture card) */
   KC.BRAND = "Kinkosmos";
+  /* v610 (owner): new joke modes of the portrait can be switched off here, so each one can be announced on its own.
+     true = the button is shown (portrait, picture card, compare page) and its help paragraph too; false = hidden as if
+     it did not exist (a device that had chosen it falls back to the constellation). wr = ⚔ Servant of the Chaos gods,
+     wh = Warhammer factions, leg = Space Marine legions, ow = Old World races, wi = Witcher, av = Avatar.
+     v621 (owner, Oct 5): ext = the extended list's buttons (⇅ in the header, "Сделать расширенную" in the role block)
+     and its help / "What's new" lines. Everything stays in the code; the owner unlocks one thing per version for a post.
+     A list that is already extended still opens and keeps its ⇅ switch, so one can get back to the plain list. */
+  KC.FEATURES = { ext: false, wr: false, wh: false, leg: false, ow: false, wi: false, av: false };
 
   KC.el = function (tag, cls, text) {
     const e = document.createElement(tag);
@@ -34,6 +42,9 @@ window.KC = window.KC || {};
     wodPair:  "checklist-wod-pair",
     dndGroup: "checklist-dnd-group",        // … and for the company (group) view
     wodGroup: "checklist-wod-group",
+    wr:    "checklist-wr",                  // v611: the last tab chosen under ⚔ Wr (raw string): wr | wh | leg — the ⚔ Wr button reopens it
+    wrPair:  "checklist-wr-pair",
+    wrGroup: "checklist-wr-group",
   };
 
   KC.ls = {

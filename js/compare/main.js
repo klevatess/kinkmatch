@@ -6,7 +6,12 @@
                       a number in the table opens the detailed view for that pair.
    Each participant has a role picker ("from the list" / Top / Bottom): a role chosen here replaces the one in the list.
    A comparison of 3+ can be saved (KC.store.cmp) and reopened from the picker at the top or from
-   "My lists"; it then takes the newest version of every list on this device. */
+   "My lists"; it then takes the newest version of every list on this device.
+   v613 — extended lists (two roles, core/ext.js) are compared by their roles, crosswise: a pair of an extended and
+   a plain list takes the extended list's role opposite to the plain one (no role in the plain list: its role picker
+   asks for one); two extended lists: "Сравниваем: A ↑ · B ↓ | A ↓ · B ↑". In a company an extended list needs a
+   role picked. With an extended list in the pair: "✦ Новое вместе" (both marked "Хочу"), the filter
+   "✦ Что попробуем?" (one marked "Хочу", the other Может / Да / Обожаю) and the roulette "✦ Попробуем новое?". */
 (function (KC) {
   const t = (k, v) => KC.i18n.t(k, v), esc = KC.esc;
   const BADGE = { love: "b-match", yes: "b-good", maybe: "b-maybe", limit: "b-limit" };
@@ -17,14 +22,16 @@
   let PMODE = "any";                    /* pair table: "any" | "role" (only Top + Bottom pairs) */
   let SAVED = null;                     /* the saved comparison on screen: {id, name} */
   let NOTE = null;                      /* after opening a saved one: {updated: [names], gone: [names]} */
+  let DIR = "tb";                       /* v613: two extended lists — "tb" = A Top · B Bottom, "bt" = the other way */
   const C = KC.store.cmp;
   /* what is on screen, for the roulette (compare/roulette.js) */
   KC.cmpState = () => ({ pair: LAST, group: LAST ? null : GROUP, pmode: PMODE });
-  const rlBtn = () => '<div class="cmp-rl"><button class="btn ghost" type="button" data-act="roulette">' + esc(t("rl.btn")) + "</button></div>";
+  const rlBtn = tryNew => '<div class="cmp-rl"><button class="btn ghost" type="button" data-act="roulette">' + esc(t("rl.btn")) + "</button>"
+    + (tryNew ? '<button class="btn ghost" type="button" data-act="roulette-try">' + esc(t("ext.rlTry")) + "</button>" : "") + "</div>";
 
   KC.initTheme();
   KC.i18n.set(KC.i18n.detect(null));
-  function applyStatic() { KC.i18n.apply(document); KC.$("backLink").href = "index.html?lang=" + KC.i18n.lang; }
+  function applyStatic() { KC.i18n.apply(document); KC.$("backLink").href = KC.i18n.lang + "/"; }   /* v608: back to the form page of this language */
   KC.i18n.mountSwitcher(() => { applyStatic(); relabel(); drawPickers(); drawSaved(); if (LAST || GROUP) render(false); });
   applyStatic();
 
@@ -42,7 +49,7 @@
     if (i < 2) { nm.id = i ? "nameB" : "nameA"; col.querySelector("textarea").id = i ? "codeB" : "codeA"; }
     nm.value = name || ""; col.querySelector("textarea").value = code || "";
     const rs = col.querySelector(".cmp-role"); roleOpts(rs); rs.value = ROLES.indexOf(role) > 0 ? role : "";
-    box.appendChild(col); relabel(); drawPickers(col);
+    box.appendChild(col); relabel(); drawPickers(col); extNote(col);
     return col;
   }
   function relabel() {
@@ -50,6 +57,7 @@
       col.querySelector(".cmp-name").placeholder = t("cmp.person", { n: i + 1 }) + " — " + t("cmp.namePh");
       col.querySelector("textarea").placeholder = t("cmp.codePh");
       const rs = col.querySelector(".cmp-role"); roleOpts(rs); rs.title = t("cmp.roleList");
+      if (col.querySelector(".ext-hint")) extNote(col);
       const rm = col.querySelector('[data-act="rm"]'); rm.hidden = box.children.length <= 2; rm.title = t("cmp.remove"); rm.setAttribute("aria-label", t("cmp.remove"));
     });
     KC.$("addPart").hidden = box.children.length >= MAX;
@@ -73,8 +81,16 @@
   box.addEventListener("change", e => {
     const sel = e.target.closest(".cmp-pick"); if (!sel || !sel.value) return;
     const s = sources().find(x => x.v === sel.value); const col = sel.closest(".cmp-col");
-    if (s) { col.querySelector("textarea").value = s.code; col.querySelector(".cmp-name").value = s.name || ""; }
+    if (s) { col.querySelector("textarea").value = s.code; col.querySelector(".cmp-name").value = s.name || ""; extNote(col); }
   });
+  /* v613: under the role picker of an extended list: "Расширенная анкета — роли Верх и Низ" */
+  function extNote(col) {
+    let n = col.querySelector(".ext-hint"); const a = new URLSearchParams(KC.codec.extract(col.querySelector("textarea").value)).get("a");
+    const on = KC.codec.isExtCode(a);
+    if (on && !n) { n = KC.el("div", "role-hint ext-hint"); col.querySelector(".cmp-role").after(n); }
+    if (n) { n.hidden = !on; n.textContent = t("ext.note"); }
+  }
+  box.addEventListener("input", e => { const col = e.target.closest && e.target.closest(".cmp-col"); if (col && e.target.matches("textarea")) extNote(col); });
   /* back to "Fill from saved lists…" only once the list is closed: phone pickers stay open after a tap (B21) */
   box.addEventListener("focusout", e => { const sel = e.target.closest && e.target.closest(".cmp-pick"); if (sel) sel.value = ""; });
   box.addEventListener("click", e => {
@@ -124,18 +140,43 @@
     const desc = KC.i18n.item(id).desc;
     return '<div class="rrow"><div class="nm">' + itemName(id) + "</div>"
       + (desc ? '<button class="mini help" type="button" data-act="help" aria-label="' + esc(t("item.help")) + '">?</button>' : "")
-      + '<div class="who">' + who.map(w => esc(w.name) + ": " + badge(w.v)).join(" &nbsp; ") + "</div>"
+      + '<div class="who">' + who.map(w => esc(w.name) + ": " + (w.v ? badge(w.v) : "") + (w.w ? '<span class="want-tag">' + esc(t("ext.want")) + "</span>" : w.v ? "" : badge(null))).join(" &nbsp; ") + "</div>"
       + (desc ? '<div class="item-desc" hidden>' + esc(desc) + "</div>" : "") + "</div>";
   };
-  const pairRow = r => rowHTML(r.id, [{ name: LAST.nA, v: r.a }, { name: LAST.nB, v: r.b }]);
+  const wOf = (st, id) => !!(st.items[id] || {}).w;   /* v613: "✦ Хочу" in a role view of an extended list */
+  const pairRow = r => rowHTML(r.id, [{ name: LAST.nA, v: r.a, w: wOf(LAST.A, r.id) }, { name: LAST.nB, v: r.b, w: wOf(LAST.B, r.id) }]);
+  /* "✦ Новое вместе": both marked "Хочу" — that says it all, the answer next to it is left out (owner) */
+  const newRow = id => rowHTML(id, [{ name: LAST.nA, v: null, w: true }, { name: LAST.nB, v: null, w: true }]);
   const blockOf = (title, dot, sub, body, n) => '<div class="result-group"><h3><span class="dot" style="background:' + dot + '"></span>' + esc(title)
     + ' <span style="font-weight:400;color:var(--muted);font-size:14px">(' + n + ')</span></h3><div class="sub">' + esc(sub) + "</div>" + body + "</div>";
   const block = (title, dot, sub, rows) => !rows.length ? "" : blockOf(title, dot, sub, rows.map(pairRow).join(""), rows.length);
   const note = text => '<div class="result-group"><div class="sub">' + esc(text) + "</div></div>";
-  function profileLine(name, st) {
+  function profileLine(name, st, ext) {
     const bits = [];
     KC.PROFILE.forEach(f => { const v = !f.hidden && st.meta[f.id]; if (v) bits.push(esc(KC.i18n.fieldLabel(f.id)) + ": " + esc((Array.isArray(v) ? v : [v]).map(o => KC.i18n.optLabel(f.id, o)).join(", "))); });
-    return bits.length ? '<div class="cmp-profile"><b>' + esc(name) + "</b> · " + bits.join(" · ") + "</div>" : "";
+    const tag = ext ? ' <span class="ext-tag">' + esc(t("ext.badge")) + "</span>" : "";
+    return bits.length || ext ? '<div class="cmp-profile"><b>' + esc(name) + "</b>" + tag + (bits.length ? " · " + bits.join(" · ") : "") + "</div>" : "";
+  }
+  /* v613: a pair with extended lists -> the two plain lists compared (role views), or {need: participant} when a
+     plain list has no role and the other list is extended. a, b = {name, st, role (picked here)} */
+  const arrowOf = r => t("ext.arrow." + r);
+  function pairOf(a, b) {
+    const X = KC.ext, ea = X.isExt(a.st), eb = X.isExt(b.st);
+    let ra = ea && a.role ? X.ofRole(a.role) : null, rb = eb && b.role ? X.ofRole(b.role) : null, dir = false;
+    if (ea && eb) { if (!ra && !rb) { ra = DIR === "tb" ? "t" : "b"; rb = X.other(ra); dir = true; } else if (!ra) ra = X.other(rb); else if (!rb) rb = X.other(ra); }
+    else if (ea && !ra) { const r = X.ofRole(b.role || X.roleOf(b.st)); if (!r) return { need: b }; ra = X.other(r); }
+    else if (eb && !rb) { const r = X.ofRole(a.role || X.roleOf(a.st)); if (!r) return { need: a }; rb = X.other(r); }
+    return { A: ra ? X.view(a.st, ra) : a.st, B: rb ? X.view(b.st, rb) : b.st, nA: a.name + (ra ? " " + arrowOf(ra) : ""), nB: b.name + (rb ? " " + arrowOf(rb) : ""),
+      ext: { a: ea, b: eb, dir }, raw: { a, b } };
+  }
+  const dirHTML = () => { const a = LAST.raw.a.name, b = LAST.raw.b.name, btn = (d, txt) => '<button type="button" data-dir="' + d + '"' + (DIR === d ? ' class="on"' : "") + ">" + esc(txt) + "</button>";
+    return '<div class="cmp-dir">' + esc(t("ext.dir")) + ' <span class="seg">' + btn("tb", a + " " + arrowOf("t") + " · " + b + " " + arrowOf("b")) + btn("bt", a + " " + arrowOf("b") + " · " + b + " " + arrowOf("t")) + "</span></div>"; };
+  /* a plain list without a role next to an extended one: its role picker asks (owner, v613) */
+  function askRole(p, other) {
+    const sel = p.col.querySelector(".cmp-role"); sel.classList.add("role-need");
+    const h = KC.el("div", "role-hint", other ? t("ext.needRole", { name: other }) : t("ext.needRoleGroup")); sel.after(h);
+    try { sel.scrollIntoView({ behavior: "smooth", block: "center" }); sel.focus(); } catch (e) {}
+    KC.toast(t(other ? "ext.needRoleToast" : "ext.needRoleGroup"));
   }
   const fbtn = (cur, f, label) => '<button class="btn mini' + (cur === f ? " on" : "") + '" data-f="' + f + '">' + esc(label) + "</button>";
   function matches(id) {
@@ -154,7 +195,8 @@
   const foldBody = kind => { if (kind === "pair") return KC.space.pairSVG(LAST.A, LAST.B, LAST.nA, LAST.nB);
     if (!KC.dnd || !KC.wod) return KC.space.groupSVG(GROUP, SEL, GFILTER === "allYM");
     const m = KC.dnd.mode("group");
-    return KC.space.modeSwitch("group") + (m === "dnd" ? KC.space.partyHTML(GROUP) : m === "wod" ? KC.space.wodGroupHTML(GROUP) : KC.space.groupSVG(GROUP, SEL, GFILTER === "allYM")); };
+    return KC.space.modeSwitch("group") + (m === "dnd" ? KC.space.partyHTML(GROUP) : m === "wod" ? KC.space.wodGroupHTML(GROUP)
+      : KC.dnd.isWr(m) ? KC.space.modeGroupHTML(GROUP, m) : KC.space.groupSVG(GROUP, SEL, GFILTER === "allYM")); };   /* v610: cult, army, legions */
   const fold = kind => { const on = !!folds()[kind];
     return '<details class="about sp-fold" data-fold="' + kind + '"' + (on ? " open" : "") + "><summary>✦ " + esc(t("sp.fold." + kind)) + '</summary><div class="sp-fold-body">' + (on ? foldBody(kind) : "") + "</div></details>"; };
   KC.$("results").addEventListener("toggle", e => {
@@ -168,12 +210,22 @@
   function renderPair() {
     const searching = !!KC.$("cmpSearch").value.trim();
     /* v601 (owner): the filters sit under the star map, right above the lists (and the search next to them) */
-    HEAD = profileLine(LAST.nA, LAST.A) + profileLine(LAST.nB, LAST.B) + rlBtn() + (FILTER === "all" ? fold("pair") : "")
+    const X = !!(LAST.ext && (LAST.ext.a || LAST.ext.b));   /* v613: an extended list in the pair */
+    if (!X && FILTER === "try") FILTER = "all";
+    HEAD = profileLine(LAST.nA, LAST.A, X && LAST.ext.a) + profileLine(LAST.nB, LAST.B, X && LAST.ext.b) + (X && LAST.ext.dir ? dirHTML() : "") + rlBtn(X) + (FILTER === "all" ? fold("pair") : "")
       + '<div class="cmp-filter">' + (LAST.fromGroup ? '<button class="btn mini" data-f="group">' + esc(t("cmp.backGroup")) + "</button>" : "")
       + fbtn(FILTER, "all", t("cmp.all"))
       + fbtn(FILTER, "yesA", t("cmp.yesOf", { who: LAST.nA })) + fbtn(FILTER, "yesB", t("cmp.yesOf", { who: LAST.nB }))
-      + fbtn(FILTER, "ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + fbtn(FILTER, "ymB", t("cmp.yesMaybeOf", { who: LAST.nB })) + "</div>";
+      + fbtn(FILTER, "ymA", t("cmp.yesMaybeOf", { who: LAST.nA })) + fbtn(FILTER, "ymB", t("cmp.yesMaybeOf", { who: LAST.nB }))
+      + (X ? fbtn(FILTER, "try", t("ext.fTry")) : "") + "</div>";
     let html = "";
+    const ansA = id => (LAST.A.items[id] || {}).interest || null, ansB = id => (LAST.B.items[id] || {}).interest || null;
+    if (FILTER === "try") {   /* v613: one of them marked "Хочу", the other Может / Да / Обожаю */
+      const rows = [];
+      KC.CATS.forEach(c => c.items.forEach(([, id]) => { const a = ansA(id), b = ansB(id);
+        if (matches(id) && ((wOf(LAST.A, id) && POSM[b]) || (wOf(LAST.B, id) && POSM[a]))) rows.push({ id, a, b }); }));
+      return html + (rows.length ? block(t("ext.tryTitle"), "var(--accent)", t("ext.trySub"), rows) : note(searching ? t("noresults") : t("ext.tryNone")));
+    }
     if (FILTER !== "all") {
       const side = FILTER === "yesA" || FILTER === "ymA", who = side ? LAST.nA : LAST.nB, wm = FILTER.indexOf("ym") === 0;
       const rows = only(KC.match.yesOf(side ? LAST.A : LAST.B, wm)).map(r => ({ id: r.id, a: (LAST.A.items[r.id] || {}).interest || null, b: (LAST.B.items[r.id] || {}).interest || null }));
@@ -188,6 +240,10 @@
     const stat = (n, color, key) => '<div class="cmp-stat"><b style="color:' + color + '">' + n + "</b>" + esc(t(key)) + "</div>";
     html += '<div class="cmp-summary">' + stat(g.match.length, "var(--love)", "cmp.stat.match") + stat(disc, "var(--maybe)", "cmp.stat.discuss")
       + stat(g.oneA.length + g.oneB.length, "var(--chip-ink)", "cmp.stat.one") + stat(ex, "var(--limit)", "cmp.stat.excluded") + "</div>";
+    if (X) {   /* v613: "✦ Новое вместе" above the matches */
+      const nw = []; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (matches(id) && wOf(LAST.A, id) && wOf(LAST.B, id)) nw.push(id); }));
+      if (nw.length) html += blockOf(t("ext.newTitle"), "var(--accent)", t("ext.newSub"), nw.map(newRow).join(""), nw.length);
+    }
     html += block(t("cmp.g.match"), "var(--love)", t("cmp.g.match.sub"), g.match);
     html += block(t("cmp.g.discOne", { who: LAST.nA }), "var(--maybe)", t("cmp.g.discOne.sub", { who: LAST.nA }), g.discA);
     html += block(t("cmp.g.discOne", { who: LAST.nB }), "var(--maybe)", t("cmp.g.discOne.sub", { who: LAST.nB }), g.discB);
@@ -239,7 +295,7 @@
     if (SELG !== GROUP) { SEL = null; SELG = GROUP; }   /* a new company: no planet selected */
     /* v601 (owner): "Save" moved under the saved-comparison picker; the filters sit under the star map */
     KC.$("cmpSaveBar").innerHTML = savedBar(); KC.$("cmpSaveBar").hidden = false;
-    HEAD = rlBtn() + P.map(p => profileLine(p.name, p.st)).join("") + fold("group")   /* the system; "…and Maybe" counts Maybe too */
+    HEAD = rlBtn() + P.map(p => profileLine(p.name, p.st, p.ext)).join("") + fold("group")   /* the system; "…and Maybe" counts Maybe too */
       + '<div class="cmp-filter">' + fbtn(GFILTER, "allYes", t("cmp.allYes")) + fbtn(GFILTER, "allYM", t("cmp.allYM")) + fbtn(GFILTER, "pairs", t("cmp.pairs")) + "</div>";
     let html = "";
     if (GFILTER === "pairs") {
@@ -263,7 +319,7 @@
     const ym = GFILTER === "allYM";
     if (!rows.length) return html + note(searching ? t("noresults") : t(ym ? "cmp.noAllYM" : "cmp.noAllYes"));
     return html + blockOf(t(ym ? "cmp.allYMTitle" : "cmp.allYesTitle", { n: P.length }), ym ? "var(--maybe)" : "var(--love)", t(ym ? "cmp.allYMSub" : "cmp.allYesSub"),
-      rows.map(r => rowHTML(r.id, P.map((p, i) => ({ name: p.name, v: r.vals[i] })))).join(""), rows.length);
+      rows.map(r => rowHTML(r.id, P.map((p, i) => ({ name: p.name, v: r.vals[i], w: wOf(p.st, r.id) })))).join(""), rows.length);
   }
 
   /* #results = #resHead (profiles, roulette, star map, filters) + the search box + #resBody (the lists).
@@ -281,6 +337,7 @@
 
   KC.$("cmpBtn").addEventListener("click", () => {
     const P = [], bad = [];
+    box.querySelectorAll(".role-need").forEach(x => x.classList.remove("role-need")); box.querySelectorAll(".role-hint:not(.ext-hint)").forEach(x => x.remove());
     [...box.children].forEach((col, i) => {
       const raw = col.querySelector("textarea").value.trim(); if (!raw) return;
       const st = KC.codec.decode(raw);
@@ -289,14 +346,20 @@
       /* a role chosen here replaces the one inside the list (tags, "Top + Bottom" pairs, roulette) */
       const role = col.querySelector(".cmp-role").value;
       if (role) st.meta = Object.assign({}, st.meta, { role });
-      P.push({ name: typed || st.name || t("cmp.person", { n: i + 1 }), typed, code: raw, st, role });
+      P.push({ name: typed || st.name || t("cmp.person", { n: i + 1 }), typed, code: raw, st, role, col, ext: KC.ext.isExt(st) });
     });
     if (bad.length) { KC.toast(t("cmp.damaged", { n: bad.join(", ") })); return; }
     if (P.length < 2) { KC.toast(t("cmp.needBoth")); return; }
+    let pair = null;
+    if (P.length === 2) { DIR = "tb"; pair = pairOf(P[0], P[1]); if (pair.need) { askRole(pair.need, (pair.need === P[0] ? P[1] : P[0]).name); return; } }
+    else {   /* v613: in a company an extended list is compared by the role picked for it */
+      const miss = P.find(p => p.ext && !p.role); if (miss) { askRole(miss, null); return; }
+      P.forEach(p => { if (p.ext) { const r = KC.ext.ofRole(p.role); p.st = KC.ext.view(p.st, r); p.name += " " + arrowOf(r); } });
+    }
     KC.$("cmpSearch").value = ""; NOTE = null;
     KC.stats.event(P.length === 2 ? "compare-2" : "compare-3plus");
     if (P.length < C.MIN) SAVED = null;
-    if (P.length === 2) { GROUP = null; LAST = { A: P[0].st, B: P[1].st, nA: P[0].name, nB: P[1].name }; FILTER = "all"; }
+    if (P.length === 2) { GROUP = null; LAST = pair; FILTER = "all"; }
     else { LAST = null; GROUP = P; GFILTER = "allYes"; }
     render(true);
   });
@@ -304,6 +367,9 @@
   KC.$("cmpSaveBar").addEventListener("click", e => { if (e.target.closest('button[data-act="save"]')) saveCurrent(); });
   KC.$("results").addEventListener("click", e => {
     if (e.target.closest('button[data-act="roulette"]')) { KC.roulette.open(); return; }
+    if (e.target.closest('button[data-act="roulette-try"]')) { KC.roulette.open({ tryNew: true }); return; }
+    const dr = e.target.closest("button[data-dir]");   /* v613: which roles of two extended lists */
+    if (dr && LAST && LAST.raw) { if (dr.dataset.dir !== DIR) { DIR = dr.dataset.dir; const p = pairOf(LAST.raw.a, LAST.raw.b); p.fromGroup = LAST.fromGroup; LAST = p; render(false); } return; }
     /* v591: the pair's constellations ↔ DnD classes ↔ (v597) World of Darkness.
        A button changes the mode (data-mode) or the World of Darkness line (data-wod); either way the block is redrawn.
        (v592–v598 shared the choice with the portrait; v599, owner: each view remembers its own) */

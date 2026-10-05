@@ -132,7 +132,7 @@
     sg.main.forEach((m, k) => { stars[B[k]].bright = true; stars[B[k]].s = m; });
     let r = 0; stars.forEach(st => { if (!st.s) st.s = rest[r++] || null; });
     E.forEach(p => stars.push({ x: p[0], y: p[1], grey: true, bright: false, s: null }));
-    return { wod: true, line, id, stars, lines: L, main: sg.main, kind: sg.kind };
+    return { wod: true, line, id, stars, lines: L, main: sg.main, kind: sg.kind, many: sg.many };
   }
 
   /* ---------- the details ---------- */
@@ -161,7 +161,9 @@
     slayers: { death: "hard", realms: "mind", spirit: "slow" } };
   const GEN = [15, 15, 15, 14, 14, 14, 13, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7];
   const RANK = lv => lv <= 4 ? "cliath" : lv <= 8 ? "fostern" : lv <= 12 ? "adren" : lv <= 16 ? "athro" : "elder";
-  const SEEM = lv => lv <= 6 ? "childling" : lv <= 14 ? "wilder" : "grump";
+  /* v615: the Childling seeming is never given — this is a profile of adults' sexual preferences, a child stage has no place
+     in it (the canon starts adult players as Wilders anyway); low levels are Wilders */
+  const SEEM = lv => lv <= 14 ? "wilder" : "grump";
   const FAITH = lv => lv <= 5 ? 3 : lv <= 11 ? 4 : lv <= 17 ? 5 : 6;
   /* v599 (owner): W20 starting Rage by auspice, starting Gnosis by breed, + a bonus that grows with the rank */
   const RAGE0 = { ragabash: 1, theurge: 2, philodox: 3, galliard: 4, ahroun: 5 }, GNOSIS0 = { homid: 1, metis: 3, lupus: 5 };
@@ -238,12 +240,20 @@
   const sub = scope => { const r = KC.ls.raw(KEY(scope)); return LINES.indexOf(r) >= 0 ? r : "vamp"; };
   const setSub = (v, scope) => { if (LINES.indexOf(v) >= 0) KC.ls.setRaw(KEY(scope), v); };
 
-  /* the mode switch built the same way for the portrait and the compare page (each view keeps its own choice): "✦ Constellation | 🎲 DnD | 🦇 World of Darkness",
-     and in the World of Darkness a second row "🧛 Vampire | 🐺 Werewolf | 🧚 Fey | 😈 Demon" */
+  /* the mode switch built the same way for the portrait and the compare page (each view keeps its own choice):
+     one row — "⚔ Wr" on the left (v611, only when one of its tabs is switched on), "✦ Constellation | 🎲 DnD | 🦇 World of Darkness" on the right;
+     under it, the tabs of the open group: World of Darkness "🧛 Vampire | 🐺 Werewolf | 🧚 Fey | 😈 Demon",
+     or ⚔ Wr "Chaos gods | 🌌 40K | 🛡 Legion" (only the tabs that are switched on, and only when there are two or more) */
   function switchHTML(scope) {
-    const t = k => KC.i18n.t(k), esc = KC.esc, m = KC.dnd.mode(scope), cur = sub(scope);
-    const b = (attr, v, key, pressed) => '<button type="button" class="btn ghost mini" ' + attr + '="' + v + '" aria-pressed="' + pressed + '">' + esc(t(key)) + "</button>";
-    return '<div class="pt-mode" role="group" aria-label="' + esc(t("dnd.switch")) + '">' + b("data-mode", "sign", "dnd.toSign", m === "sign") + b("data-mode", "dnd", "dnd.toDnd", m === "dnd") + b("data-mode", "wod", "wod.toWod", m === "wod") + "</div>"
+    const t = k => KC.i18n.t(k), esc = KC.esc, m = KC.dnd.mode(scope), cur = sub(scope), tabs = KC.dnd.wrTabs(), wrOn = KC.dnd.inWrg(m);
+    const b = (attr, v, key, pressed, cls) => '<button type="button" class="btn ghost mini' + (cls ? " " + cls : "") + '" ' + attr + '="' + v + '" aria-pressed="' + pressed + '">' + esc(t(key)) + "</button>";
+    const wi = KC.dnd.usable("wi"), av = KC.dnd.usable("av");   /* v615: 🗡 Witcher, v616: 🌀 Avatar — own buttons on the left, after ⚔ Wr */
+    return '<div class="pt-mode" role="group" aria-label="' + esc(t("dnd.switch")) + '">'
+      + (tabs.length ? b("data-mode", wrOn ? m : KC.dnd.wrLast(scope), "wr.toWr", wrOn, "pt-wrb" + (wi || av ? "" : " pt-left-end")) : "")
+      + (wi ? b("data-mode", "wi", "wi.toWi", m === "wi", "pt-wib" + (av ? "" : " pt-left-end")) : "")
+      + (av ? b("data-mode", "av", "av.toAv", m === "av", "pt-avb pt-left-end") : "")
+      + b("data-mode", "sign", "dnd.toSign", m === "sign") + b("data-mode", "dnd", "dnd.toDnd", m === "dnd") + b("data-mode", "wod", "wod.toWod", m === "wod") + "</div>"
+      + (wrOn && tabs.length > 1 ? '<div class="pt-mode pt-wr-sub" role="group" aria-label="' + esc(t("wr.switch")) + '">' + tabs.map(x => b("data-mode", x, { wr: "wr.gods", wh: "wh.toWh", leg: "leg.toLeg", ow: "ow.toOw" }[x], m === x)).join("") + "</div>" : "")
       + (m === "wod" ? '<div class="pt-mode pt-wod-sub" role="group" aria-label="' + esc(t("wod.switch")) + '">' + LINES.map(l => b("data-wod", l, "wod.l." + l, l === cur)).join("") + "</div>" : "");
   }
   /* under the mode: only "not official World of Darkness material" (owner, v597); the full Dark Pack notice

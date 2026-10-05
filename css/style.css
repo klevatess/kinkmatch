@@ -168,7 +168,7 @@
 /* ============ site additions ============ */
 .overlay{position:fixed;inset:0;background:rgba(20,10,15,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:80}
 .overlay.show{display:flex}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);max-height:90vh;overflow:auto}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);max-height:90vh;max-height:90dvh;overflow:auto}
 .modal h3{font-family:Fraunces,Georgia,serif;margin:0 0 4px;font-size:21px}
 .modal p{color:var(--muted);font-size:13px;margin:4px 0 12px;line-height:1.55}
 .linkbox{display:flex;gap:8px}
@@ -329,7 +329,7 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
   .top-actions .btn{padding:6px 5px;font-size:12px}
   .top-actions #compareBtn{flex:2 1 42%}
   .top-actions #savedBtn{flex:1 1 30%}
-  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{flex:1 1 20%}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #roleView{flex:1 1 20%}
 }
 /* phones: fixed 8-column grid, always exactly two rows of buttons */
 @media (max-width:560px){
@@ -339,7 +339,7 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
   .top-actions #themeBtn{grid-column:span 1}
   .top-actions #compareBtn{grid-column:span 4}
   .top-actions #savedBtn{grid-column:span 3}
-  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{grid-column:span 2}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #roleView{grid-column:span 2}
 }
 @media (max-width:560px){
   .top-actions{align-items:stretch}
@@ -353,7 +353,7 @@ input.bad{border-color:var(--limit)!important;background:var(--limit-bg)}
   .top-actions #themeBtn{flex:0 0 34px;padding:7px 0}
   .top-actions #compareBtn{flex:0 1 calc(58% - 40px)}
   .top-actions #savedBtn{flex:0 1 42%}
-  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #resetBtn{flex:1 1 auto}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn, .top-actions #roleView{flex:1 1 auto}
 }
 @media (max-width:560px){
   .top-actions #savedBtn{flex:1 0 calc(42% - 12px)}
@@ -576,7 +576,7 @@ details.portrait .portrait-body{padding:4px 18px 18px}
 .rl-spinning .rl-item{opacity:.75}
 .rl-pair h4{margin:14px 0 4px;font-size:15px}
 .rl-note{color:var(--muted);font-size:13px;margin:6px 0}
-#rlOverlay .modal{max-height:88vh;overflow:auto}
+#rlOverlay .modal{max-height:88vh;max-height:88dvh;overflow:auto}
 .help-body h5{font-size:13px;color:var(--accent);margin:12px 0 2px;font-weight:600}
 /* help window: two tabs — "How to use" | "What's new" (green dot = new) */
 .help-tabs{display:flex;gap:18px;align-items:flex-end;border-bottom:1px solid var(--line2);margin:0 0 4px;padding-right:4px}
@@ -716,10 +716,10 @@ details.sp-fold>summary{font-size:17px}
 .sp-fold-body>.pt-mode{justify-content:center;margin:10px 0 0}
 /* v597: World of Darkness — the line switch under the mode switch, the Dark Pack notice */
 .pt-mode{flex-wrap:wrap}
-.pt-wod-sub{margin-top:-2px}
+.pt-wod-sub{margin-top:-2px;justify-content:center}   /* v615 (owner): centred like the ⚔ Wr tabs */
 .pt-wod-sub .btn{padding-left:8px;padding-right:8px}
 /* narrow screens: the four lines as a tidy 2 × 2 block instead of 3 + 1 */
-@media (max-width:520px){.pt-wod-sub{display:grid;grid-template-columns:repeat(2,auto);justify-content:end}.sp-signs .pt-wod-sub,.sp-fold-body>.pt-wod-sub{justify-content:center}}
+@media (max-width:520px){.pt-wod-sub{display:grid;grid-template-columns:repeat(2,auto);justify-content:center}.sp-signs .pt-wod-sub,.sp-fold-body>.pt-wod-sub{justify-content:center}}
 .sp-signs .pt-wod-sub{justify-content:center;margin:-2px 0 6px}
 .sp-fold-body>.pt-wod-sub{justify-content:center;margin:6px 0 0}
 .wod-note{font-size:10.5px;line-height:1.35;color:var(--muted);margin:8px 4px 0;text-align:center}
@@ -730,5 +730,81 @@ details.sp-fold>summary{font-size:17px}
 .share-count{font-size:13px;color:var(--muted);margin:0 2px;flex:1 1 auto}
 .share-count.zero{color:var(--limit);font-weight:600}
 .share-send{margin-left:auto;flex:0 0 auto}   /* v601 (owner): small, not a big colour block */
-/* v601: "new" dot next to "My portrait" */
-.pt-new{margin:0 2px}
+
+/* v607: the Close / Cancel button stays at the bottom of the window; only the text above it scrolls.
+   -22px = the .modal padding, so the bar sits on the window's bottom edge (same trick as .help-tabs). */
+.modal-foot{position:sticky;bottom:-22px;z-index:2;margin:6px 0 -22px;padding:8px 0 22px;background:var(--panel)}
+.modal-foot::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px;background:linear-gradient(rgba(0,0,0,0),var(--panel));pointer-events:none}
+/* v608: the practice list written into the /<lang>/ pages for search engines; hidden (not display:none),
+   replaced by the real list as soon as the scripts run */
+.seo-list{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+/* v611: ⚔ Wr is on the left of the mode row (the other modes stay on the right); its tabs (gods, 40K, legion) open under the row,
+   centred like the World of Darkness tabs (owner, Oct 4). The ⚔ sign is coloured so the button catches the eye (owner: "brighter"). */
+.pt-mode .pt-left-end{margin-right:auto}   /* v615: ⚔ Wr and 🗡 Witcher on the left, the rest on the right */
+.pt-mode .pt-wrb::first-letter{color:#a8323a;font-size:1.2em;line-height:1}
+.pt-wr-sub,.sp-signs .pt-wr-sub,.sp-fold-body>.pt-wr-sub{justify-content:center;margin:-2px 0 6px}
+.pt-wr-sub .btn{padding-left:8px;padding-right:8px}
+/* v613: the extended list — two rows per practice ("↑ Верх" / "↓ Низ"), each with its answers and "✦ Хочу";
+   "Расширенная" next to the count; the header switch and the role filter. Colours stay as in a plain list (owner). */
+.ext-badge{display:inline-block;font-size:11px;line-height:1;padding:3px 7px;border:1px solid var(--line);border-radius:20px;color:var(--muted);margin-left:6px;vertical-align:middle;letter-spacing:.02em}
+.ext-rows{display:flex;flex-direction:column;gap:5px}
+.ext-row{display:flex;align-items:center;gap:6px}
+.ext-row .rl{font-size:11px;color:var(--muted);width:44px;flex:0 0 44px;white-space:nowrap}
+.ext-row .scale button{padding:6px 10px;font-size:12px}
+.ext-row.r-hidden{display:none}
+.want{font:inherit;font-size:11.5px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:6px 8px;white-space:nowrap;cursor:pointer}
+.want.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.want[disabled]{opacity:.35;cursor:default}
+/* v615 (owner): the plain ⇄ extended switch is a square icon button next to ♥ (one row with the lists, no extra row);
+   the role filter sits in the header row where "Clear" was (hidden for a plain list) */
+.ext-tg[hidden],.role-view[hidden]{display:none}
+.ext-tg{font-size:18px}
+.ext-tg:hover{border-color:var(--accent)}
+.ext-tg:has(input:checked){color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.top-actions select.role-view{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 8px;cursor:pointer}
+/* a list that filters something: the same small accent dot as "Все пункты" / "Шаблон…" (CODING_RULES: never a filled field) */
+.top-actions select.role-view.on{background:var(--panel) radial-gradient(circle, var(--accent) 0 3.5px, transparent 4px) no-repeat 10px 50% / 10px 10px;padding-left:26px;color:var(--ink);font-weight:400}
+@media (max-width:560px){
+  .subbar .ext-tg{order:3;width:38px}
+  .top-actions select.role-view{font-size:11.5px;padding:6px 2px;flex:0 1 auto !important;max-width:84px;min-width:0}
+  .top-actions select.role-view.on{padding-left:20px;background-position:6px 50%}
+}
+.ext-note{font-size:13px;color:var(--muted);margin:4px 0 0}
+.ext-make{margin-top:10px}
+/* a long extended list: the browser lays out only the sections near the screen (owner: open as fast as a plain list) */
+.is-ext .cat{content-visibility:auto;contain-intrinsic-size:auto 1400px}
+/* v613: compare with extended lists */
+.ext-tag{display:inline-block;font-size:11px;font-weight:400;padding:2px 7px;border:1px solid var(--line);border-radius:20px;color:var(--muted);margin-left:4px;vertical-align:1px}
+.cmp-role.role-need{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.role-hint{font-size:12.5px;color:var(--accent);margin:4px 2px 6px;line-height:1.35}
+.role-hint.ext-hint{color:var(--muted)}
+.role-hint[hidden]{display:none}
+.cmp-dir{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 4px;font-size:13px;color:var(--muted)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:12.5px;padding:6px 10px;border:none;background:var(--panel);color:var(--muted);border-left:1px solid var(--line);cursor:pointer}
+.seg button:first-child{border-left:none}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.cmp-rl{display:flex;gap:8px;flex-wrap:wrap}.cmp-rl .btn{flex:1 1 45%}
+.want-tag{display:inline-block;font-size:11.5px;color:var(--accent);margin-left:3px;font-weight:600;white-space:nowrap}
+.pt-role{margin:6px 0 14px}.pt-role + .pt-role{border-top:1px dashed var(--line);padding-top:12px}
+.pt-role-h{font-size:14px;color:var(--muted);font-weight:600;margin:0 0 4px}
+
+/* v614: "Constellation guide" tab of the help window (built when opened, from js/lore/<lang>.lore.js) */
+.help-tab[hidden], .help-body[hidden]{display:none}
+.help-lore h4{margin:16px 0 2px;padding-top:10px;border-top:1px solid var(--line2)}
+.help-lore h4:first-of-type{border-top:0;padding-top:0}
+.lore-item{margin:10px 0}
+.lore-item h5{margin:0 0 2px;font-size:14px}
+.lore-item p{margin:2px 0 6px;font-size:13.5px;line-height:1.55}
+.lore-lead,.lore-none{color:var(--muted);font-size:13px}
+.lore-note{color:var(--muted);font-size:12px;margin-top:16px;border-top:1px solid var(--line2);padding-top:8px}
+@media (max-width:520px){.help-tabs{gap:18px}.help-tab{font-size:17px}.help-tab .new-dot{right:-11px}}
+/* v615: the mode buttons at the top of the constellation guide */
+.lore-sw{margin:6px 0 12px;padding-bottom:10px;border-bottom:1px solid var(--line2)}
+.lore-sw .pt-mode{display:flex;gap:6px}
+.lore-sw .pt-mode + .pt-mode{margin-top:6px}
+/* v617: the note of a starter template under the intro */
+.tpl-desc{margin:10px 0 0;padding:9px 12px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--ink)}
+.tpl-desc[hidden]{display:none}
+.tpl-starter .meta span{color:var(--muted)}
