@@ -280,10 +280,33 @@
       });
       const cnt = sec.querySelector(".cat-head .count"); if (cnt) cnt.textContent = "(" + inTpl + ")";
       sec.classList.toggle("empty", visible === 0); if (visible) any = true;
+      sec.dataset.rows = visible;
     });
     KC.$("noresults").style.display = any ? "none" : "block";
     F.renderFiltDot();
+    F.sizeCats();
   };
+
+  /* v622: an extended list lays out only the sections near the screen (content-visibility, css). A section not laid
+     out yet takes the height given here, so the page must guess it well: with one fixed guess (1400 px, v613) every
+     section grew by thousands of px as it came on screen — the page jumped and stuttered while scrolling (owner, Oct 5).
+     Guess = the section's head + its shown rows × the average row height measured on this device. After a filter
+     change the remembered heights are dropped (no "auto" for one frame), so a section that changed is guessed anew. */
+  let sizeFrame = 0;
+  F.sizeCats = function () {
+    if (!document.body.classList.contains("is-ext")) return;
+    const cats = [...document.querySelectorAll(".cat")].filter(s => +s.dataset.rows > 0);
+    if (!cats.length) return;
+    const probe = cats[0], head = probe.querySelector(".cat-head");
+    const headH = head ? head.getBoundingClientRect().height + 26 : 60;    /* + the section's top margin */
+    const rows = [...probe.querySelectorAll(".item:not(.filtered-out)")];
+    const rowH = rows.length ? rows.reduce((a, r) => a + r.getBoundingClientRect().height, 0) / rows.length : 150;
+    const px = s => Math.round(headH + (+s.dataset.rows) * rowH) + "px";
+    cats.forEach(s => { s.style.containIntrinsicSize = px(s); });
+    clearTimeout(sizeFrame);
+    sizeFrame = setTimeout(() => { cats.forEach(s => { s.style.containIntrinsicSize = "auto " + px(s); }); }, 50);
+  };
+  let sizeT = 0; window.addEventListener("resize", () => { clearTimeout(sizeT); sizeT = setTimeout(F.sizeCats, 250); });
 
   /* template picker in the filter panel + the note above the list */
   F.renderTplUI = function () {

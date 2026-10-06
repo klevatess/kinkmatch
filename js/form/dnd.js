@@ -280,7 +280,7 @@
     if (WRG.indexOf(m) >= 0 && usable(m)) KC.ls.setRaw(WRKEY(scope), m); };
   /* v611: ⚔ Wr is one button on the left that opens its own tabs — Chaos gods (wr), factions (wh), legions (leg), (v612) Old World (ow), Witcher (wi).
      The tab chosen last is remembered (per scope) and reopened by the ⚔ Wr button; a tab that is switched off is skipped. */
-  const WR = ["wr", "wh", "leg", "ow", "wi", "av"];   /* v616: + "av" = Avatar elements (KC.av), its own button like the Witcher */
+  const WR = ["wr", "wh", "leg", "ow", "wi", "av", "rz"];   /* v616: + "av" = Avatar elements (KC.av), its own button like the Witcher; v623: + "rz" = Re:Zero sins (KC.rz) */
   /* v615 (owner): the Witcher (wi) is its own button next to ⚔ Wr, not a tab inside it. WR = every mode of this family
      (they need the list itself: isWr, wrOf); WRG = the tabs under ⚔ Wr. */
   const WRG = ["wr", "wh", "leg", "ow"];

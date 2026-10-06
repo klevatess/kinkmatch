@@ -105,8 +105,9 @@
     const attrs = sg.dnd ? ' data-cls="' + sg.cls + '" data-al="' + hd.alKey + '" data-race="' + hd.race + '" data-lv="' + hd.lv + '"'
       : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : sg.wr ? ' data-god="' + sg.id + '" data-mut="' + sg.mut + '"'
       : sg.wh ? ' data-faction="' + sg.id + '"' : sg.leg ? ' data-legion="' + sg.id + '"' : sg.ow ? ' data-race="' + sg.id + '"' : sg.wi ? ' data-school="' + sg.id + '" data-wsign="' + sg.wsign + '"'
-      : sg.av ? ' data-el="' + sg.id + '" data-type="' + (sg.type || "") + '"' + (sg.avatar ? ' data-avatar="1"' : "") : "";
-    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
+      : sg.av ? ' data-el="' + sg.id + '" data-type="' + (sg.type || "") + '"' + (sg.avatar ? ' data-avatar="1"' : "")
+      : sg.rz ? ' data-sin="' + sg.id + '" data-rank="' + sg.rank + '"' : "";
+    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : sg.rz ? " pt-rz" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
       + (hd.rl ? '<div class="sg-rl">' + esc(hd.rl) + "</div>" : "") + '<div class="sg-sub">' + esc(hd.sub) + "</div>"
       + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : KC.dnd.wrOf(sg) ? KC.wr.noticeHTML() : "") + "</div>";
   }
@@ -130,6 +131,7 @@
     if (sg.leg) return KC.leg.LEGIONS.indexOf(sg.id) >= 0 ? [k("leg.l." + sg.id)] : [{ key: "leg.lost", vars: { n: KC.leg.NUM[sg.id] } }];
     if (sg.ow) return [k("ow.r." + sg.id)].concat(sg.grudges !== null && sg.grudges !== undefined ? [kv("ow.grudges", sg.grudges)] : []);
     if (sg.wi) return [k("wi.s." + sg.id), k("wi.g." + sg.wsign)];
+    if (sg.rz) return [k("rz.s." + sg.id), { key: "rz.r." + sg.rank, vars: { s: t("rz.g." + sg.id) } }];
     if (sg.av) return sg.avatar ? [k("av.avatar"), k("av.e." + sg.id)] : [k("av.e." + sg.id)].concat(sg.type ? [k("av.t." + sg.type)] : []);
     return [];   /* the constellation itself: our own signs, nothing to look up */
   }

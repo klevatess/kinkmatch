@@ -20,7 +20,7 @@ function manifest() {
 function release() {}
 /* v621: the site ships with new things locked (KC.FEATURES false, announced one by one); tests see everything
    unlocked unless they ask for the shipped state with { locked: true } */
-const FEAT_ALL = "KC.FEATURES = { wr: true, wh: true, leg: true, ow: true, wi: true, av: true }; KC.FEATURES.ext = true;";
+const FEAT_ALL = "KC.FEATURES = { wr: true, wh: true, leg: true, ow: true, wi: true, av: true }; KC.FEATURES.ext = true; KC.FEATURES.rz = true;";
 function unlock(f, src, locked) { return f === "core/kc.js" && !locked ? src.replace(/KC\.FEATURES = \{[^}]*\};/, FEAT_ALL) : src; }
 /* scope(): pages opened until .end() are closed by it (self-contained test blocks free their memory) */
 let SCOPE = null;

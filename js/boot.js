@@ -20,8 +20,8 @@
       "@lang",
       "core/ext.js", "core/lore.js", "core/codec.js", "core/store.js", "core/match.js", "core/help.js", "core/stats.js", "core/migrate.js", "core/portrait.js",
     ],
-    form:    ["form/render.js", "form/events.js", "form/pdf.js", "form/share.js", "form/library.js", "form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/portrait.js", "form/nebula.js", "form/migrate.js", "form/main.js"],
-    compare: ["form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "compare/space.js", "compare/main.js", "compare/roulette.js"],
+    form:    ["form/render.js", "form/events.js", "form/pdf.js", "form/share.js", "form/library.js", "form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "form/portrait.js", "form/nebula.js", "form/migrate.js", "form/main.js"],
+    compare: ["form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "compare/space.js", "compare/main.js", "compare/roulette.js"],
     LANGS: LANGS,
     fallback: fallback,   /* also used by KC.i18n.detect, so both pick the same */
     /* the files of one language; English practice names are needed on every page (the grey line under a name) */

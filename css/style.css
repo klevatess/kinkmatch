@@ -48,8 +48,7 @@
   header.top{
     position:sticky; top:0; z-index:30;
     padding-top:env(safe-area-inset-top,0px);
-    background:color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    background:var(--bg);   /* v622: solid, no blur — the blur was redrawn on every scroll frame over the long list */
     border-bottom:1px solid var(--line);
   }
   .top-inner{max-width:820px; margin:0 auto; padding:9px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
@@ -166,9 +165,9 @@
 
 
 /* ============ site additions ============ */
-.overlay{position:fixed;inset:0;background:rgba(20,10,15,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:80}
+.overlay{overscroll-behavior:contain;position:fixed;inset:0;background:rgba(20,10,15,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:80}
 .overlay.show{display:flex}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);max-height:90vh;max-height:90dvh;overflow:auto}
+.modal{overscroll-behavior:contain;background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);max-height:90vh;max-height:90dvh;overflow:auto}
 .modal h3{font-family:Fraunces,Georgia,serif;margin:0 0 4px;font-size:21px}
 .modal p{color:var(--muted);font-size:13px;margin:4px 0 12px;line-height:1.55}
 .linkbox{display:flex;gap:8px}
@@ -808,3 +807,6 @@ details.sp-fold>summary{font-size:17px}
 .tpl-desc{margin:10px 0 0;padding:9px 12px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--ink)}
 .tpl-desc[hidden]{display:none}
 .tpl-starter .meta span{color:var(--muted)}
+
+/* v622: a window is open — the page behind stays still */
+html.has-modal,html.has-modal body{overflow:hidden}

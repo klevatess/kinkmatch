@@ -1695,7 +1695,7 @@ const S = (title) => console.log("\n## " + title);
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => {
       hp.KC.i18n.set(l); hp.KC.help.open("news");
       const s3 = hp.d.getElementById("helpNews");
-      ok(s3 && !s3.hidden && hp.d.getElementById("helpPane").hidden && s3.querySelectorAll("h5").length === 5 && /5/.test(s3.querySelectorAll("h5")[0].textContent) && s3.querySelectorAll("ul")[0].querySelectorAll("li").length === 8 && /29/.test(s3.querySelectorAll("h5")[1].textContent) && /29/.test(s3.querySelectorAll("h5")[2].textContent) && /DnD/.test(s3.querySelectorAll("h5")[2].textContent) && /29/.test(s3.querySelectorAll("h5")[3].textContent) && /27/.test(s3.querySelectorAll("h5")[4].textContent) && [1, 2, 3, 4].map(k => s3.querySelectorAll("ul")[k].querySelectorAll("li").length).join() === "6,8,8,3", l + ": “What's new” tab (v601): World of Darkness (6 points) on top, the DnD update (8) and Kinkosmos (8) dated 29 Sept, 27 Sept (3) below");
+      ok(s3 && !s3.hidden && hp.d.getElementById("helpPane").hidden && s3.querySelectorAll("h5").length === 6 && /5/.test(s3.querySelectorAll("h5")[1].textContent) && s3.querySelectorAll("ul")[0].querySelectorAll("li").length === 4 && s3.querySelectorAll("ul")[1].querySelectorAll("li").length === 8 && /29/.test(s3.querySelectorAll("h5")[2].textContent) && /29/.test(s3.querySelectorAll("h5")[3].textContent) && /DnD/.test(s3.querySelectorAll("h5")[3].textContent) && /29/.test(s3.querySelectorAll("h5")[4].textContent) && /27/.test(s3.querySelectorAll("h5")[5].textContent) && [2, 3, 4, 5].map(k => s3.querySelectorAll("ul")[k].querySelectorAll("li").length).join() === "6,8,8,3", l + ": “What's new” tab (v601): World of Darkness (6 points) on top, the DnD update (8) and Kinkosmos (8) dated 29 Sept, 27 Sept (3) below");
       ok(hp.d.getElementById("helpNewsTab").textContent === hp.KC.i18n.t("help.news.h") && !!hp.d.querySelector("#helpNewsTab .new-dot"), l + ": tab name with a green dot");
     });
     eq([hp.KC.help.SECTIONS.indexOf("news"), !!hp.d.getElementById("help-news"), hp.d.querySelectorAll('#helpToc button[data-go="news"]').length], [-1, false, 0], "“What's new” is not a section of “How to use”");
@@ -1914,7 +1914,7 @@ const S = (title) => console.log("\n## " + title);
     ok(/созвезд/i.test(h.d.getElementById("help-portrait").textContent) && /Что попробуем/.test(h.d.getElementById("help-roulette").textContent), "portrait (with the constellation) and roulette are explained");
     ok(/Система компании/.test(h.d.getElementById("help-compare").textContent) && /туманност/.test(h.d.getElementById("help-tpl").textContent), "compare pictures and template nebulas are explained");
     h.KC.help.open("news");
-    eq(h.d.querySelectorAll("#helpNews h5")[3].textContent, "29 сентября 2026", "what's new: the Kinkosmos entry (under the WoD and DnD updates; dated 29 Sept, owner v601)");
+    eq(h.d.querySelectorAll("#helpNews h5")[4].textContent, "29 сентября 2026", "what's new: the Kinkosmos entry (under the WoD and DnD updates; dated 29 Sept, owner v601)");
     ok(!!h.d.querySelector('#portraitSection summary .help-q[data-help="lore"]'), "“?” next to the portrait opens the constellation guide");
     ok(!h.errors.length, "no script errors");
     _sc.end();
@@ -1996,7 +1996,7 @@ const S = (title) => console.log("\n## " + title);
     ok(/DnD/.test(g.d.getElementById("help-portrait").textContent) && /Мировоззрение/.test(g.d.getElementById("help-portrait").textContent) && /половина «Нет»/.test(g.d.getElementById("help-portrait").textContent), "help: the DnD mode and the alignment are explained");
     ok(!/Небо|пронумерован/.test(g.d.getElementById("help-roulette").textContent), "help: the roulette sky is no longer mentioned");
     g.KC.help.open("news");
-    const top = g.d.querySelectorAll("#helpNews ul")[1];   /* v601: the World of Darkness entry is on top */
+    const top = g.d.querySelectorAll("#helpNews ul")[2];   /* v601: the World of Darkness entry is on top */
     ok(/DnD/.test(top.textContent) && !/небо общих/.test(top.textContent), "what's new: the DnD mode is in, the roulette sky is out");
     const skyKeys = []; LANGS.forEach(l => ["rl.sky", "rl.skyBold"].forEach(k => { if (K.i18n.has("ui", k, l)) skyKeys.push(l + ":" + k); }));
     eq(skyKeys, [], "the sky's texts are gone in every language");
@@ -2139,7 +2139,7 @@ const S = (title) => console.log("\n## " + title);
     g.KC.help.open("portrait"); ok(/Раса/.test(g.d.getElementById("help-portrait").textContent) && /Уровень/.test(g.d.getElementById("help-portrait").textContent), "help: race and level are explained");
     g.KC.help.open("news");
     const h5 = g.d.querySelectorAll("#helpNews h5"), uls = g.d.querySelectorAll("#helpNews ul");
-    ok(/DnD-обновление/.test(h5[2].textContent) && /Раса/.test(uls[2].textContent) && /Партия/.test(uls[2].textContent) && !/DnD/.test(uls[3].textContent), "what's new: the DnD update is its own entry (under World of Darkness); the Kinkosmos entry no longer lists DnD");
+    ok(/DnD-обновление/.test(h5[3].textContent) && /Раса/.test(uls[3].textContent) && /Партия/.test(uls[3].textContent) && !/DnD/.test(uls[4].textContent), "what's new: the DnD update is its own entry (under World of Darkness); the Kinkosmos entry no longer lists DnD");
     ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !c4.errors.length, "no script errors");
     _sc.end();
   }
@@ -2220,7 +2220,7 @@ const S = (title) => console.log("\n## " + title);
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
     const pv = g.d.querySelector(".pt-wod");
     ok(!!pv && pv.dataset.line === "fey" && /Ваш род/i.test(pv.querySelector(".sg-over").textContent) && !pv.querySelector(".sg-al") && pv.querySelector(".wod-note").textContent === "Не официальный материал World of Darkness." , "portrait: the fey kith, no alignment line, only “not official” under it (the full notice is in the help)");
-    ok(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wod-sub):not(.pt-wr-sub) [data-mode]").length === 3 + (g.KC.dnd.wrTabs().length ? 1 : 0) + (g.KC.dnd.usable("wi") ? 1 : 0) + (g.KC.dnd.usable("av") ? 1 : 0) && g.d.querySelector('.pt-wod-sub [data-wod="fey"]').getAttribute("aria-pressed") === "true", "three modes + ⚔ Wr when one of its tabs is switched on (v611); the fey button is pressed");
+    ok(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wod-sub):not(.pt-wr-sub) [data-mode]").length === 3 + (g.KC.dnd.wrTabs().length ? 1 : 0) + (g.KC.dnd.usable("wi") ? 1 : 0) + (g.KC.dnd.usable("av") ? 1 : 0) + (g.KC.dnd.usable("rz") ? 1 : 0) && g.d.querySelector('.pt-wod-sub [data-wod="fey"]').getAttribute("aria-pressed") === "true", "three modes + ⚔ Wr when one of its tabs is switched on (v611); the fey button is pressed");
     click(g.w, g.d.querySelector('.pt-wod-sub [data-wod="vamp"]'));
     ok(g.d.querySelector(".pt-wod").dataset.line === "vamp" && g.w.localStorage.getItem("checklist-wod") === "vamp" && /поколение/.test(g.d.querySelector(".pt-wod .sg-rl").textContent), "→ vampire: sect · generation; the line is remembered");
     click(g.w, g.d.querySelector('.pt-mode [data-mode="dnd"]'));
@@ -2322,11 +2322,11 @@ const S = (title) => console.log("\n## " + title);
     const g = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
     g.KC.help.open("news");
     const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
-    eq(h5, ["5 октября 2026 · Расширенная анкета", "29 сентября 2026 · Мир Тьмы", "29 сентября 2026 · DnD-обновление", "29 сентября 2026", "27 сентября 2026"], "what's new: (v613) the extended list on top, then World of Darkness, DnD and Kinkosmos dated 29 September (owner)");
-    ok(/Ярость и Гнозис/.test(g.d.querySelectorAll("#helpNews ul")[1].textContent) && /Не официальный материал World of Darkness/.test(g.d.querySelectorAll("#helpNews ul")[1].textContent), "…the WoD entry lists the lines and the notice");
+    eq(h5, ["7 октября 2026 · Боги Хаоса и Грехи Re:Zero", "5 октября 2026 · Расширенная анкета", "29 сентября 2026 · Мир Тьмы", "29 сентября 2026 · DnD-обновление", "29 сентября 2026", "27 сентября 2026"], "what's new: (v613) the extended list on top, then World of Darkness, DnD and Kinkosmos dated 29 September (owner)");
+    ok(/Ярость и Гнозис/.test(g.d.querySelectorAll("#helpNews ul")[2].textContent) && /Не официальный материал World of Darkness/.test(g.d.querySelectorAll("#helpNews ul")[2].textContent), "…the WoD entry lists the lines and the notice");
     const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"], nf = [];
-    LANGS.forEach(l => { g.KC.i18n.set(l); g.KC.help.open("news"); const n = g.d.querySelectorAll("#helpNews h5").length; if (n !== 5 || /28/.test(g.d.querySelectorAll("#helpNews h5")[2].textContent)) nf.push(l + ":" + n); });
-    eq(nf, [], "the same five entries and dates in all 7 languages");
+    LANGS.forEach(l => { g.KC.i18n.set(l); g.KC.help.open("news"); const n = g.d.querySelectorAll("#helpNews h5").length; if (n !== 6 || /28/.test(g.d.querySelectorAll("#helpNews h5")[3].textContent)) nf.push(l + ":" + n); });
+    eq(nf, [], "the same six entries and dates in all 7 languages");
     g.KC.i18n.set("ru");
     // portrait "new" dot, “Only No” filter
     ok(!g.d.querySelector("#portraitSection summary .new-dot"), "v615: no green dot next to “My portrait” (owner)");
@@ -2637,7 +2637,7 @@ const S = (title) => console.log("\n## " + title);
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(own) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
     const row = g.d.querySelector("#portraitBody .pt-mode");
-    eq([...row.querySelectorAll("[data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "v611/v615/v616: one row — ⚔ Wr, 🗡 Witcher and 🌀 Avatar on the left, then ✦ 🎲 🦇");
+    eq([...row.querySelectorAll("[data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "📖 Грехи Re:Zero", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "v611/v615/v616: one row — ⚔ Wr, 🗡 Witcher and 🌀 Avatar on the left, then ✦ 🎲 🦇");
     ok(!g.d.querySelector(".pt-wr-sub"), "no ⚔ Wr tabs before ⚔ Wr is chosen");
     click(g.w, g.d.querySelector('.pt-mode .pt-wrb'));
     const pv = g.d.querySelector(".pt-wr");
@@ -2719,7 +2719,7 @@ const S = (title) => console.log("\n## " + title);
     const ork = lover(H.PROF.orks); ork.name = "Ann";
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ork) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
-    eq(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub) [data-mode]").length, 6, "six buttons in the mode row while every switch is on (⚔ Wr + 🗡 Witcher + 🌀 Avatar + three)");
+    eq(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub) [data-mode]").length, 7, "seven buttons in the mode row while every switch is on (⚔ Wr + 🗡 Witcher + 🌀 Avatar + 📖 Re:Zero + three)");
     click(g.w, g.d.querySelector('.pt-mode .pt-wrb')); click(g.w, g.d.querySelector('.pt-wr-sub [data-mode="wh"]'));
     const pw = g.d.querySelector(".pt-wh");
     ok(!!pw && pw.dataset.faction === "orks" && /Ваша фракция/.test(pw.querySelector(".sg-over").textContent) && pw.querySelector(".sg-name").textContent === "Орки"
@@ -2892,7 +2892,7 @@ const S = (title) => console.log("\n## " + title);
     const imp = fresh.KC.store.importAll(bk), m2 = fresh.KC.store.mine.list(), xe = m2.find(x => x.data.ext), xp = m2.find(x => !x.data.ext);
     ok(imp && imp.mine === 2 && !!xe && xe.data.items.chains.b === "love" && xe.data.items.chains.t === "limit" && xe.data.pair === xp.data.uid && xp.data.pair === xe.data.uid && bk.own.ext === 1,
       "a backup carries the extended list with both roles; restoring it keeps both lists and their link");
-    fresh.KC.help.open("answer"); ok(/Расширенная анкета/.test(fresh.d.getElementById("help-answer").textContent) && /Новое вместе/.test(fresh.KC.i18n.t("help.news_html").slice(0, 1300)), "help explains the extended list; «Что нового» has the entry of Oct 4");
+    fresh.KC.help.open("answer"); ok(/Расширенная анкета/.test(fresh.d.getElementById("help-answer").textContent) && /Новое вместе/.test(fresh.KC.i18n.t("help.news_html").slice(0, 5000)), "help explains the extended list; «Что нового» has the entry of Oct 4");
     // the portrait: one per role, a card per role; the PDF: both roles
     const sec = h.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new h.w.Event("toggle"));
     ok(h.d.querySelectorAll(".pt-role").length === 2 && !!h.d.querySelector('.pt-role[data-r="b"] .pt-sign') && /↑ Верх/.test(h.d.querySelector('.pt-role[data-r="t"] .pt-role-h').textContent) && !!h.d.querySelector('.pt-role[data-r="b"] [data-card="b"]'),
@@ -3093,7 +3093,7 @@ const S = (title) => console.log("\n## " + title);
     const st = mk((id, i) => i < 320 ? V[(i * 7 + 3) % 4] : null); st.name = "Ann";
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
-    eq([...g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub):not(.pt-wod-sub) [data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "mode row: ⚔ Wr, 🗡 Witcher, 🌀 Avatar on the left");
+    eq([...g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub):not(.pt-wod-sub) [data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "📖 Грехи Re:Zero", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "mode row: ⚔ Wr, 🗡 Witcher, 🌀 Avatar on the left");
     click(g.w, g.d.querySelector(".pt-mode .pt-avb"));
     const pv = g.d.querySelector(".pt-av");
     ok(!!pv && A.ELEMENTS.indexOf(pv.dataset.el) >= 0 && /Ваша стихия/.test(pv.querySelector(".sg-over").textContent) && /^(Обычный тип|Особый тип|Редкий тип|Без особого типа)/.test(pv.querySelector(".sg-rl").textContent)
@@ -3245,28 +3245,97 @@ const S = (title) => console.log("\n## " + title);
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
     const f = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
-    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), [], "every new switch is off in the shipped build");
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), ["wr", "rz"], "shipped build: only ⚔ Wr and (v623) 📖 Re:Zero are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
-    ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wrb, .pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no ⚔ Wr / 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
+    ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
     K.dnd.setMode("wi"); eq(K.dnd.mode(), "sign", "choosing a locked mode stores nothing");
-    ok(!/data-mode="(wr|wh|leg|ow|wi|av)"/.test(K.lore.switchHTML()), "constellation guide: no locked mode buttons");
-    const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wr|wh|leg|ow|wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
+    ok(!/data-mode="(wh|leg|ow|wi|av)"/.test(K.lore.switchHTML()), "constellation guide: no locked mode buttons");
+    const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wh|leg|ow|wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
     K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
-    ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb) && !/⚔ Wr/.test(hb), "help: no extended-list, Wr or Avatar paragraphs");
-    ok(!hn.querySelector("[data-feat]") && !/Расширенная анкета|✦ Хочу|Обе роли/.test(hn.textContent) && /Кнопки «Очистить» больше нет/.test(hn.textContent) && /Стартовые шаблоны/.test(hn.textContent) && /^5 октября 2026$/.test(hn.querySelector("h5").textContent),
+    ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb), "help: no extended-list or Avatar paragraphs");
+    ok(!hn.querySelector("[data-feat]") && !/Расширенная анкета|✦ Хочу|Обе роли/.test(hn.textContent) && /Кнопки «Очистить» больше нет/.test(hn.textContent) && /Стартовые шаблоны/.test(hn.textContent) && /^5 октября 2026$/.test(hn.querySelectorAll("h5")[1].textContent),
       "What's new: the 5 Oct entry without the extended list (its lines stay in the code), the Clear line and starter templates shown");
     ok(/data-feat=\\"ext/.test(require("fs").readFileSync(__dirname + "/../js/lang/ru.ui.js", "utf8")), "…the extended-list lines are kept in the texts");
-    const e0 = open("form", { locked: true }); e0.KC.help.open("lore"); ok(!/Wr/.test(e0.d.getElementById("helpLore").textContent) && /Мир Тьмы\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names no ⚔ Wr");
+    const e0 = open("form", { locked: true }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
     f.KC.store.mine.sync(f.KC.form.state); f.d.getElementById("mineBtn").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true }));
     ok(f.d.getElementById("mineList").textContent.length > 0 && !/Обычная/.test(f.d.getElementById("mineList").textContent), "My lists: no «Обычная» mark while the extended list is locked");
     // an extended list made before the lock still opens and keeps its switch (way back to the plain list)
     const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
     const g = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
     ok(!g.d.getElementById("extToggleBox").hidden && !g.d.getElementById("roleView").hidden, "an extended list keeps ⇅ and the role filter");
-    const c = open("compare", { locked: true }); ok(!c.errors.length && !/data-mode="(wr|av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
+    const c = open("compare", { locked: true }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
     const u = open("form"); u.KC.help.open("news"); ok(/Расширенная анкета/.test(u.d.getElementById("helpNews").textContent) && !/Кнопки «Очистить» больше нет/.test(u.d.getElementById("helpNews").textContent), "unlocked: the extended-list lines come back, the stand-in line goes");
     ok(!f.errors.length && !g.errors.length && !u.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v622: smooth scrolling: section height guesses for the extended list, the page behind a window stays still");
+  {
+    const _sc = scope();
+    const css = require("fs").readFileSync(__dirname + "/../css/style.css", "utf8");
+    ok(!/header\.top\{[^}]*backdrop-filter/.test(css) && /html\.has-modal,html\.has-modal body\{overflow:hidden\}/.test(css) && /\.modal\{overscroll-behavior:contain/.test(css), "css: solid header without blur, windows hold the scroll, page locked under a window");
+    const f = open("form"), K = f.KC, d = f.d;
+    K.help.open("news"); ok(d.documentElement.classList.contains("has-modal"), "a window open → the page is locked");
+    d.getElementById("helpClose").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true })); ok(!d.documentElement.classList.contains("has-modal"), "closed → unlocked");
+    const plain = { items: {}, meta: { role: "dom" } }; let n = 0; K.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe"][n++ % 3] }; }));
+    const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
+    const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    const cats = [...g.d.querySelectorAll(".cat")];
+    ok(g.d.body.classList.contains("is-ext") && cats.every(c => +c.dataset.rows === c.querySelectorAll(".item:not(.filtered-out)").length) && cats.every(c => /px$/.test(c.style.containIntrinsicSize)), "extended list: every section gets its own height guess from its shown rows");
+    ok(!f.errors.length && !g.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v623: ⚔ Wr (Chaos gods) unlocked with its tab row; 📖 Re:Zero sins: seven sins, three ranks, Sloth from unanswered items");
+  {
+    const _sc = scope();
+    const fsx = require("fs"), LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const f = open("form"), K = f.KC, R = K.rz;
+    eq(R.SINS.length + "/" + R.RACE.length + "/" + R.RANKS.join(), "7/6/follower,archbishop,witch", "seven sins (six compete, Sloth from U), three ranks");
+    const bad = [];
+    R.SINS.forEach(k => { const F = R.FIG[k]; if (!F) { bad.push(k + ": no sign"); return; } const [P, E, Ln, B] = F, n = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) bad.push(k + ": stars");
+      Ln.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < n)) bad.push(k + ": line " + i); })); });
+    eq(bad, [], "every sin has a sign: 9 group stars, 3 bright slots, lines only to existing stars");
+    // texts in every language
+    const miss = [];
+    LANGS.forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".ui.js", "utf8"))({ addLang: (lg, k, d) => Object.assign(o, d) });
+      ["rz.toRz", "rz.mine", "rz.their", "card.o.rz", "sp.rz.h", "sp.rz.grp", "sp.rz.same", "sp.rz.near", "sp.rz.far", "help.rz_html", "help.compareRz_html"].concat(R.SINS.map(k => "rz.s." + k), R.SINS.map(k => "rz.g." + k), R.RANKS.map(k => "rz.r." + k))
+        .forEach(k => { if (!o[k]) miss.push(l + ":" + k); });
+      if (!/^<h5>[^<]*(7|7 日|7日)[^<]*<\/h5>/.test(o["help.news_html"]) || !/Re:Zero|リゼロ/.test(o["help.news_html"].slice(0, 300))) miss.push(l + ": news of Oct 7");
+      const lo = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(lo, d) });
+      R.SINS.map(k => "rz.s." + k).concat(R.RANKS.map(k => "rz.r." + k)).forEach(k => { if (!lo[k]) miss.push(l + ": lore " + k); }); });
+    eq(miss, [], "names, ranks, help, the Oct 7 news and the guide texts in all 7 languages");
+    // Sloth from unanswered items; a template-filled list counts against the template
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    const fill = (n, v) => { const st = K.store.blank(); ids.slice(0, n).forEach((id, i) => { st.items[id] = { interest: v || ["yes", "love", "maybe", "limit"][i % 4] }; }); return st; };
+    const lazy = fill(Math.floor(ids.length * .2)), c1 = R.choose(K.portrait.compute(lazy, null), lazy, null);
+    eq(c1 && c1.sin + "/" + c1.rank, "sloth/witch", "80 % unanswered → Witch of Sloth");
+    const starter = K.store.tpl.starters()[0], tl = K.store.blank(); starter.ids.forEach((id, i) => { tl.items[id] = { interest: ["yes", "love", "maybe"][i % 3] }; });
+    eq(R.answers(tl).U, 0, "a list filled only from a starter template: counted against the template (nothing unanswered)");
+    const tl2 = JSON.parse(JSON.stringify(tl)); ids.filter(id => starter.ids.indexOf(id) < 0).slice(0, 5).forEach(id => { tl2.items[id] = { interest: "yes" }; });
+    ok(R.answers(tl2).U > .5, "5 positive answers outside the template → counted against the whole list");
+    const full = fill(ids.length), c2 = R.choose(K.portrait.compute(full, null), full, null);
+    ok(c2 && c2.sin !== "sloth" && R.RANKS.indexOf(c2.rank) >= 0, "a full list: one of the six, with a rank");
+    const greedy = fill(ids.length, "love"), cg = R.scores(K.portrait.compute(greedy, null), greedy, null), maybe = fill(ids.length, "maybe");
+    ok(cg.o.greed > cg.o.envy, "all Love → Greed above Envy"); const cm = R.scores(K.portrait.compute(fill(ids.length, "yes"), null), fill(ids.length, "yes"), null);
+    ok(R.answers(maybe).mb === 1 && R.answers(greedy).yl === 1, "shares: Maybe and Yes + Love among the answers");
+    // portrait: the button, the sign, the rank line, the guide
+    const st = fill(ids.length);
+    const g = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "rz", "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
+    const so = g.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new g.w.Event("toggle"));
+    const sign = g.d.querySelector(".pt-sign.pt-rz");
+    ok(!!g.d.querySelector('.pt-mode .pt-rzb[data-mode="rz"]') && /Грехи Re:Zero/.test(g.d.querySelector(".pt-rzb").textContent) && !!sign && R.SINS.indexOf(sign.dataset.sin) >= 0 && /^(Последователь греха|Архиепископ греха|Ведьма) /.test(sign.querySelector(".sg-rl").textContent),
+      "shipped build: the 📖 button, the sin's sign and its rank line");
+    ok(!!g.d.querySelector(".pt-wrb") && !!g.d.querySelector(".pt-mode.pt-wr-sub") === false, "⚔ Wr is there (sub-row only when Wr is open)");
+    g.KC.dnd.setMode("wr"); g.KC.form.renderPortrait(); const sub = g.d.querySelector(".pt-wr-sub");
+    ok(!!sub && sub.querySelectorAll("button").length === 1 && /Боги Хаоса/.test(sub.textContent) && !!g.d.querySelector(".pt-sign.pt-wr"), "⚔ Wr open: the tab row with the one tab «Боги Хаоса», the god's sign");
+    g.KC.dnd.setMode("rz"); const lp = g.KC.lore.provider(); ok(lp.length === 1 && lp[0].items.length === 2 && /^rz\.s\./.test(lp[0].items[0].key) && /^rz\.r\./.test(lp[0].items[1].key), "the guide describes the sin and the rank");
+    g.KC.help.open("portrait"); ok(/Грехи Re:Zero/.test(g.d.getElementById("help-portrait").textContent) && /Служитель богов Хаоса/.test(g.d.getElementById("help-portrait").textContent), "help: the Re:Zero and ⚔ Wr paragraphs");
+    // compare page
+    const c = open("compare", { locked: true }); ok(/data-mode="rz"/.test(c.KC.wod.switchHTML("pair")) && !!c.KC.rz, "compare page: the 📖 mode");
+    ok(!f.errors.length && !g.errors.length && !c.errors.length, "no script errors");
     _sc.end();
   }
 

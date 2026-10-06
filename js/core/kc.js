@@ -11,8 +11,9 @@ window.KC = window.KC || {};
      wh = Warhammer factions, leg = Space Marine legions, ow = Old World races, wi = Witcher, av = Avatar.
      v621 (owner, Oct 5): ext = the extended list's buttons (⇅ in the header, "Сделать расширенную" in the role block)
      and its help / "What's new" lines. Everything stays in the code; the owner unlocks one thing per version for a post.
-     A list that is already extended still opens and keeps its ⇅ switch, so one can get back to the plain list. */
-  KC.FEATURES = { ext: false, wr: false, wh: false, leg: false, ow: false, wi: false, av: false };
+     A list that is already extended still opens and keeps its ⇅ switch, so one can get back to the plain list.
+     v623 (owner, Oct 7): ⚔ Wr (Chaos gods) unlocked; rz = Re:Zero sins, new and on. */
+  KC.FEATURES = { ext: false, wr: true, wh: false, leg: false, ow: false, wi: false, av: false, rz: true };
 
   KC.el = function (tag, cls, text) {
     const e = document.createElement(tag);
@@ -65,7 +66,10 @@ window.KC = window.KC || {};
   /* overlay modal: open/close + click-outside */
   KC.modal = function (overlayId, closeBtnId) {
     const ov = KC.$(overlayId);
-    const m = { open() { ov.classList.add("show"); }, close() { ov.classList.remove("show"); } };
+    /* v622: while a window is open the page behind does not scroll (on phones a scroll ran through to the long list
+       and made the windows stutter, owner Oct 5) */
+    const lock = () => { document.documentElement.classList.toggle("has-modal", !!document.querySelector(".overlay.show")); };
+    const m = { open() { ov.classList.add("show"); lock(); }, close() { ov.classList.remove("show"); lock(); } };
     if (closeBtnId) KC.$(closeBtnId).addEventListener("click", m.close);
     ov.addEventListener("click", e => { if (e.target === ov) m.close(); });
     return m;
