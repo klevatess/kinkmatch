@@ -48,12 +48,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=623">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- v628: the saved theme is applied before the first paint (no light flash between pages when dark is chosen);
+     v629: the browser bar colour follows it too -->
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
+<link rel="stylesheet" href="css/style.css?v=630">
 </head>
 <body>
+<!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
+<noscript><p class="noscript" data-i18n="noscript">This site needs JavaScript. Please turn it on in your browser settings.</p></noscript>
 
 <header class="top">
   <div class="top-inner">
@@ -70,6 +73,8 @@
       <button class="btn ghost" id="mineBtn" data-i18n="hdr.mine" data-i18n-title="hdr.mineTitle"></button>
       <button class="btn ghost" id="shareBtn" data-i18n="hdr.share" data-i18n-title="hdr.shareTitle"></button>
       <button class="btn ghost" id="pdfBtn" data-i18n="hdr.pdf"></button>
+      <!-- v627 (owner): the filters row folds under this arrow (folded by default on phones, remembered) -->
+      <button class="btn ghost icon-btn filt-tg" id="filtToggle" type="button" aria-controls="subbar" aria-expanded="true" data-i18n-title="hdr.filters"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
       <!-- v615 (owner): "Clear" is gone (a new list: My lists → Start a new list; delete there). Its place: the role filter of an
            extended list; empty for a plain list -->
       <select class="jump role-view" id="roleView" data-i18n-title="ext.roleView" hidden>
@@ -79,7 +84,7 @@
       </select>
     </div>
   </div>
-  <div class="subbar">
+  <div class="subbar" id="subbar">
     <div class="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input type="search" id="search" data-i18n-ph="search.ph" autocomplete="off">
@@ -129,7 +134,6 @@
   <section class="intro">
     <h1 data-i18n="intro.h1"></h1>
     <p data-i18n-html="intro.p1_html"></p>
-    <p data-i18n="intro.p2"></p>
     <p class="tpl-desc" id="tplDesc" hidden></p>
     <div class="idfields">
       <label><span data-i18n="name.label"></span> <span class="hint" data-i18n="name.hint"></span><input type="text" id="metaName" autocomplete="off" data-i18n-ph="name.ph" disabled></label>
@@ -280,6 +284,6 @@
   </div>
 </div>
 
-<script src="js/boot.js?v=623" data-page="form" data-v="623"></script>
+<script src="js/boot.js?v=630" data-page="form" data-v="630"></script>
 </body>
 </html>

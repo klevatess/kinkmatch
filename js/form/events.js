@@ -93,6 +93,7 @@
   KC.$("jump").addEventListener("blur", e => { e.target.value = ""; });
 
   KC.$("onlyFav").addEventListener("change", F.applySearch);
+  KC.$("filtToggle").addEventListener("click", () => { KC.ls.setRaw(KC.KEYS.filters, F.filtersOpen() ? "0" : "1"); F.renderFiltFold(); if (F.sizeCats) F.sizeCats(); });
   /* template list in the header: only changes what is shown now (never what the list was created by) */
   KC.$("tplSel").addEventListener("change", e => {
     const x = e.target.value && KC.store.tpl.byTid(e.target.value);

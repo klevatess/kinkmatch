@@ -810,3 +810,49 @@ details.sp-fold>summary{font-size:17px}
 
 /* v622: a window is open — the page behind stays still */
 html.has-modal,html.has-modal body{overflow:hidden}
+
+/* ===== v627 (owner, Oct 9): a lower header on phones =====
+   - languages: one button with the current language, the seven in a drop-down menu under it;
+   - the progress moves up into the title row (no own row any more);
+   - the filters row (search, section, template, view, ♥, ⇅) folds under the arrow button (body.filters-off),
+     folded by default on phones; smaller controls in it. */
+.lang-sw.lang-dd{position:relative;border:0;overflow:visible;display:inline-block;margin-right:0}
+.lang-dd .lang-cur{white-space:nowrap;font:600 12px Inter,system-ui,sans-serif;color:var(--accent);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 8px;cursor:pointer;line-height:1}
+.lang-dd .lang-cur::after{content:" ▾";font-size:10px;color:var(--muted)}
+.lang-dd .lang-cur:hover{border-color:var(--accent)}
+.lang-dd .lang-menu{display:none;position:absolute;right:0;top:calc(100% + 4px);z-index:45;flex-direction:column;min-width:150px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.lang-dd.open .lang-menu{display:flex}
+.lang-dd .lang-menu .lang-btn{display:block;width:100%;text-align:left;border:0;border-radius:7px;background:transparent;color:var(--ink);font:500 13.5px Inter,system-ui,sans-serif;padding:8px 10px;line-height:1.2}
+.lang-dd .lang-menu .lang-btn+.lang-btn{border-left:0}
+.lang-dd .lang-menu .lang-btn:hover{background:var(--accent-soft)}
+.lang-dd .lang-menu .lang-btn.on{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+.brand-row{flex-wrap:nowrap}
+.brand-row .brand{max-width:none;flex:0 0 auto;min-width:0}
+.brand-row .progress-inline{order:0;flex:1 1 auto;flex-basis:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* the filters fold */
+.filt-tg{display:inline-flex;align-items:center;justify-content:center;position:relative}
+.filt-tg svg{transition:transform .15s}
+.filt-tg[aria-expanded="true"] svg{transform:rotate(180deg)}
+.filt-tg.on::after{content:"";position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+body.filters-off .subbar{display:none}
+@media (max-width:600px){
+  .top-inner{padding:6px 12px;gap:6px}
+  .brand-row{gap:7px}
+  .brand-row .brand{font-size:15px}
+  .brand-row .progress-inline{font-size:11.5px}
+  .top-actions{display:flex;flex-wrap:wrap;gap:5px}
+  .top-actions .btn{padding:6px 5px;font-size:12px;line-height:1.1;white-space:nowrap;flex:1 1 auto;text-align:center;min-width:0}
+  .top-actions #themeBtn, .top-actions .filt-tg{flex:0 0 32px;padding:5px 0}
+  .top-actions #compareBtn{flex:1 1 40%}
+  .top-actions #savedBtn{flex:1 1 30%}
+  .top-actions #mineBtn, .top-actions #shareBtn, .top-actions #pdfBtn{flex:1 1 20%}
+  .top-actions select.role-view{flex:0 1 auto !important}
+  .subbar{padding:0 12px 7px;gap:5px;row-gap:5px}
+  .subbar .search input{padding:6px 10px 6px 30px;font-size:14px}
+  .subbar .search svg{left:9px}
+  .subbar select.jump, .subbar #jump, .subbar #tplSel, .subbar #view{padding:6px 6px;font-size:13.5px}
+  .subbar .fav-toggle{width:34px;height:32px}
+}
+
+/* v629: shown only when JavaScript is off */
+.noscript{max-width:640px;margin:24px auto;padding:14px 16px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--ink);font-size:15px;text-align:center}

@@ -56,8 +56,12 @@
     showCount(link, noCount);
     KC.$("sendLink").hidden = !navigator.share;
     const qr = KC.$("qr"); qr.innerHTML = ""; qr.classList.remove("qr-atlas");
-    try { new QRCode(qr, { text: link, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); qrFrame(qr); }
-    catch (e) { qr.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center">' + KC.esc(t("share.qrTooLong")) + "</div>"; }
+    const msg = k => { qr.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center">' + KC.esc(t(k)) + "</div>"; };
+    /* v629: the QR library is fetched when a QR is first needed */
+    const linkEl = KC.$("shareLink");
+    KC.lib("qr").then(() => { if (!qr.isConnected || linkEl.value !== link) return;   /* the window moved on, or the page is gone */
+      try { qr.innerHTML = ""; new QRCode(qr, { text: link, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); qrFrame(qr); }
+      catch (e) { msg("share.qrTooLong"); } }, () => { if (qr.isConnected) msg("share.qrFail"); });
   }
   function showList() {
     show(F.shareLink(), t("share.kindList"));

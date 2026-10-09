@@ -14,6 +14,7 @@ KC.addLang("es", "cats", {
   "non-monogamy": "No monogamia",
   "voyeurism-exhibitionism": "Voyeurismo / exhibicionismo",
   "bodily-fluids": "Fluidos corporales",
+  "hardcore": "Hardcore: enemas, infusiones, sangre",
   "marking": "Marcas en el cuerpo",
   "session-length": "Duración de la sesión",
 });
@@ -538,4 +539,28 @@ KC.addLang("es", "items", {
   "session-long": ["Sesiones largas (5–7 horas)", "Una escena de cinco a siete horas, con pausas."],
   "session-day": ["Sesiones de un día (24 horas)", "Una sesión de un día entero, con comida, sueño y pausas."],
   "session-multi-day": ["Sesiones de varios días", "Una sesión a lo largo de varios días, con descanso y cuidado de la salud."],
+  /* v624 (owner, Oct 9) */
+  "daddy-kink": ["Daddy / Mommy kink", "Una pareja adulta en el papel de «papi» o «mami» cariñoso pero estricto: llamarle Daddy / Mommy, cuidados, elogios y reglas. Sin jugar a ser niños: es una dinámica entre adultos."],
+  "onii-chan-play": ["Onii-chan / onee-chan (llamar «hermano / hermana mayor»)", "Juego de rol japonés: llamar a la pareja «hermano mayor» o «hermana mayor» (onii-chan / onee-chan). Solo entre adultos y solo como forma de tratamiento; nunca con familiares reales."],
+  "gerontophilia": ["Gerontofilia", "Atracción por parejas mucho mayores: por personas ancianas."],
+  "makeup": ["Maquillaje", "Maquillaje llamativo en la pareja o en ti: llevarlo, maquillar a alguien, admirarlo."],
+  "smeared-makeup": ["Maquillaje corrido", "Pintalabios corrido, rímel que se corre con las lágrimas o la saliva."],
+  "snot-fetish": ["Mocos (mucofilia)", "Fetiche por los mocos y la mucosidad nasal."],
+  "ruining-sub-belongings": ["Estropear las cosas del sub (con consentimiento)", "El Dom rompe, mancha o destroza cosas del sub; solo las que el sub aceptó de antemano que se estropeen."],
+  "public-omorashi": ["Omorashi en público", "Aguantar y no llegar a tiempo en un lugar público, con el riesgo de que alguien lo note. Ten en cuenta la ley y a las personas de alrededor: no forman parte del juego."],
+  "milk-enema": ["Enema de leche", "Un enema con leche tibia (no caliente). Puede causar hinchazón y cólicos; mejor no si hay intolerancia a la lactosa."],
+  "urine-enema": ["Enema de orina", "Un enema con orina en lugar de agua. La orina no es estéril: puede causar irritación e infecciones."],
+  "food-insertion": ["Introducir comida (vagina)", "Introducir comida (fruta, verdura, etc.) en la vagina. Solo piezas enteras y lisas, fáciles de sacar; nada dulce ni graso: riesgo de candidiasis e infecciones."],
+  /* v625 (owner, Oct 9) */
+  "sex-during-chores": ["Sexo durante las tareas cotidianas", "Sexo o caricias mientras uno de los dos está con cosas cotidianas: cocinar, fregar, trabajar en el ordenador, ver una serie."],
+  "cigarette-burns": ["Quemaduras de cigarrillo", "Quemar la piel con un cigarrillo. Deja cicatrices y puede infectarse: acordar el lugar de antemano, ni en la cara ni en piel fina, y mantén la quemadura limpia después."],
+  "forced-sex-unpleasant-partner": ["Sexo forzado con una pareja desagradable", "Por acuerdo: al sub lo «obligan» a tener sexo con alguien que le resulta desagradable. La tercera persona es adulta, conoce las reglas del juego y está de acuerdo; el sub aprueba de antemano quién puede ser."],
+  "no-safeword-short": ["Escenas cortas sin palabra de seguridad", "Una escena corta que el bottom no puede detener con una palabra. Seguridad: hablar antes con detalle de la escena y los límites duros; acordar una señal de «parar por salud» (un gesto, una pelota en la mano) que siempre vale; el top vigila el estado del bottom y detiene la escena ante cualquier señal de peligro; sin alcohol; solo con una pareja de confianza desde hace tiempo; hablar de la escena después."],
+  "no-safeword-long": ["Escenas largas sin palabra de seguridad (un día o más)", "Un día o más sin poder detenerla con una palabra. Seguridad: todo lo de las escenas cortas y además: dejar el acuerdo por escrito antes (duración, límites, qué está permitido); tener una forma de salir antes (una palabra clave a través de una tercera persona, una llamada acordada a un amigo); revisar con regularidad cómo está; sueño, comida, agua y medicación según el horario; nada que ponga la vida en riesgo sin supervisión."],
+  /* v630 (owner, Oct 9) */
+  "pubic-hair-fetish": ["Fetiche por el vello púbico", "Te atrae el vello natural en los genitales, de tu pareja o el tuyo."],
+  "fully-shaved-fetish": ["Fetiche por el depilado total", "Te atrae la piel completamente lisa: genitales y cuerpo sin vello."],
+  "primal-play": ["Juego primal (cazador y presa)", "Juego animal e instintivo: persecución, forcejeo, gruñidos, mordiscos, «te atrapé, eres mío». Acuerden un gesto de parada: con la emoción las palabras pueden no oírse."],
+  "cock-slapping": ["Bofetadas con el pene", "Golpear la cara con el pene: más de poder y humillación que de dolor."],
+  "emetophilia": ["Fetiche por el vómito (emetofilia)", "Te excita el vómito, propio, de la pareja o provocado en el juego. El mayor riesgo es aspirarlo: no boca arriba, sin ataduras ni mordaza, sin alcohol. Vomitar a menudo daña la garganta y los dientes."],
 });

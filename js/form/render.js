@@ -340,6 +340,17 @@
     KC.$("view").classList.toggle("on", KC.$("view").value !== "all");
     KC.$("roleView").classList.toggle("on", F.roleView() !== "both");
     KC.$("onlyFav").closest(".fav-toggle").classList.toggle("on", KC.$("onlyFav").checked);
+    F.renderFiltFold();
+  };
+  /* v627 (owner): the filters row folds under the arrow in the header — open by default (v628), the
+     choice is remembered on this device. While folded, the arrow shows a dot if something is filtering the list. */
+  F.filtersOpen = () => { const r = KC.ls.raw(KC.KEYS.filters); return r !== "0"; };   /* v628 (owner): open by default everywhere */
+  F.filtActive = () => !!(KC.$("search").value.trim() || F.tpl() || KC.$("view").value !== "all" || KC.$("onlyFav").checked);
+  F.renderFiltFold = function () {
+    const open = F.filtersOpen(), b = KC.$("filtToggle"); if (!b) return;
+    document.body.classList.toggle("filters-off", !open);
+    b.setAttribute("aria-expanded", open ? "true" : "false");
+    b.classList.toggle("on", !open && F.filtActive());
   };
 
   /* banner for a list opened from a link: says what happened with "Received" */

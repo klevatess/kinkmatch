@@ -41,9 +41,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=623">
+<!-- v628: the saved theme is applied before the first paint (no light flash between pages when dark is chosen);
+     v629: the browser bar colour follows it too -->
+<meta name="color-scheme" content="light dark">
+<script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
+<link rel="stylesheet" href="css/style.css?v=630">
 </head>
 <body>
+<!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
+<noscript><p class="noscript" data-i18n="noscript">This site needs JavaScript. Please turn it on in your browser settings.</p></noscript>
 
 <header class="top">
   <div class="top-inner">
@@ -96,6 +102,6 @@
   </div>
 </div>
 
-<script src="js/boot.js?v=623" data-page="compare" data-v="623"></script>
+<script src="js/boot.js?v=630" data-page="compare" data-v="630"></script>
 </body>
 </html>

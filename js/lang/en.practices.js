@@ -13,6 +13,7 @@ KC.addLang("en", "cats", {
   "non-monogamy": "Non-monogamy",
   "voyeurism-exhibitionism": "Voyeurism / exhibitionism",
   "bodily-fluids": "Bodily fluids",
+  "hardcore": "Hardcore: enemas, infusions, blood",
   "marking": "Marking",
   "session-length": "Session length",
 });
@@ -537,4 +538,28 @@ KC.addLang("en", "items", {
   "session-long": ["Long sessions (5–7 hours)", "A scene lasting five to seven hours, with breaks."],
   "session-day": ["Day-long sessions (24 hours)", "A session lasting a full day, with food, sleep and breaks."],
   "session-multi-day": ["Multi-day sessions", "A session spread over several days, with rest and care for health."],
+  /* v624 (owner, Oct 9) */
+  "daddy-kink": ["Daddy / Mommy kink", "An adult partner as a caring but strict “Daddy” or “Mommy”: being called Daddy / Mommy, looking after, praise and rules. No playing children — it's a dynamic between adults."],
+  "onii-chan-play": ["Onii-chan / onee-chan (calling a partner big brother / sister)", "A Japanese role-play: calling a partner “big brother” or “big sister” (onii-chan / onee-chan). Adults only and only a play with the form of address — never real relatives."],
+  "gerontophilia": ["Gerontophilia", "Attraction to partners much older than you — to elderly people."],
+  "makeup": ["Makeup", "Bold makeup on your partner or yourself: wearing it, putting it on someone, admiring it."],
+  "smeared-makeup": ["Smeared makeup", "Smudged lipstick, mascara running from tears or spit."],
+  "snot-fetish": ["Snot (mucophilia)", "A fetish for snot and nasal mucus."],
+  "ruining-sub-belongings": ["Ruining the sub's belongings (consensual)", "The Dom tears, stains or breaks the sub's things — only the ones the sub agreed in advance can be ruined."],
+  "public-omorashi": ["Public omorashi", "Holding it in and not making it in time in a public place, with the risk of being noticed. Mind the law and the people around you — they are not part of the play."],
+  "milk-enema": ["Milk enema", "An enema with warm (not hot) milk. Bloating and cramps are possible; better not with lactose intolerance."],
+  "urine-enema": ["Urine enema", "An enema with urine instead of water. Urine isn't sterile: irritation and infections are possible."],
+  "food-insertion": ["Food insertion (vagina)", "Putting food (fruit, vegetables and so on) into the vagina. Only whole, smooth pieces that are easy to get out; nothing sugary or oily — risk of thrush and infections."],
+  /* v625 (owner, Oct 9) */
+  "sex-during-chores": ["Sex during everyday chores", "Sex or touching while one partner is busy with ordinary things: cooking, washing up, working at the computer, watching a series."],
+  "cigarette-burns": ["Cigarette burns", "Burning the skin with a cigarette. It leaves scars and can get infected: agree on the spot in advance, not on the face or thin skin, and keep the burn clean afterwards."],
+  "forced-sex-unpleasant-partner": ["Forced sex with an unappealing partner", "By agreement: the sub is “made” to have sex with someone they find unappealing. The third person is an adult who knows the rules of the game and consents; the sub approves in advance who it may be."],
+  "no-safeword-short": ["Short scenes without a safeword", "A short scene the bottom cannot stop with a word. Safety: negotiate the scene and hard limits in detail beforehand; agree on a “health stop” signal (a gesture, a ball in the hand) that always works; the top watches the bottom's state and stops the scene at any sign of trouble; no alcohol; only with a partner you have trusted for a long time; talk the scene through afterwards."],
+  "no-safeword-long": ["Long scenes without a safeword (a day or more)", "A day or longer with no right to stop it with a word. Safety: everything for short scenes, plus — write the agreement down beforehand (how long, limits, what is allowed); keep a way out early (a code word through a third person, an agreed call to a friend); check in on wellbeing regularly; sleep, food, water and medication on schedule; nothing life-threatening unsupervised."],
+  /* v630 (owner, Oct 9) */
+  "pubic-hair-fetish": ["Pubic hair fetish", "Being into natural hair on the genitals — your partner's or your own."],
+  "fully-shaved-fetish": ["Fully shaved fetish", "Being into completely smooth skin: genitals and body with no hair."],
+  "primal-play": ["Primal play (predator and prey)", "Animal, instinctive play: chasing, wrestling, growling, biting, “caught you — you're mine”. Agree on a stop gesture: in the heat of it words may not be heard."],
+  "cock-slapping": ["Cock slapping", "Slapping someone's face with a cock — more about power and humiliation than pain."],
+  "emetophilia": ["Vomit fetish (emetophilia)", "Being aroused by vomiting — your own, your partner's or induced in play. The main risk is breathing vomit in: not lying on the back, not tied up, no gag, no alcohol. Frequent vomiting harms the throat and teeth."],
 });

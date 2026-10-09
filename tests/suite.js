@@ -20,11 +20,11 @@ const S = (title) => console.log("\n## " + title);
   ok(!p.errors.length, "no script errors on load: " + p.errors.join(" | "));
   const ids = [], codes = [];
   KC.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); codes.push(code); }));
-  eq(ids.length, 506, "item count");
+  eq(ids.length, 527, "item count");
   eq(new Set(ids).size, ids.length, "unique ids"); eq(new Set(codes).size, codes.length, "unique codes");
   const byCode = {}; KC.CATS.forEach(c => c.items.forEach(([code, id]) => byCode[code] = id));
   eq(OLD.ORDER.map((id, i) => byCode[i]), OLD.ORDER, "codes 0..370 still mean the same items as in old versions");
-  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(506).keys()], "codes are 0..505 with no gaps or reuse");
+  eq(Object.keys(byCode).map(Number).sort((a, b) => a - b), [...Array(528).keys()].filter(c => KC.RETIRED_CODES.indexOf(c) < 0), "codes are 0..527 with no reuse; only retired codes are missing");
   eq(["furry","xenophilia-tentacles","trampling-barefoot","trampling-shoes","rubber-band-snapping","forced-drinking-beer-cider","irrumatio-to-vomiting","bukkake","cum-in-eyes","nerd-hikikomori","humiliating-body-writing","wax-burns","spitting-in-mouth","snowballing","used-as-toy-for-other-sub","bondage-bag"].map(id => ids.indexOf(id) >= 0), Array(16).fill(true), "16 added items present");
   eq(["sleep-sacks", "bondage-bag", "scarification", "electricity-violet-wand"].map(id => KC.i18n.item(id, "ru").name), ["Спальный мешок", "Бондажный мешок", "Шрамирование", "Электро — вайолет-ванд"], "RU names as requested");
   eq(KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "wax-burns"), true, "wax burns under marking");
@@ -65,7 +65,7 @@ const S = (title) => console.log("\n## " + title);
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
   });
-  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 506, "EN names unique");
+  const enNames = ids.map(id => KC.i18n.item(id, "en").name); eq(new Set(enNames).size, 527, "EN names unique");
   const enCyr = ids.filter(id => /[а-яё]/i.test(KC.i18n.item(id, "en").desc)); eq(enCyr, [], "EN hints contain no Cyrillic");
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
@@ -121,7 +121,7 @@ const S = (title) => console.log("\n## " + title);
   p = open("form", { navLang: "ru" });
   let { w, d } = p;
   eq(p.KC.i18n.lang, "ru", "RU browser -> RU page");
-  eq(d.querySelectorAll(".item").length, 506, "506 rows rendered");
+  eq(d.querySelectorAll(".item").length, 527, "527 rows rendered");
   ok(d.querySelector(".brand-row #langSw"), "language switcher sits in the title row");
   const dotted = [...d.querySelectorAll(".item .new-dot")].map(x => x.closest(".item").dataset.id).sort();
   const newer = []; p.KC.CATS.forEach(c => c.items.forEach(([code, id]) => { if (code >= 497) newer.push(id); }));
@@ -132,7 +132,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector(".legend .new-dot"), "legend explains the dot");
   ok(!d.querySelector('#roleTop .opt[data-val="switch"]') && d.querySelectorAll("#roleTop .opt").length === 2, "role top: 2 buttons, no Switch");
   ok(!d.querySelector('#aboutBody .opt[data-field="role"]'), "role not duplicated in About me");
-  ok(/Свитч/.test(d.querySelector(".role-explain").textContent), "switch still mentioned in text");
+  ok(/Свитч/.test(d.getElementById("extMake").textContent), "switch still mentioned (v627: on the extended-list button)");
   ok(!/FormsPal|KinkSheet/.test(d.querySelector(".foot").textContent) && /открытых источников/.test(d.querySelector(".foot").textContent), "footer updated");
   const row = id => d.querySelector('.item[data-id="' + id + '"]');
   const ans = (id, v) => click(w, row(id).querySelector('.scale button[data-v="' + v + '"]'));
@@ -150,7 +150,7 @@ const S = (title) => console.log("\n## " + title);
   let saved = JSON.parse(w.localStorage.getItem("practices-checklist-v1"));
   eq(saved.items, { hugging: { interest: "love" }, "spanking-hand": { interest: "maybe" }, "fisting-anal": { interest: "limit" }, "impact-bruising": { interest: "yes" } }, "answers saved (toggle-off removed)");
   eq(saved.meta, { role: "sub", exp: "medium", rel: "poly", attire: ["lace", "leather"] }, "profile saved as keys");
-  eq(d.getElementById("progress").textContent, "Отмечено 4 из 506 практик", "progress text");
+  eq(d.getElementById("progress").textContent, "Отмечено 4 из 527 практик", "progress text");
   const link = p.KC.form.shareLink();
   ok(/[#&]lg=ru(&|$)/.test(link), "share link carries lg=ru");
   ok(/[#&]m=/.test(link), "share link carries profile (m=)");
@@ -172,7 +172,7 @@ const S = (title) => console.log("\n## " + title);
   ok(d.querySelector('#roleTop .opt[data-val="sub"]').getAttribute("aria-pressed") === "true", "role survived switch");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submissive / Bottom", "role label translated");
   eq(d.getElementById("metaName").value, "Борис", "name survived switch");
-  eq(d.getElementById("progress").textContent, "4 of 506 practices marked", "EN progress");
+  eq(d.getElementById("progress").textContent, "4 of 527 practices marked", "EN progress");
   eq(d.getElementById("shareBtn").textContent, "Share", "header translated");
   eq(d.documentElement.lang, "en", "<html lang> updated");
   ok(/lg=en/.test(p.KC.form.shareLink()), "link now carries lg=en");
@@ -185,7 +185,7 @@ const S = (title) => console.log("\n## " + title);
   ok(row("hugging").querySelector('.scale button[data-v="love"]').classList.contains("sel"), "answer survived switch to PT");
   eq(row("hugging").querySelector('.scale button[data-v="love"]').textContent, "Adoro", "PT scale");
   eq(d.querySelector('#roleTop .opt[data-val="sub"]').textContent, "Submisso(a) / Bottom", "PT role label");
-  eq(d.getElementById("progress").textContent, "4 de 506 práticas marcadas", "PT progress");
+  eq(d.getElementById("progress").textContent, "4 de 527 práticas marcadas", "PT progress");
   const ptHash = p.KC.form.shareLink().split("#")[1];
   ok(/lg=pt/.test(ptHash), "PT link carries lg=pt");
   eq(open("form", { hash: ptHash, storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "pt", "PT link opens in PT");
@@ -227,7 +227,8 @@ const S = (title) => console.log("\n## " + title);
   eq(open("form", { hash: noLg, navLang: "en-US" }).KC.i18n.lang, "en", "no lg, English browser -> EN");
   const es = open("form", { hash: ruLink.replace("lg=ru", "lg=es") });
   eq(es.KC.i18n.lang, "es", "lg=es opens in Spanish");
-  eq([...es.d.querySelectorAll("#langSw button")].map(b => b.textContent), ["RU", "EN", "ES", "JA", "PT", "TH", "ZH"], "switcher shows all seven languages");
+  eq([...es.d.querySelectorAll("#langSw .lang-menu button")].map(b => b.dataset.lang), ["ru", "en", "es", "ja", "pt", "th", "zh"], "switcher shows all seven languages (v627: in the drop-down menu)");
+  eq(es.d.querySelector("#langSw .lang-cur").textContent, "ES", "…the button shows the current one");
   eq(["zh-TW", "zh-HK", "zh-CN", "zh"].map(nl => open("form", { navLang: nl }).KC.i18n.lang), ["zh", "zh", "zh", "zh"], "Chinese browsers (any region) -> ZH");
   eq(open("form", { navLang: "th-TH" }).KC.i18n.lang, "th", "Thai browser -> TH");
   eq(open("form", { navLang: "ja-JP" }).KC.i18n.lang, "ja", "Japanese browser -> JA");
@@ -351,7 +352,7 @@ const S = (title) => console.log("\n## " + title);
   eq(Object.entries(gp.KC.form.state.items).filter(([id]) => ids.indexOf(id) >= 0).sort(), [["cbt", { interest: "limit" }], ["hugging", { interest: "love" }], ["knife-play", { interest: "maybe" }], ["orgy", { interest: "yes" }], ["puppy-play", { interest: "yes" }]], "old ids moved to current items; current answer wins");
   ok(gp.d.querySelector('.item[data-id="puppy-play"] .scale button[data-v="yes"]').classList.contains("sel"), "moved answer is visible on the page");
   const gShown = gp.d.querySelectorAll(".scale button.sel").length, gLink = Object.keys(KCn.codec.decode(gp.KC.form.shareLink()).items).length;
-  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 506 практик", "counter = what is shown");
+  eq(gp.d.getElementById("progress").textContent, "Отмечено " + gShown + " из 527 практик", "counter = what is shown");
   eq(gLink, gShown, "link contains exactly what the counter says");
   Object.keys(KC.ID_ALIASES).forEach(k => { if (ids.indexOf(KC.ID_ALIASES[k]) < 0) ok(false, "alias target missing: " + k); });
 
@@ -368,7 +369,7 @@ const S = (title) => console.log("\n## " + title);
   const all = {}; OLD.ORDER.forEach((id, i) => all[id] = { interest: vals[i % 4] });
   const lens = [0, 1, 40, 200, 371].map(n => { const it = {}; OLD.ORDER.slice(0, n).forEach(id => it[id] = all[id]); return KCn.codec.packAnswers(it).length; });
   console.log("  answer chars at 0/1/40/200/371 marks:", lens.join("/"));
-  ok(lens[4] <= 215 && lens[3] <= 160, "links stay short (371 marks <= 215 chars, 200 marks <= 160)");
+  ok(lens[4] <= 225 && lens[3] <= 165, "links stay short (371 marks <= 225 chars, 200 marks <= 165; the bitmap grows ~1 char per 6 practices)");
   ["", "@@@", "a=", "a=!!!&m=%%%", "garbage#a=Zm9v", "#a=Ag&n=%E0%A4"].forEach(g => { let okk = true; try { KCn.codec.decode(g); } catch (e) { okk = false; } ok(okk, "no crash on junk " + JSON.stringify(g)); });
   // simulate a future release that adds items (new codes appended, inserted mid-category)
   const today = KCn.codec.encode({ items: all, meta: {} });
@@ -381,7 +382,7 @@ const S = (title) => console.log("\n## " + title);
   const srt = o => Object.entries(o).sort();
   eq(srt(KCn.codec.decode(KCn.codec.encode(withNew)).items), srt(withNew.items), "link with new items round-trips");
   const allNew = {}; KCn.CATS.forEach(c => c.items.forEach(([, id], i) => allNew[id] = { interest: vals[i % 4] }));
-  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 506, "fully filled 506-item link round-trips");
+  eq(Object.keys(KCn.codec.decode(KCn.codec.encode({ items: allNew, meta: {} })).items).length, 527, "fully filled 527-item link round-trips");
 
   /* form: "Show" filter */
   S("Show filter");
@@ -390,7 +391,7 @@ const S = (title) => console.log("\n## " + title);
   const vsel = p.d.getElementById("view");
   eq([...vsel.options].map(o => o.textContent), ["Все пункты", "Только без ответа", "Только новые", "Отвеченные, по ответам", "Обожаю / Да / Может", "Только «Нет»"], "Show menu labels (v601: + only No)");
   vsel.value = "unanswered"; vsel.dispatchEvent(new p.w.Event("change"));
-  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [504, -1, -1], "unanswered: answered items hidden");
+  eq([vis().length, vis().indexOf("hugging"), vis().indexOf("furry")], [525, -1, -1], "unanswered: answered items hidden");
   click(p.w, p.d.querySelector('.item[data-id="chains"] .scale button[data-v="yes"]'));
   ok(vis().indexOf("chains") >= 0, "a row just answered stays visible until the filter is re-applied");
   vsel.dispatchEvent(new p.w.Event("change")); ok(vis().indexOf("chains") < 0, "re-applying hides it");
@@ -399,7 +400,7 @@ const S = (title) => console.log("\n## " + title);
   eq(vis().sort(), newIds.sort(), "new: exactly the green-dot items (" + newIds.length + ")");
   const sb = p.d.getElementById("search"); sb.value = "корм"; sb.dispatchEvent(new p.w.Event("input"));
   ok(vis().length > 0 && vis().every(id => newIds.indexOf(id) >= 0), "search combines with the filter");
-  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 506, "all items again");
+  sb.value = ""; vsel.value = "all"; vsel.dispatchEvent(new p.w.Event("change")); eq(vis().length, 527, "all items again");
 
   /* backup */
   S("Backup");
@@ -682,7 +683,7 @@ const S = (title) => console.log("\n## " + title);
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "ผ้าปิดตา", "TH name");
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "TH page shows English subtitle");
   eq(tp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "ชอบมาก", "TH scale + answer");
-  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 506 รายการ", "TH progress");
+  eq(tp.d.getElementById("progress").textContent, "เลือกแล้ว 4 จาก 527 รายการ", "TH progress");
   ok(/lg=th/.test(tp.KC.form.shareLink()), "TH link carries lg=th");
   eq(open("form", { hash: tp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "th", "TH link opens in Thai");
   ok(/ลิมิตเด็ดขาด/.test(tp.KC.form.buildSheet().textContent), "TH PDF sheet");
@@ -694,7 +695,7 @@ const S = (title) => console.log("\n## " + title);
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "眼罩", "ZH name");
   eq(zp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "ZH page shows English subtitle");
   eq(zp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "超愛", "ZH scale + answer");
-  eq(zp.d.getElementById("progress").textContent, "已勾選 4／506 項", "ZH progress");
+  eq(zp.d.getElementById("progress").textContent, "已勾選 4／527 項", "ZH progress");
   ok(/lg=zh/.test(zp.KC.form.shareLink()), "ZH link carries lg=zh");
   eq(open("form", { hash: zp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "zh", "ZH link opens in Chinese");
   ok(/硬限制/.test(zp.KC.form.buildSheet().textContent), "ZH PDF sheet");
@@ -706,7 +707,7 @@ const S = (title) => console.log("\n## " + title);
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
   eq(p.d.querySelector('.item[data-id="face-sitting"] .sub').textContent, "Face-sitting", "JA page shows English subtitle");
   eq(p.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "大好き", "JA scale + answer");
-  eq(p.d.getElementById("progress").textContent, "506項目中 4項目にチェック済み", "JA progress");
+  eq(p.d.getElementById("progress").textContent, "527項目中 4項目にチェック済み", "JA progress");
   ok(/lg=ja/.test(p.KC.form.shareLink()), "JA link carries lg=ja");
   ok(/ハードリミット/.test(p.KC.form.buildSheet().textContent), "JA PDF sheet");
   const js = p.d.getElementById("search"); js.value = "鞭"; js.dispatchEvent(new p.w.Event("input"));
@@ -850,13 +851,13 @@ const S = (title) => console.log("\n## " + title);
   const tact = b3.d.getElementById("tplAct");
   eq(tact.textContent, "Показать все пункты", "note button: show all");
   click(b3.w, tact);
-  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [506, "Только пункты шаблона", ""], "show all: every item, button to go back");
+  eq([visP(b3).length, tact.textContent, b3.d.getElementById("tplSel").value], [527, "Только пункты шаблона", ""], "show all: every item, button to go back");
   ok(/создана по шаблону «Evening»\. Показаны все пункты\./.test(b3.d.getElementById("tplNoteText").textContent), "note still says what the list was created by");
   await sleep(300);
   eq(LS(b3, OK_).template.name, "Evening", "showing all does not unbind the list");
   click(b3.w, tact); eq(visP(b3).length, 5, "back to the template's items");
   const bsel = b3.d.getElementById("tplSel"); bsel.value = ""; bsel.dispatchEvent(new b3.w.Event("change"));
-  eq([visP(b3).length, b3.KC.form.state.template.name], [506, "Evening"], "“No template” in Filters: a view choice only");
+  eq([visP(b3).length, b3.KC.form.state.template.name], [527, "Evening"], "“No template” in Filters: a view choice only");
   bsel.value = td.tpl.id; bsel.dispatchEvent(new b3.w.Event("change"));
   const bl = b3.KC.form.shareLink(), bld = b3.KC.codec.decode(bl);
   eq([Object.keys(bld.items), bld.by && bld.by.id, bld.tpl], [["hugging"], td.tpl.id, undefined], "plain link of a list by a template: its answers + fi= mark");
@@ -878,7 +879,7 @@ const S = (title) => console.log("\n## " + title);
   const borisRow = [...b3.d.querySelectorAll("#mineList .saved-row")].find(r => !/по шаблону/.test(r.textContent));
   click(b3.w, borisRow.querySelector('[data-act="load"]'));
   b3 = open("form", { storage: b3.storage() });
-  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 506], "switched to my plain list");
+  eq([b3.KC.form.state.name, b3.KC.form.state.template, visP(b3).length], ["Boris", undefined, 527], "switched to my plain list");
   r3 = open("form", { hash: tplLink.split("#")[1], storage: b3.storage() });
   b3 = open("form", { storage: r3.storage() });
   eq([b3.KC.form.state.template.name, Object.keys(b3.KC.form.state.items).sort(), LS(b3, MK).length], ["Evening", ["chains", "hugging"], 2], "template link from another list: my list by it is reopened (not a new one)");
@@ -904,7 +905,7 @@ const S = (title) => console.log("\n## " + title);
   S("Templates: someone's list shown by my template");
   const bobPlain = KCn.codec.encode({ uid: "BOB002", name: "Bob", items: { hugging: { interest: "yes" }, "spanking-hand": { interest: "love" }, chains: { interest: "maybe" } }, meta: {} }, "ru");
   rv = open("form", { hash: bobPlain, storage: recStorage });
-  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 506], "plain list: no template, no note");
+  eq([rv.KC.form.sharedBy, rv.d.getElementById("tplNote").hidden, visP(rv).length], [null, true, 527], "plain list: no template, no note");
   click(rv.w, rv.d.getElementById("bannerTpl"));
   ok(!rv.d.getElementById("tplSel").hidden, "“Show by a template…” points at the template list in the header");
   const rsel = rv.d.getElementById("tplSel"); rsel.value = td.tpl.id; rsel.dispatchEvent(new rv.w.Event("change"));
@@ -920,7 +921,7 @@ const S = (title) => console.log("\n## " + title);
   click(dz.w, dz.d.querySelector('#savedTplList button[data-act="del"]'));
   eq([conf, LS(dz, TK).length], [1, 0], "deleting a template asks first");
   dz = open("form", { storage: dz.storage() });
-  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [506, true], "list by a deleted template: opens with all items");
+  eq([visP(dz).length, dz.d.getElementById("tplAct").hidden], [527, true], "list by a deleted template: opens with all items");
   ok(/создана по шаблону «Evening», но этого шаблона больше нет среди сохранённых\. Показаны все пункты\./.test(dz.d.getElementById("tplNoteText").textContent), "…and still says what it was created by");
   click(dz.w, dz.d.getElementById("mineBtn"));
   ok(/по удалённому шаблону «Evening»/.test(dz.d.getElementById("mineList").textContent), "My lists: “by the deleted template”");
@@ -954,8 +955,8 @@ const S = (title) => console.log("\n## " + title);
   eq(KCn.codec.decode(emptyLink.replace(/&k=\w+/, "")).damaged, false, "…a link without checksum still opens");
   const bigSet = []; KCn.CATS.forEach(c => c.items.forEach(([, id]) => bigSet.push(id)));
   const bigL = KCn.codec.encode(Object.assign(KCn.store.blank(), { tpl: { id: "ABCDEF", name: "All", ids: bigSet } }), "ru"), bigD = KCn.codec.decode(bigL);
-  eq([bigD.tpl.ids.length, bigD.damaged], [506, false], "a template of every item round-trips (bitmap form)");
-  ok(new URLSearchParams(bigL).get("t").length <= 90, "…in about 80 characters (grows 1 bit per item)");
+  eq([bigD.tpl.ids.length, bigD.damaged], [527, false], "a template of every item round-trips (bitmap form)");
+  ok(new URLSearchParams(bigL).get("t").length <= 95, "…in about 90 characters (grows 1 bit per item)");
 
   S("Templates: updates and own template");
   p = open("form", { storage: senderStorage });
@@ -1082,7 +1083,7 @@ const S = (title) => console.log("\n## " + title);
   eq([ts.hidden, ts.value, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [false, td.tpl.id, "Evening", true], "list by a template: the header list shows its name, highlighted");
   eq(ts.options[0].textContent, "✕ Без шаблона", "first option removes it");
   ts.value = ""; ts.dispatchEvent(new hq.w.Event("change"));
-  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [506, "Шаблон…", false], "one pick: no template, the list says “Template…”");
+  eq([visP(hq).length, ts.options[ts.selectedIndex].textContent, ts.classList.contains("on")], [527, "Шаблон…", false], "one pick: no template, the list says “Template…”");
 
   S("v557: share the current template");
   hq = open("form", { storage: recStorage });
@@ -1311,7 +1312,7 @@ const S = (title) => console.log("\n## " + title);
     const K = open("form").KC, codeOf = {}, next = {};
     K.CATS.forEach(c => c.items.forEach(([code, id], i) => { codeOf[id] = code; next[id] = (c.items[i + 1] || [])[1]; }));
     eq([codeOf["other-sub-serves-you"], codeOf["urination-in-front"]], [475, 476], "codes 475, 476");
-    eq([next["used-as-toy-for-other-sub"], next["urination-in-front"], next["omorashi"]], ["other-sub-serves-you", "omorashi", "golden-showers"], "placed next to related items");
+    eq([next["used-as-toy-for-other-sub"], next["urination-in-front"], next["omorashi"]], ["other-sub-serves-you", "omorashi", "public-omorashi"], "placed next to related items");
     eq([K.i18n.item("other-sub-serves-you", "ru").name, K.i18n.item("urination-in-front", "ru").name], ["Вас удовлетворяет другой сабмиссив по принуждению", "Мочеиспускание при партнёре / во время сессии"], "RU names");
     ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(["other-sub-serves-you", "urination-in-front"].filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
@@ -1690,14 +1691,25 @@ const S = (title) => console.log("\n## " + title);
     ok(/без пары/.test(g.d.getElementById("rlOut").textContent), "the odd one out is named");
     ok(!c.errors.length && !g.errors.length, "no script errors");
 
-    // what's new
-    const hp = open("form");
-    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => {
+    // what's new — v624: one structural check instead of a snapshot of the entries per version (every new entry broke them):
+    // every entry dated with one list under it, no empty points, the same shape in all 7 languages, the newest on top
+    const hp = open("form"), NL = ["ru", "en", "pt", "es", "ja", "th", "zh"], shape = {};
+    NL.forEach(l => {
       hp.KC.i18n.set(l); hp.KC.help.open("news");
-      const s3 = hp.d.getElementById("helpNews");
-      ok(s3 && !s3.hidden && hp.d.getElementById("helpPane").hidden && s3.querySelectorAll("h5").length === 6 && /5/.test(s3.querySelectorAll("h5")[1].textContent) && s3.querySelectorAll("ul")[0].querySelectorAll("li").length === 4 && s3.querySelectorAll("ul")[1].querySelectorAll("li").length === 8 && /29/.test(s3.querySelectorAll("h5")[2].textContent) && /29/.test(s3.querySelectorAll("h5")[3].textContent) && /DnD/.test(s3.querySelectorAll("h5")[3].textContent) && /29/.test(s3.querySelectorAll("h5")[4].textContent) && /27/.test(s3.querySelectorAll("h5")[5].textContent) && [2, 3, 4, 5].map(k => s3.querySelectorAll("ul")[k].querySelectorAll("li").length).join() === "6,8,8,3", l + ": “What's new” tab (v601): World of Darkness (6 points) on top, the DnD update (8) and Kinkosmos (8) dated 29 Sept, 27 Sept (3) below");
+      const s3 = hp.d.getElementById("helpNews"), h5 = s3.querySelectorAll("h5"), uls = s3.querySelectorAll("ul");
+      shape[l] = [...uls].map(u => u.querySelectorAll("li").length).join();
+      ok(!s3.hidden && hp.d.getElementById("helpPane").hidden && h5.length >= 5 && h5.length === uls.length && [...uls].every(u => u.querySelectorAll("li").length > 0)
+        && [...s3.querySelectorAll("li")].every(li => li.textContent.trim().length > 8) && [...h5].every(h => /2026/.test(h.textContent)), l + ": “What's new”: a list under every dated entry, no empty points");
       ok(hp.d.getElementById("helpNewsTab").textContent === hp.KC.i18n.t("help.news.h") && !!hp.d.querySelector("#helpNewsTab .new-dot"), l + ": tab name with a green dot");
     });
+    eq(NL.filter(l => shape[l] !== shape.ru), [], "“What's new”: the same entries with the same number of points in all 7 languages");
+    hp.KC.i18n.set("ru"); hp.KC.help.open("news");
+    const MON = { января: 1, февраля: 2, марта: 3, апреля: 4, мая: 5, июня: 6, июля: 7, августа: 8, сентября: 9, октября: 10, ноября: 11, декабря: 12 };
+    const nDates = [...hp.d.querySelectorAll("#helpNews h5")].map(h => { const m = h.textContent.match(/(\d+) (\S+) (\d{4})/); return m && MON[m[2]] ? +m[3] * 10000 + MON[m[2]] * 100 + +m[1] : 0; });
+    ok(nDates.every(x => x > 0) && nDates.every((x, i) => !i || x <= nDates[i - 1]), "“What's new”: every entry dated, the newest on top");
+    const nTxt = hp.d.getElementById("helpNews").textContent;
+    ok(/Ярость и Гнозис/.test(nTxt) && /Не официальный материал World of Darkness/.test(nTxt) && /Партия/.test(nTxt) && /29 сентября 2026/.test(nTxt) && !/небо общих/.test(nTxt),
+      "“What's new” keeps the World of Darkness, DnD and Kinkosmos entries (29 Sept); the roulette sky is gone");
     eq([hp.KC.help.SECTIONS.indexOf("news"), !!hp.d.getElementById("help-news"), hp.d.querySelectorAll('#helpToc button[data-go="news"]').length], [-1, false, 0], "“What's new” is not a section of “How to use”");
     // switching tabs
     hp.KC.i18n.set("ru"); hp.KC.help.open("pdf");
@@ -1913,8 +1925,6 @@ const S = (title) => console.log("\n## " + title);
     h.KC.help.open("portrait");
     ok(/созвезд/i.test(h.d.getElementById("help-portrait").textContent) && /Что попробуем/.test(h.d.getElementById("help-roulette").textContent), "portrait (with the constellation) and roulette are explained");
     ok(/Система компании/.test(h.d.getElementById("help-compare").textContent) && /туманност/.test(h.d.getElementById("help-tpl").textContent), "compare pictures and template nebulas are explained");
-    h.KC.help.open("news");
-    eq(h.d.querySelectorAll("#helpNews h5")[4].textContent, "29 сентября 2026", "what's new: the Kinkosmos entry (under the WoD and DnD updates; dated 29 Sept, owner v601)");
     ok(!!h.d.querySelector('#portraitSection summary .help-q[data-help="lore"]'), "“?” next to the portrait opens the constellation guide");
     ok(!h.errors.length, "no script errors");
     _sc.end();
@@ -1995,9 +2005,6 @@ const S = (title) => console.log("\n## " + title);
     g.KC.help.open("portrait");
     ok(/DnD/.test(g.d.getElementById("help-portrait").textContent) && /Мировоззрение/.test(g.d.getElementById("help-portrait").textContent) && /половина «Нет»/.test(g.d.getElementById("help-portrait").textContent), "help: the DnD mode and the alignment are explained");
     ok(!/Небо|пронумерован/.test(g.d.getElementById("help-roulette").textContent), "help: the roulette sky is no longer mentioned");
-    g.KC.help.open("news");
-    const top = g.d.querySelectorAll("#helpNews ul")[2];   /* v601: the World of Darkness entry is on top */
-    ok(/DnD/.test(top.textContent) && !/небо общих/.test(top.textContent), "what's new: the DnD mode is in, the roulette sky is out");
     const skyKeys = []; LANGS.forEach(l => ["rl.sky", "rl.skyBold"].forEach(k => { if (K.i18n.has("ui", k, l)) skyKeys.push(l + ":" + k); }));
     eq(skyKeys, [], "the sky's texts are gone in every language");
     ok(!f.errors.length && !g.errors.length, "no script errors");
@@ -2137,9 +2144,6 @@ const S = (title) => console.log("\n## " + title);
     // help and the patch note
     c3.KC.help.open("compare"); ok(/Партия/.test(c3.d.getElementById("help-compare").textContent) && /Руководства мастера/.test(c3.d.getElementById("help-compare").textContent), "help: the party and the foes are explained");
     g.KC.help.open("portrait"); ok(/Раса/.test(g.d.getElementById("help-portrait").textContent) && /Уровень/.test(g.d.getElementById("help-portrait").textContent), "help: race and level are explained");
-    g.KC.help.open("news");
-    const h5 = g.d.querySelectorAll("#helpNews h5"), uls = g.d.querySelectorAll("#helpNews ul");
-    ok(/DnD-обновление/.test(h5[3].textContent) && /Раса/.test(uls[3].textContent) && /Партия/.test(uls[3].textContent) && !/DnD/.test(uls[4].textContent), "what's new: the DnD update is its own entry (under World of Darkness); the Kinkosmos entry no longer lists DnD");
     ok(!f.errors.length && !g.errors.length && !c2.errors.length && !c3.errors.length && !c4.errors.length, "no script errors");
     _sc.end();
   }
@@ -2276,7 +2280,6 @@ const S = (title) => console.log("\n## " + title);
       ["lasombra shadow sidhe devils", "gangrel talons pooka devourers", "toreador striders sidhe devils", "nosferatu gnawers selkie defilers", "tremere uktena nocker malefactors", "malkavian striders eshu fiends", "tremere uktena sluagh malefactors"],
       "the owner's coterie of seven: the table after v605 (no Caitiff, one Malkavian, one Selkie; old v602 percentages — the v605 section checks a variant-A portrait)");
     ok(!/W/.test(W.PROF.demon.slayers[0]) && W.PROF.demon.slayers[0] === "R1 S.6", "Slayers: no fluids (owner)");
-    eq([W.PROF.fey.satyr[0], W.PROF.fey.boggan[0]], ["X1 N.3", "N1 S-.3"], "fey variant E: Satyrs and Boggans");
     // share window
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     const own = { name: "Ann", uid: "ANN600", items: {}, meta: {} }; ids.slice(0, 7).forEach(id => { own.items[id] = { interest: "yes" }; });
@@ -2318,16 +2321,7 @@ const S = (title) => console.log("\n## " + title);
   S("v601: WoD without Caitiff / Ravnos; compare layout; smaller Send; portrait dot; “Only No”; roulette without sections; news");
   {
     const _sc = scope();
-    // news
     const g = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } });
-    g.KC.help.open("news");
-    const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
-    eq(h5, ["7 октября 2026 · Боги Хаоса и Грехи Re:Zero", "5 октября 2026 · Расширенная анкета", "29 сентября 2026 · Мир Тьмы", "29 сентября 2026 · DnD-обновление", "29 сентября 2026", "27 сентября 2026"], "what's new: (v613) the extended list on top, then World of Darkness, DnD and Kinkosmos dated 29 September (owner)");
-    ok(/Ярость и Гнозис/.test(g.d.querySelectorAll("#helpNews ul")[2].textContent) && /Не официальный материал World of Darkness/.test(g.d.querySelectorAll("#helpNews ul")[2].textContent), "…the WoD entry lists the lines and the notice");
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"], nf = [];
-    LANGS.forEach(l => { g.KC.i18n.set(l); g.KC.help.open("news"); const n = g.d.querySelectorAll("#helpNews h5").length; if (n !== 6 || /28/.test(g.d.querySelectorAll("#helpNews h5")[3].textContent)) nf.push(l + ":" + n); });
-    eq(nf, [], "the same six entries and dates in all 7 languages");
-    g.KC.i18n.set("ru");
     // portrait "new" dot, “Only No” filter
     ok(!g.d.querySelector("#portraitSection summary .new-dot"), "v615: no green dot next to “My portrait” (owner)");
     const ids = []; g.KC.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
@@ -2416,7 +2410,7 @@ const S = (title) => console.log("\n## " + title);
     // races: every race reachable on made-up lists
     const inCl = (...cl) => { const s2 = new Set(); cl.forEach(k => DD.CL[k][1].split(" ").forEach(id => s2.add(id))); return s2; };
     const R = { human: ["pet", "classic"], elf: ["protocol", "touch"], drow: ["protocol"], dwarf: ["protocol", "iron"], dragonborn: ["protocol", "wardrobe"],
-      halforc: ["service", "company"], goliath: ["pet", "spank"], tiefling: ["protocol", "edge"], yuanti: ["dark", "home"], halfling: ["home"],
+      halforc: ["service", "company"], goliath: ["pet", "spank"], tiefling: ["edge"], yuanti: ["dark", "home"], halfling: ["home"],
       tabaxi: ["pet", "wild"], changeling: ["pet"], kenku: ["spank", "home"] };
     const rg = {}; Object.keys(R).forEach(r => { const s2 = inCl(...R[r]); rg[r] = DD.race(mk((id, i) => s2.has(id) ? "love" : i % 3 ? "limit" : "maybe"), null); });
     eq(Object.keys(rg).filter(r => rg[r] !== r), [], "all 13 races reachable");
@@ -2493,8 +2487,6 @@ const S = (title) => console.log("\n## " + title);
     const _sc = scope();
     const f = open("form"), K = f.KC, W = K.wod;
     const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => b.pct - a.pct) });
-    eq([W.PROF.vamp.ventrue[1], W.PROF.vamp.lasombra[1], W.PROF.demon.devils[1], W.PROF.demon.malefactors[1]], [-0.2, -0.11, 1.26, -1.16], "v605 biases: Ventrue −0.6 + 0.4, Lasombra 0.29 − 0.4, Devils 0.26 + 1.0, Malefactors −0.81 − 0.35");
-    eq([W.PROF.vamp.ventrue[0], W.PROF.vamp.lasombra[0], W.PROF.demon.devils[0], W.PROF.demon.malefactors[0]], ["D1 F.4", "B.8 D.8", "D1 R.3 V.3", "B1 F.8"], "profiles unchanged (only the biases were hand-tuned)");
     ok(/owner, v605: hand-tuned/.test(fs.readFileSync(require("./harness").ROOT + "/js/form/wod.js", "utf8")), "hand-tuned shifts are marked in the code (kept on recalibration)");
     /* a made-up portrait in the owner's shape (variant A percentages, not the owner's list): v604 gave Lasombra + Malefactors */
     const like = D({ intimacy: 37, bondage: 73, fetishes: 57, "role-play": 47, ds: 68, sm: 69, "sex-penetration": 49, "voyeurism-exhibitionism": 35, "bodily-fluids": 30 });
@@ -2612,7 +2604,6 @@ const S = (title) => console.log("\n## " + title);
     R.GODS.forEach(g => Object.keys(R.K[g]).forEach(k => { if (!CI[k]) unknown.push(g + " → cluster " + k); }));
     eq(unknown, [], "every item of the gods and of the clusters exists; every attraction points to a cluster");
     eq(R.GODS.map(g => R.ITEMS[g].split(" ").length), [16, 18, 26, 17, 11], "items with a bonus: 16 / 18 / 26 / 17 / 11 (owner's table)");
-    eq([R.EXCESS.W, R.EXCESS.L0, R.BIAS.slaanesh], [4, 49, -6.05], "Slaanesh: excess weight 4, from 49 % Yes + Love, bias −6.05 (owner, Oct 3)");
     // every god is reachable: a made-up list that loves that god's items and clusters
     const all = [...ids];
     const mk = (fn, meta) => { const it = {}; all.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
@@ -2637,7 +2628,9 @@ const S = (title) => console.log("\n## " + title);
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(own) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
     const row = g.d.querySelector("#portraitBody .pt-mode");
-    eq([...row.querySelectorAll("[data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "📖 Грехи Re:Zero", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "v611/v615/v616: one row — ⚔ Wr, 🗡 Witcher and 🌀 Avatar on the left, then ✦ 🎲 🦇");
+    /* v624: the expected row comes from the switches (no snapshot to update when a mode is unlocked) */
+    const rowOf = K2 => [].concat(K2.dnd.wrTabs().length ? ["wr.toWr"] : [], ["wi", "av", "rz"].filter(m => K2.dnd.usable(m)).map(m => m + ".to" + m[0].toUpperCase() + m[1]), ["dnd.toSign", "dnd.toDnd", "wod.toWod"]).map(k => K2.i18n.t(k));
+    eq([...row.querySelectorAll("[data-mode]")].map(b => b.textContent), rowOf(g.KC), "one row: ⚔ Wr, then the own buttons (🗡 🌀 📖) of the modes switched on, then ✦ 🎲 🦇");
     ok(!g.d.querySelector(".pt-wr-sub"), "no ⚔ Wr tabs before ⚔ Wr is chosen");
     click(g.w, g.d.querySelector('.pt-mode .pt-wrb'));
     const pv = g.d.querySelector(".pt-wr");
@@ -2719,7 +2712,6 @@ const S = (title) => console.log("\n## " + title);
     const ork = lover(H.PROF.orks); ork.name = "Ann";
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ork) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
-    eq(g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub) [data-mode]").length, 7, "seven buttons in the mode row while every switch is on (⚔ Wr + 🗡 Witcher + 🌀 Avatar + 📖 Re:Zero + three)");
     click(g.w, g.d.querySelector('.pt-mode .pt-wrb')); click(g.w, g.d.querySelector('.pt-wr-sub [data-mode="wh"]'));
     const pw = g.d.querySelector(".pt-wh");
     ok(!!pw && pw.dataset.faction === "orks" && /Ваша фракция/.test(pw.querySelector(".sg-over").textContent) && pw.querySelector(".sg-name").textContent === "Орки"
@@ -2892,7 +2884,7 @@ const S = (title) => console.log("\n## " + title);
     const imp = fresh.KC.store.importAll(bk), m2 = fresh.KC.store.mine.list(), xe = m2.find(x => x.data.ext), xp = m2.find(x => !x.data.ext);
     ok(imp && imp.mine === 2 && !!xe && xe.data.items.chains.b === "love" && xe.data.items.chains.t === "limit" && xe.data.pair === xp.data.uid && xp.data.pair === xe.data.uid && bk.own.ext === 1,
       "a backup carries the extended list with both roles; restoring it keeps both lists and their link");
-    fresh.KC.help.open("answer"); ok(/Расширенная анкета/.test(fresh.d.getElementById("help-answer").textContent) && /Новое вместе/.test(fresh.KC.i18n.t("help.news_html").slice(0, 5000)), "help explains the extended list; «Что нового» has the entry of Oct 4");
+    fresh.KC.help.open("answer"); ok(/Расширенная анкета/.test(fresh.d.getElementById("help-answer").textContent) && /Новое вместе/.test(fresh.KC.i18n.t("help.news_html")), "help explains the extended list; «Что нового» has the entry of Oct 4");
     // the portrait: one per role, a card per role; the PDF: both roles
     const sec = h.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new h.w.Event("toggle"));
     ok(h.d.querySelectorAll(".pt-role").length === 2 && !!h.d.querySelector('.pt-role[data-r="b"] .pt-sign') && /↑ Верх/.test(h.d.querySelector('.pt-role[data-r="t"] .pt-role-h').textContent) && !!h.d.querySelector('.pt-role[data-r="b"] [data-card="b"]'),
@@ -3093,7 +3085,6 @@ const S = (title) => console.log("\n## " + title);
     const st = mk((id, i) => i < 320 ? V[(i * 7 + 3) % 4] : null); st.name = "Ann";
     const g = open("form", { storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(st) }, session: {} } });
     const sec = g.d.getElementById("portraitSection"); sec.open = true; sec.dispatchEvent(new g.w.Event("toggle"));
-    eq([...g.d.querySelectorAll("#portraitBody .pt-mode:not(.pt-wr-sub):not(.pt-wod-sub) [data-mode]")].map(b => b.textContent), ["⚔ Wr", "🗡 Ведьмак", "🌀 Аватар", "📖 Грехи Re:Zero", "✦ Созвездие", "🎲 DnD", "🦇 Мир Тьмы"], "mode row: ⚔ Wr, 🗡 Witcher, 🌀 Avatar on the left");
     click(g.w, g.d.querySelector(".pt-mode .pt-avb"));
     const pv = g.d.querySelector(".pt-av");
     ok(!!pv && A.ELEMENTS.indexOf(pv.dataset.el) >= 0 && /Ваша стихия/.test(pv.querySelector(".sg-over").textContent) && /^(Обычный тип|Особый тип|Редкий тип|Без особого типа)/.test(pv.querySelector(".sg-rl").textContent)
@@ -3167,7 +3158,6 @@ const S = (title) => console.log("\n## " + title);
       fsz[m] = mm ? +(+mm[1] / vb[2]).toFixed(5) : null; });
     ok(Object.values(fsz).every(v => v && Math.abs(v - fsz.wi) < 1e-4), "the same pixels per unit (so the same label size) in every mode: " + JSON.stringify(fsz));
     // Avatar: special ≈ 35 %, rare ≈ 7–8 % (thresholds)
-    eq([K.av.T.healing, K.av.T.metal, K.av.T.lightning, K.av.T.blood, K.av.T.lava, K.av.T.combustion], [.35, .3, 58, .55, 20, 1.1], "Avatar type thresholds (v620: re-fitted to the owner's known people; lava = sex + fluids)");
     ok(!f.errors.length && !r2.errors.length && !r3.errors.length, "no script errors: " + f.errors.concat(r2.errors, r3.errors).join(" | "));
     _sc.end();
   }
@@ -3213,7 +3203,7 @@ const S = (title) => console.log("\n## " + title);
     ok(A.typeOf("earth", K.portrait.compute(sand, null), sand, null) === "sand", "Earth with darkness loved (and iron not above it) → Sand");
     const metal = set(set(base(), CI("iron"), "love"), CI("dark"), "limit");
     ok(A.typeOf("earth", K.portrait.compute(metal, null), metal, null) === "metal", "Earth with iron loved over darkness → Metal");
-    const vines = set(set(base(), CI("rope"), "love"), CI("home"), "limit");
+    const vines = set(set(set(base(), CI("rope"), "love"), CI("home"), "limit"), CI("blood"), "limit");   /* v625: blood off too (new items shifted the base pattern) */
     ok(A.typeOf("water", K.portrait.compute(vines, null), vines, null) === "vines", "Water with ropes loved → Vines");
     const sexIds = K.CATS.find(c => c.id === "sex-penetration").items.map(x => x[1]);
     const lava = set(set(set(base(), ids, "maybe"), sexIds, "love"), CI("dark"), "limit");
@@ -3230,7 +3220,6 @@ const S = (title) => console.log("\n## " + title);
     const set = (st, list, v) => { list.forEach(id => { st.items[id] = { interest: v }; }); return st; };
     const grp = g => K.CATS.find(c => c.id === g).items.map(x => x[1]);
     ok(/hunt1/.test(A.CPROF.earth) && !/hunt/.test(A.CPROF.air), "hunt cluster counts for Earth");
-    eq(A.T.lava, 20, "lava threshold 20");
     const st = set(set(set(K.store.blank(), ids, "maybe"), grp("sex-penetration").slice(0, Math.ceil(grp("sex-penetration").length * .6)), "love"), grp("bodily-fluids"), "yes");
     const d = K.portrait.compute(st, null), dv = K.dnd.devs(d).dev;
     eq(A.typeOf("earth", d, st, null), (dv["sex-penetration"] || 0) + (dv["bodily-fluids"] || 0) >= 20 ? "lava" : A.typeOf("earth", d, st, null), "Lava follows sex + fluids");
@@ -3239,13 +3228,13 @@ const S = (title) => console.log("\n## " + title);
     _sc.end();
   }
 
-  S("v621: shipped with new things locked (KC.FEATURES): extended list buttons, ⚔ Wr, 🗡 Witcher, 🌀 Avatar");
+  S("v621: things locked with KC.FEATURES (v624: the extended list is unlocked — locked here by a patch to keep testing the switch)");
   {
     const _sc = scope();
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
-    const f = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
-    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), ["wr", "rz"], "shipped build: only ⚔ Wr and (v623) 📖 Re:Zero are on");
+    const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), ["wr", "rz"], "with ext locked: only ⚔ Wr and 📖 Re:Zero are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
     ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
@@ -3254,19 +3243,15 @@ const S = (title) => console.log("\n## " + title);
     const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wh|leg|ow|wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
     K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
     ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb), "help: no extended-list or Avatar paragraphs");
-    ok(!hn.querySelector("[data-feat]") && !/Расширенная анкета|✦ Хочу|Обе роли/.test(hn.textContent) && /Кнопки «Очистить» больше нет/.test(hn.textContent) && /Стартовые шаблоны/.test(hn.textContent) && /^5 октября 2026$/.test(hn.querySelectorAll("h5")[1].textContent),
-      "What's new: the 5 Oct entry without the extended list (its lines stay in the code), the Clear line and starter templates shown");
-    ok(/data-feat=\\"ext/.test(require("fs").readFileSync(__dirname + "/../js/lang/ru.ui.js", "utf8")), "…the extended-list lines are kept in the texts");
-    const e0 = open("form", { locked: true }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
+    const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
     f.KC.store.mine.sync(f.KC.form.state); f.d.getElementById("mineBtn").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true }));
     ok(f.d.getElementById("mineList").textContent.length > 0 && !/Обычная/.test(f.d.getElementById("mineList").textContent), "My lists: no «Обычная» mark while the extended list is locked");
     // an extended list made before the lock still opens and keeps its switch (way back to the plain list)
     const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
-    const g = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    const g = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") }, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
     ok(!g.d.getElementById("extToggleBox").hidden && !g.d.getElementById("roleView").hidden, "an extended list keeps ⇅ and the role filter");
-    const c = open("compare", { locked: true }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
-    const u = open("form"); u.KC.help.open("news"); ok(/Расширенная анкета/.test(u.d.getElementById("helpNews").textContent) && !/Кнопки «Очистить» больше нет/.test(u.d.getElementById("helpNews").textContent), "unlocked: the extended-list lines come back, the stand-in line goes");
-    ok(!f.errors.length && !g.errors.length && !u.errors.length, "no script errors");
+    const c = open("compare", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") } }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
+    ok(!f.errors.length && !g.errors.length, "no script errors");
     _sc.end();
   }
 
@@ -3303,10 +3288,9 @@ const S = (title) => console.log("\n## " + title);
     LANGS.forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".ui.js", "utf8"))({ addLang: (lg, k, d) => Object.assign(o, d) });
       ["rz.toRz", "rz.mine", "rz.their", "card.o.rz", "sp.rz.h", "sp.rz.grp", "sp.rz.same", "sp.rz.near", "sp.rz.far", "help.rz_html", "help.compareRz_html"].concat(R.SINS.map(k => "rz.s." + k), R.SINS.map(k => "rz.g." + k), R.RANKS.map(k => "rz.r." + k))
         .forEach(k => { if (!o[k]) miss.push(l + ":" + k); });
-      if (!/^<h5>[^<]*(7|7 日|7日)[^<]*<\/h5>/.test(o["help.news_html"]) || !/Re:Zero|リゼロ/.test(o["help.news_html"].slice(0, 300))) miss.push(l + ": news of Oct 7");
       const lo = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(lo, d) });
       R.SINS.map(k => "rz.s." + k).concat(R.RANKS.map(k => "rz.r." + k)).forEach(k => { if (!lo[k]) miss.push(l + ": lore " + k); }); });
-    eq(miss, [], "names, ranks, help, the Oct 7 news and the guide texts in all 7 languages");
+    eq(miss, [], "names, ranks, help and the guide texts in all 7 languages");
     // Sloth from unanswered items; a template-filled list counts against the template
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     const fill = (n, v) => { const st = K.store.blank(); ids.slice(0, n).forEach((id, i) => { st.items[id] = { interest: v || ["yes", "love", "maybe", "limit"][i % 4] }; }); return st; };
@@ -3336,6 +3320,148 @@ const S = (title) => console.log("\n## " + title);
     // compare page
     const c = open("compare", { locked: true }); ok(/data-mode="rz"/.test(c.KC.wod.switchHTML("pair")) && !!c.KC.rz, "compare page: the 📖 mode");
     ok(!f.errors.length && !g.errors.length && !c.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v624: 11 new practices (506–516), the «Хардкор» section after the fluids (enemas moved there), extended list unlocked");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, ids = [], at = {};
+    K.CATS.forEach(c => c.items.forEach(([code, id]) => { ids.push(id); at[id] = c.id; }));
+    const NEW = ["daddy-kink", "onii-chan-play", "gerontophilia", "makeup", "smeared-makeup", "snot-fetish", "ruining-sub-belongings", "public-omorashi", "milk-enema", "urine-enema", "food-insertion"];
+    eq(NEW.filter(id => ids.indexOf(id) < 0), [], "all new practices are in the list");
+    eq(NEW.map(id => at[id]).join(), "role-play,role-play,fetishes,fetishes,fetishes,fetishes,humiliation,bodily-fluids,hardcore,hardcore,hardcore", "each in its section");
+    const order = K.CATS.map(c => c.id);
+    eq(order.indexOf("hardcore") - order.indexOf("bodily-fluids"), 1, "«Хардкор» comes right after the fluids");
+    eq(K.CATS.find(c => c.id === "hardcore").items.map(x => x[1]).join(), "enema-cleansing,enema-retention,milk-enema,urine-enema,food-insertion,funnel-play,injections-saline,blood-play,emetophilia", "the section: all enemas, food insertion (v626: vagina only), funnel, saline, blood");
+    ok(K.CATS.find(c => c.id === "sensation-play").items.every(x => !/enema/.test(x[1])), "no enemas left in sensation play");
+    eq(K.portrait.MERGE.hardcore, "bodily-fluids", "portrait: the hardcore section counts with the fluids (9 groups unchanged)");
+    const st = K.store.blank(); ["milk-enema", "urine-enema", "enema-cleansing"].forEach(id => { st.items[id] = { interest: "love" }; });
+    const sec = K.portrait.compute(st, null).sections.find(x => x.id === "bodily-fluids");
+    ok(!!sec && sec.pct !== null && !K.portrait.compute(st, null).sections.some(x => x.id === "hardcore"), "…answers there show up in the fluids group");
+    // links: an old link keeps its answers after the move (codes never change)
+    const old = K.store.blank(); old.items["enema-retention"] = { interest: "yes" }; old.items["blood-play"] = { interest: "limit" };
+    const back = K.codec.decode(K.codec.encode(old));
+    ok(back.items["enema-retention"].interest === "yes" && back.items["blood-play"].interest === "limit", "moved items keep their answers in links");
+    // texts
+    const fsx = require("fs"), miss = [];
+    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+      if (!o.cats.hardcore) miss.push(l + ": section name"); NEW.forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); }); });
+    eq(miss, [], "names and hints in all 7 languages");
+    ok(NEW.every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "new practices carry the green dot");
+    // extended list unlocked
+    const g = open("form", { locked: true }), KG = g.KC;
+    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "ext,rz,wr", "shipped build: ⚔ Wr, 📖 Re:Zero and (v624) the extended list are on");
+    ok(!g.d.getElementById("extToggleBox").hidden, "the ⇅ switch is back in the header");
+    KG.help.open("news"); const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
+    ok(h5[0] === "9 октября 2026 · Расширенная анкета" && h5[2] === "5 октября 2026" && g.d.querySelectorAll("#helpNews ul")[0].querySelectorAll("li").length === 5 && !g.d.querySelector("#helpNews [data-feat], #helpNews [data-nofeat]"),
+      "What's new: the extended list is its own entry of Oct 9 on top; the Oct 5 entry keeps the rest");
+    ok(!f.errors.length && !g.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v625: food insertion = vagina only (the anus item retired in v626), 5 more practices (518–522), the no-safeword items explain safety, onii-chan in the name");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, at = {}, code = {};
+    K.CATS.forEach(c => c.items.forEach(([cd, id]) => { at[id] = c.id; code[id] = cd; }));
+    const NEW = { "sex-during-chores": [518, "sex-penetration"], "cigarette-burns": [519, "marking"], "forced-sex-unpleasant-partner": [520, "humiliation"], "no-safeword-short": [521, "service-control"], "no-safeword-long": [522, "service-control"] };
+    eq(Object.keys(NEW).filter(id => code[id] !== NEW[id][0] || at[id] !== NEW[id][1]), [], "codes 518–522, each in its section; 517 (food in the anus, v625) retired in v626");
+    ok(K.RETIRED_CODES.indexOf(517) >= 0 && !code["food-insertion-anal"] && K.codec.decode(K.codec.encode({ items: { "food-insertion": { interest: "yes" } }, meta: {} })).items["food-insertion"].interest === "yes", "517 is retired (never reused); links still work");
+    const fsx = require("fs"), miss = [];
+    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+      Object.keys(NEW).forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); });
+      if (/анус|anus|ano\b|ânus|アナル|ทวาร|肛門/i.test(o.items["food-insertion"][0])) miss.push(l + ": food-insertion still names the anus");
+      ["no-safeword-short", "no-safeword-long"].forEach(id => { if (o.items[id] && o.items[id][1].length < (/ja|zh/.test(l) ? 70 : 150)) miss.push(l + ": " + id + " has no safety instructions"); });
+      if (l !== "ja" && !/Onii|Онии|โอนี่/.test(o.items["onii-chan-play"][0])) miss.push(l + ": onii-chan not in the name"); });
+    eq(miss, [], "texts in all 7 languages; vagina / anus split; the no-safeword hints carry safety instructions; the Japanese term in the name");
+    ok(/Обливание холодным душем/.test(fsx.readFileSync(__dirname + "/../js/lang/ru.practices.js", "utf8")), "typo fixed: «холодным душем»");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v627: lower header on phones — filters fold under an arrow, languages in a drop-down, a short intro");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, d = f.d, w = f.w;
+    const tg = d.getElementById("filtToggle"), first = K.form.filtersOpen();
+    click(w, tg); ok(K.form.filtersOpen() === !first && d.body.classList.contains("filters-off") === first && K.ls.raw(K.KEYS.filters) === (first ? "0" : "1"), "the arrow folds / unfolds the filters row and remembers it");
+    K.ls.setRaw(K.KEYS.filters, "0"); K.form.renderFiltFold();
+    ok(d.body.classList.contains("filters-off") && tg.getAttribute("aria-expanded") === "false" && !tg.classList.contains("on"), "folded, nothing filtering: no dot");
+    const sb = d.getElementById("search"); sb.value = "клизм"; sb.dispatchEvent(new w.Event("input"));
+    ok(tg.classList.contains("on"), "folded while the search filters the list: a dot on the arrow");
+    sb.value = ""; sb.dispatchEvent(new w.Event("input")); ok(!tg.classList.contains("on"), "…and it goes when nothing filters");
+    const ls = d.getElementById("langSw"), cur = ls.querySelector(".lang-cur");
+    ok(!!cur && /RU/.test(cur.textContent) && ls.querySelectorAll(".lang-menu .lang-btn").length === 7 && !ls.classList.contains("open"), "languages: one button with the current language, the seven in a closed menu");
+    click(w, cur); ok(ls.classList.contains("open") && cur.getAttribute("aria-expanded") === "true", "the button opens the menu");
+    click(w, d.body); ok(!ls.classList.contains("open"), "a click elsewhere closes it");
+    const intro = d.querySelector(".intro").textContent;
+    ok(!/Заполненный список/.test(intro) && d.querySelectorAll(".intro p").length <= 2 && /Всё хранится только на этом устройстве/.test(intro), "intro: one short line (+ the template note)");
+    K.help.open("start"); ok(/Стоп-слово и границы всегда важнее/.test(d.getElementById("help-start").textContent) && /«\?» рядом с пунктом/.test(d.getElementById("help-start").textContent), "…the rest is in “How to use”");
+    ok(!/две отдельные анкеты/.test(d.querySelector(".role-top").textContent) && /Свитч\? Сделать расширенную/.test(d.getElementById("extMake").textContent) && !d.getElementById("extMake").hidden, "role block: short, and the switch button for the extended list");
+    const css = require("fs").readFileSync(__dirname + "/../css/style.css", "utf8");
+    ok(/body\.filters-off \.subbar\{display:none\}/.test(css), "css: the folded filters row is hidden");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v628: the saved theme before the first paint; filters open by default");
+  {
+    const _sc = scope();
+    const fsx = require("fs"), bad = [];
+    ["index.html", "compare.html", "ru/index.html", "en/index.html"].forEach(fl => { const h = fsx.readFileSync(__dirname + "/../" + fl, "utf8");
+      const sc = h.indexOf('localStorage.getItem("checklist-theme")'), css = h.indexOf('rel="stylesheet" href="') >= 0 ? h.search(/<link rel="stylesheet" href="[^"]*css\/style\.css/) : -1;
+      if (sc < 0 || css < 0 || sc > css || !/<meta name="color-scheme" content="light dark">/.test(h)) bad.push(fl); });
+    eq(bad, [], "every page sets the saved theme in <head> before the stylesheet");
+    const f = open("form"); ok(f.KC.form.filtersOpen() && !f.d.body.classList.contains("filters-off"), "filters open by default (owner)");
+    _sc.end();
+  }
+
+  S("v629: libraries on demand, Back closes windows, browser bar follows ◑, a note without JavaScript");
+  {
+    const _sc = scope();
+    const fsx = require("fs"), R = f2 => fsx.readFileSync(__dirname + "/../" + f2, "utf8");
+    const pages = ["index.html", "compare.html", "ru/index.html", "en/index.html", "ja/index.html"];
+    eq(pages.filter(x => /cdnjs/.test(R(x))), [], "no PDF / picture / QR library is loaded with the page");
+    ok(/await KC\.lib\("pdf"\)/.test(R("js/form/pdf.js")) && /KC\.lib\("qr"\)/.test(R("js/form/share.js")), "…they are fetched when PDF or QR is first needed");
+    eq(pages.filter(x => !/<noscript><p class="noscript" data-i18n="noscript">[^<]{20,}<\/p><\/noscript>/.test(R(x))), [], "every page says it needs JavaScript when scripts are off");
+    ok(/Для работы сайта нужен JavaScript/.test(R("ru/index.html")), "…in the page's language");
+    const f = open("form"), K = f.KC, d = f.d, w = f.w;
+    K.barColor("dark"); eq([...d.querySelectorAll('meta[name="theme-color"]')].map(m => m.getAttribute("content")), ["#161114", "#161114"], "the browser bar takes the chosen theme's colour");
+    const ov = d.getElementById("mineOverlay");
+    click(w, d.getElementById("mineBtn"));
+    ok(ov.classList.contains("show") && w.history.state && w.history.state.kcModal === "mineOverlay", "opening a window adds a history entry");
+    w.dispatchEvent(new w.PopStateEvent("popstate", { state: null }));
+    ok(!ov.classList.contains("show"), "Back (popstate) closes the window");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v630: five more practices (523–527): pubic hair, fully shaved, primal play, cock slapping, emetophilia");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, at = {}, code = {};
+    K.CATS.forEach(c => c.items.forEach(([cd, id]) => { at[id] = c.id; code[id] = cd; }));
+    const NEW = { "pubic-hair-fetish": [523, "fetishes"], "fully-shaved-fetish": [524, "fetishes"], "primal-play": [525, "role-play"], "cock-slapping": [526, "humiliation"], "emetophilia": [527, "hardcore"] };
+    eq(Object.keys(NEW).filter(id => code[id] !== NEW[id][0] || at[id] !== NEW[id][1]), [], "codes 523–527, each in its section");
+    const fsx = require("fs"), miss = [];
+    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+      Object.keys(NEW).forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); }); });
+    eq(miss, [], "names and hints in all 7 languages");
+    ok(Object.keys(NEW).every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "with the green dot");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("calibration constants — v624: the hand-tuned and fitted numbers in one place (update here when re-fitting)");
+  {
+    const _sc = scope();
+    const K = open("form").KC, W = K.wod;
+    eq([W.PROF.fey.satyr[0], W.PROF.fey.boggan[0]], ["X1 N.3", "N1 S-.3"], "fey variant E: Satyrs and Boggans");
+    eq([W.PROF.vamp.ventrue[1], W.PROF.vamp.lasombra[1], W.PROF.demon.devils[1], W.PROF.demon.malefactors[1]], [-0.2, -0.11, 1.26, -1.16], "v605 biases: Ventrue, Lasombra, Devils, Malefactors");
+    eq([W.PROF.vamp.ventrue[0], W.PROF.vamp.lasombra[0], W.PROF.demon.devils[0], W.PROF.demon.malefactors[0]], ["D1 F.4", "B.8 D.8", "D1 R.3 V.3", "B1 F.8"], "their profiles (only the biases were hand-tuned)");
+    eq([K.wr.EXCESS.W, K.wr.EXCESS.L0, K.wr.BIAS.slaanesh], [4, 49, -6.05], "Slaanesh: excess weight 4, from 49 % Yes + Love, bias −6.05 (owner, Oct 3)");
+    eq([K.av.T.healing, K.av.T.metal, K.av.T.lightning, K.av.T.blood, K.av.T.lava, K.av.T.combustion], [.35, .3, 58, .55, 20, 1.1], "Avatar type thresholds (v620; lava = sex + fluids)");
     _sc.end();
   }
 

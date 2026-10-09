@@ -15,7 +15,7 @@
   const t = (k, v) => KC.i18n.t(k, v), esc = KC.esc;
   const OPTIONS = 3, POS = { yes: 1, love: 1 };
   const WEIGHT = { "sex-penetration": 4, "bondage": 4, "humiliation": 4, "service-control": 3, "impact-rough-play": 3,
-    "fetishes": 2, "bodily-fluids": 2, "intimacy": 1, "sensation-play": 1, "role-play": 0.5, "marking": 0.5,
+    "fetishes": 2, "bodily-fluids": 2, "hardcore": 1, "intimacy": 1, "sensation-play": 1, "role-play": 0.5, "marking": 0.5,
     "voyeurism-exhibitionism": 0.5, "non-monogamy": 0, "session-length": 0 };
   const SKIP = {};
   ("sleepover aftercare shared-bathing using-real-names " +
@@ -49,6 +49,10 @@
    "forced-homosexuality forced-watching-others forced-porn-watching forced-feminization " +
    /* fluids */
    "blood-play injections-saline milking period-play funnel-play bukkake cum-in-eyes " +
+   /* v624: hardcore, public, other people's age, belongings */
+   "milk-enema urine-enema food-insertion public-omorashi gerontophilia ruining-sub-belongings " +
+   /* v625: burns, third people, no safeword */
+   "emetophilia cigarette-burns forced-sex-unpleasant-partner no-safeword-short no-safeword-long " +
    /* marking: permanent or burns */
    "tattooing branding scarification wax-burns " +
    /* sex: machines, medical, in public, needs its own talk */

@@ -129,19 +129,30 @@
       }
     },
 
-    /* segmented RU | EN switcher into #langSw; onChange(lang) re-renders the page */
+    /* the language switcher in #langSw; onChange(lang) re-renders the page.
+       v627 (owner): a drop-down — one button with the current language ("RU ▾"), the languages in a small menu under it
+       (the seven buttons stay button[data-lang], only folded), so the header row has room for the progress */
     mountSwitcher(onChange) {
       const box = KC.$("langSw"); if (!box) return;
+      const close = () => { box.classList.remove("open"); const c = box.querySelector(".lang-cur"); if (c) c.setAttribute("aria-expanded", "false"); };
       const draw = () => {
-        box.innerHTML = "";
+        box.innerHTML = ""; box.classList.add("lang-dd");
+        const c = KC.el("button", "lang-cur", LANGS[cur].label); c.type = "button"; c.title = I.t("lang.label") + ": " + LANGS[cur].name;
+        c.setAttribute("aria-haspopup", "true"); c.setAttribute("aria-expanded", "false"); box.appendChild(c);
+        const menu = KC.el("div", "lang-menu");
         I.enabled().forEach(l => {
-          const b = KC.el("button", "lang-btn" + (l === cur ? " on" : ""), LANGS[l].label);
+          const b = KC.el("button", "lang-btn" + (l === cur ? " on" : ""), LANGS[l].label + " · " + LANGS[l].name);
           b.type = "button"; b.title = LANGS[l].name; b.dataset.lang = l;
-          box.appendChild(b);
+          menu.appendChild(b);
         });
+        box.appendChild(menu);
       };
+      document.addEventListener("click", e => { if (!box.contains(e.target)) close(); });
       box.addEventListener("click", e => {
-        const b = e.target.closest("button[data-lang]"); if (!b || b.dataset.lang === cur || box.classList.contains("loading")) return;
+        const c = e.target.closest(".lang-cur");
+        if (c) { const open = !box.classList.contains("open"); box.classList.toggle("open", open); c.setAttribute("aria-expanded", open ? "true" : "false"); return; }
+        const b = e.target.closest("button[data-lang]"); if (b) close();
+        if (!b || b.dataset.lang === cur || box.classList.contains("loading")) return;
         const want = b.dataset.lang;
         /* on a /<lang>/ page: open the other language's page (the choice is remembered, the list is on this device) */
         if (pageLang()) { I.persist(want); I.navigate("../" + want + "/" + location.hash); return; }

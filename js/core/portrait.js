@@ -15,7 +15,7 @@
   const W = { love: 1.2, yes: 1, maybe: 0.4, limit: -1 }, MAX = 1.2, MIN = 3, SHRINK = 8, VMIN = 6;
   const OUT = { "session-length": 1, "non-monogamy": 1 };
   /* section -> group; groups keep the order of the first section in KC.CATS */
-  const MERGE = { "service-control": "ds", "humiliation": "ds", "impact-rough-play": "sm", "sensation-play": "sm", "marking": "sm" };
+  const MERGE = { "service-control": "ds", "humiliation": "ds", "impact-rough-play": "sm", "sensation-play": "sm", "marking": "sm", "hardcore": "bodily-fluids" };   /* v624: the hardcore section counts with the fluids */
   const groupOf = id => MERGE[id] || id;
   /* alphabetical in the current language (locale-aware) */
   const byName = (a, b) => KC.i18n.item(a).name.localeCompare(KC.i18n.item(b).name, KC.i18n.locale());

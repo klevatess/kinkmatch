@@ -1,5 +1,5 @@
 /* form/pdf.js — "Download PDF": builds a styled summary sheet off-screen, rasterises it
-   with html2canvas and slices it into A4 pages with jsPDF (both loaded from cdnjs).
+   with html2canvas and slices it into A4 pages with jsPDF (both loaded from cdnjs on the first PDF, KC.lib — v629).
    Follows the screen: a template limits the items (and is named in the header), favourites get ♥,
    "only ♥" in the filter panel limits the sheet to favourites. */
 (function (KC) {
@@ -116,6 +116,7 @@
     sheets.forEach(sh => document.body.appendChild(sh));
     try {
       if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+      await KC.lib("pdf");   /* v629: fetched on the first PDF only */
       const pdf = new window.jspdf.jsPDF("p", "pt", "a4");
       const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 24, imgW = pw - margin * 2;
       let page = 0;
