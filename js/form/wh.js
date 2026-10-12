@@ -50,11 +50,45 @@
       o[f] = n / d + BIAS[f]; });
     return o;
   }
-  function choose(st, d, set) {
+  /* the faction on its own (no link to the Old World) */
+  function own(st, d, set) {
     if (!KC.dnd.devs(d)) return null;
     if (devourer(st, set)) return "tyranids";
     const o = scores(st, set); return FACTIONS.reduce((a, f) => (o[f] > o[a] ? f : a), FACTIONS[0]);
   }
+  /* v632–v633 (owner, Oct 12): 40K, the Old World and the legions agree with each other. link() gives the 40K faction,
+     the Old World race and the side a legion must take (or null). 40K leads, the Old World follows:
+       1. a race that belongs to a 40K people pulls the faction there (PULL: Orcs → Orks, Dark Elves → Drukhari,
+          High / Wood Elves → Aeldari or Harlequins), but only when that faction is close in 40K too (within LINK.GAP)
+          and the 40K faction is not FIXED (Orks, Tyranids, Harlequins stay what they are);
+       2. then the race follows the faction (NEED): Orks → Orcs & Goblins, Drukhari → Dark Elves, Aeldari → High / Wood
+          Elves, Chaos Space Marines → a Chaos race, Tyranids → Lizardmen or Skaven; loyalist Astartes → no Chaos race;
+          any other faction → a race that does not belong to another 40K people (Harlequins may be elves, need not be);
+       3. legions: Chaos Space Marines → a traitor legion, loyalist Astartes → a loyal one.
+     Skaven and the Dark Mechanicum lean to each other (a bonus, not a rule — they may differ). */
+  const CHAOS_OW = ["skaven", "woc", "cd"], CHAOS_ALL = ["skaven", "woc", "cd", "beast"], ELF40 = ["aeldari", "harlequins"], ELFOW = ["he", "we"];
+  const LOYALIST = ["sm", "gk"], FIXED = ["orks", "tyranids", "harlequins"], LINK = { SK: 0.35, GAP: 0.1 };
+  const PULL = { orc: ["orks"], de: ["drukhari"], he: ELF40, we: ELF40 };
+  const NEED = { orks: ["orc"], drukhari: ["de"], aeldari: ELFOW, csm: CHAOS_OW, tyranids: ["liz", "skaven"] };
+  const best = (o, list) => list.reduce((a, k) => (o[k] > o[a] ? k : a), list[0]);
+  function races(f) {
+    if (NEED[f]) return NEED[f];
+    return KC.ow.RACES.filter(r => !(PULL[r] && PULL[r].indexOf(f) < 0) && !(LOYALIST.indexOf(f) >= 0 && CHAOS_ALL.indexOf(r) >= 0));
+  }
+  function link(st, d, set) {
+    if (!KC.dnd.devs(d) || !KC.ow) return null;
+    const sF = scores(st, set), sR = KC.ow.scores(st, set), argmax = o => Object.keys(o).reduce((a, k) => (o[k] > o[a] ? k : a), Object.keys(o)[0]);
+    const dev = devourer(st, set), rRaw = argmax(sR);
+    /* Skaven ⇄ Dark Mechanicum: each pulls the other a little */
+    if (rRaw === "skaven" && !dev && FIXED.indexOf(argmax(sF)) < 0) sF.dmech += LINK.SK;   // never moves Orks or Harlequins
+    if (!dev && argmax(sF) === "dmech") sR.skaven += LINK.SK;
+    const f0 = dev ? "tyranids" : argmax(sF), r0 = argmax(sR);
+    let f = f0;
+    if (FIXED.indexOf(f0) < 0 && PULL[r0] && PULL[r0].indexOf(f0) < 0) { const c = best(sF, PULL[r0]); if (sF[f0] - sF[c] <= LINK.GAP) f = c; }
+    const ok = races(f), r = ok.indexOf(r0) >= 0 ? r0 : best(sR, ok);
+    return { f, r, side: f === "csm" ? "traitor" : LOYALIST.indexOf(f) >= 0 ? "loyal" : null };
+  }
+  function choose(st, d, set) { const l = link(st, d, set); return l ? l.f : own(st, d, set); }
   function waaagh(st, set) {
     const sh = KC.clusters.shares(st, set), zp = KC.clusters.z(st, "pack", set), zs = KC.clusters.z(st, "spank", set);
     return Math.max(WAAAGH.MIN, Math.min(WAAAGH.MAX, 1 + Math.floor(sh.love / WAAAGH.LOVE + 1e-9) + (zp >= 1 ? 2 : zp >= 0 ? 1 : 0) + (zs >= 1 ? 1 : 0)));
@@ -77,5 +111,5 @@
     const shared = a.main.map(m => m.id).filter(g => b.main.some(m => m.id === g));
     return { level: a.id === b.id ? "same" : shared.length ? "near" : "far", shared };
   }
-  KC.wh = { FACTIONS, PROF, BIAS, DEVOURER, WAAAGH, FIG, devourer, scores, choose, waaagh, waaaghText, pick, head, closeness };
+  KC.wh = { FACTIONS, PROF, BIAS, DEVOURER, WAAAGH, FIG, CHAOS_OW, CHAOS_ALL, ELF40, ELFOW, LOYALIST, FIXED, PULL, NEED, LINK, races, devourer, scores, own, link, choose, waaagh, waaaghText, pick, head, closeness };
 })(window.KC);

@@ -2774,7 +2774,8 @@ const S = (title) => console.log("\n## " + title);
       const top = Object.keys(w).filter(k => w[k] >= .5), off = Object.keys(w).filter(k => w[k] < 0);
       const like = new Set(), hate = new Set(); top.forEach(k => C.ids()[k].forEach(id => like.add(id))); off.forEach(k => C.ids()[k].forEach(id => hate.add(id)));
       return mk((id, i) => like.has(id) ? "love" : hate.has(id) ? "limit" : i % 3 === 0 ? "maybe" : i % 3 === 1 ? "limit" : null); };
-    const wins = O.RACES.filter(r => { const st = lover(O.PROF[r]); return O.choose(st, K.portrait.compute(st, null), null) === r; });
+    // v633: the race on its own (O.own) — O.choose also follows the 40K faction (link rules), tested in the v633 section
+    const wins = O.RACES.filter(r => { const st = lover(O.PROF[r]); return O.own(st, K.portrait.compute(st, null), null) === r; });
     ok(wins.length >= 14, "most races win on a list that loves their themes (" + wins.length + " / 17)");
     eq(V.SIGNS.filter(g => V.chooseSign(lover(V.SPROF[g]), null) === g), V.SIGNS, "each sign wins on a list that loves its themes");
     eq(O.grudges(mk((id, i) => i % 4 === 0 ? "limit" : i % 4 === 1 ? "yes" : null), null), Math.ceil(all.length / 4), "the Dwarfs' Book of Grudges: one page per “No”");
@@ -3234,13 +3235,13 @@ const S = (title) => console.log("\n## " + title);
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
     const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
-    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]), ["wr", "rz"], "with ext locked: only ⚔ Wr and 📖 Re:Zero are on");
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,wh,wr", "with ext locked: ⚔ Wr (all four tabs, v632) and 📖 Re:Zero are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
     ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
     K.dnd.setMode("wi"); eq(K.dnd.mode(), "sign", "choosing a locked mode stores nothing");
-    ok(!/data-mode="(wh|leg|ow|wi|av)"/.test(K.lore.switchHTML()), "constellation guide: no locked mode buttons");
-    const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wh|leg|ow|wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
+    ok(!/data-mode="(wi|av)"/.test(K.lore.switchHTML()), "constellation guide: no locked mode buttons");
+    const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
     K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
     ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb), "help: no extended-list or Avatar paragraphs");
     const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
@@ -3314,7 +3315,7 @@ const S = (title) => console.log("\n## " + title);
       "shipped build: the 📖 button, the sin's sign and its rank line");
     ok(!!g.d.querySelector(".pt-wrb") && !!g.d.querySelector(".pt-mode.pt-wr-sub") === false, "⚔ Wr is there (sub-row only when Wr is open)");
     g.KC.dnd.setMode("wr"); g.KC.form.renderPortrait(); const sub = g.d.querySelector(".pt-wr-sub");
-    ok(!!sub && sub.querySelectorAll("button").length === 1 && /Боги Хаоса/.test(sub.textContent) && !!g.d.querySelector(".pt-sign.pt-wr"), "⚔ Wr open: the tab row with the one tab «Боги Хаоса», the god's sign");
+    ok(!!sub && sub.querySelectorAll("button").length === g.KC.dnd.wrTabs().length && /Боги Хаоса/.test(sub.textContent) && !!g.d.querySelector(".pt-sign.pt-wr"), "⚔ Wr open: the tab row (with «Боги Хаоса»), the god's sign");
     g.KC.dnd.setMode("rz"); const lp = g.KC.lore.provider(); ok(lp.length === 1 && lp[0].items.length === 2 && /^rz\.s\./.test(lp[0].items[0].key) && /^rz\.r\./.test(lp[0].items[1].key), "the guide describes the sin and the rank");
     g.KC.help.open("portrait"); ok(/Грехи Re:Zero/.test(g.d.getElementById("help-portrait").textContent) && /Служитель богов Хаоса/.test(g.d.getElementById("help-portrait").textContent), "help: the Re:Zero and ⚔ Wr paragraphs");
     // compare page
@@ -3351,10 +3352,11 @@ const S = (title) => console.log("\n## " + title);
     ok(NEW.every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "new practices carry the green dot");
     // extended list unlocked
     const g = open("form", { locked: true }), KG = g.KC;
-    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "ext,rz,wr", "shipped build: ⚔ Wr, 📖 Re:Zero and (v624) the extended list are on");
+    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "ext,leg,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero and (v624) the extended list are on");
     ok(!g.d.getElementById("extToggleBox").hidden, "the ⇅ switch is back in the header");
     KG.help.open("news"); const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
-    ok(h5[0] === "9 октября 2026 · Расширенная анкета" && h5[2] === "5 октября 2026" && g.d.querySelectorAll("#helpNews ul")[0].querySelectorAll("li").length === 5 && !g.d.querySelector("#helpNews [data-feat], #helpNews [data-nofeat]"),
+    const i9 = h5.indexOf("9 октября 2026 · Расширенная анкета");   // v633: found by text, newer entries go above it
+    ok(i9 >= 0 && h5[i9 + 2] === "5 октября 2026" && g.d.querySelectorAll("#helpNews ul")[i9].querySelectorAll("li").length === 5 && !g.d.querySelector("#helpNews [data-feat], #helpNews [data-nofeat]"),
       "What's new: the extended list is its own entry of Oct 9 on top; the Oct 5 entry keeps the rest");
     ok(!f.errors.length && !g.errors.length, "no script errors");
     _sc.end();
@@ -3449,6 +3451,73 @@ const S = (title) => console.log("\n## " + title);
       Object.keys(NEW).forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); }); });
     eq(miss, [], "names and hints in all 7 languages");
     ok(Object.keys(NEW).every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "with the green dot");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v631: PDF drawn in pieces (long lists came out blank after the portrait)");
+  {
+    const _sc = scope();
+    const src = require("fs").readFileSync(__dirname + "/../js/form/pdf.js", "utf8");
+    ok(/MAXPX = 15e6/.test(src) && /chunkCss/.test(src) && /html2canvas\(clip,/.test(src) && !/html2canvas\(sh,/.test(src), "the sheet is rasterised piece by piece (≤ 3 pages, ≤ 15 million pixels each), never as one canvas");
+    _sc.end();
+  }
+
+  S("v632: 40K factions, Old World and legions unlocked; Orks in 40K ⇔ Orcs & Goblins in the Old World");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC;
+    eq(["wh", "leg", "ow"].filter(m => !K.FEATURES[m] || !K.dnd.usable(m)), [], "shipped build: factions, legions and the Old World are on");
+    eq(K.dnd.wrTabs().join(), "wr,wh,leg,ow", "four tabs under ⚔ Wr");
+    // the greenskin link, both ways, on made-up lists
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    let seed = 632; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+    const bad = []; let green = 0;
+    for (let n = 0; n < 150; n++) {
+      const st = K.store.blank(), o = rnd() - .5; ids.forEach(id => { const x = rnd() + o * .6; if (x > .1) st.items[id] = { interest: x < .35 ? "limit" : x < .6 ? "maybe" : x < .85 ? "yes" : "love" }; });
+      const d = K.portrait.compute(st, null), a = K.wh.choose(st, d, null), b = K.ow.choose(st, d, null);
+      if ((a === "orks") !== (b === "orc")) bad.push(n + ":" + a + "/" + b);
+      if (a === "orks") green++;
+      if (K.wh.own(st, d, null) === "orks" && a !== "orks") bad.push(n + ": Orks lost");   // v633: Orks in 40K always stay Orks
+    }
+    eq(bad, [], "Orks in 40K exactly when Orcs & Goblins in the Old World; Orks on their own are kept (" + green + " of 150 made-up lists)");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v633: 40K, the Old World and the legions agree — 40K leads; Chaos, loyalists, elves, dark elves, Tyranids; Skaven lean to the Dark Mechanicum");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC, W = K.wh;
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
+    let seed = 633; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+    const bad = [], seen = {}; let sk = 0, dm = 0, both = 0;
+    for (let n = 0; n < 300; n++) {
+      // made-up lists with a per-category lean, so every faction rule gets hit
+      const st = K.store.blank(), o = rnd() - .5, cs = {}; K.CATS.forEach(c => (cs[c.id] = rnd() - .5));
+      K.CATS.forEach(c => c.items.forEach(([, id]) => { const x = rnd() + o * .6 + cs[c.id] * .8; if (x > .1) st.items[id] = { interest: x < .35 ? "limit" : x < .6 ? "maybe" : x < .85 ? "yes" : "love" }; }));
+      const d = K.portrait.compute(st, null), a = W.choose(st, d, null), r = K.ow.choose(st, d, null), l = K.leg.choose(st, d, null);
+      if (!a) continue;
+      const tag = n + ":" + a + "/" + r + "/" + l;
+      if (a === "csm") { seen.csm = 1; if (W.CHAOS_OW.indexOf(r) < 0 || K.leg.TRAITOR.indexOf(l) < 0) bad.push("chaos " + tag); }
+      if (W.LOYALIST.indexOf(a) >= 0) { seen.loyal = 1; if (W.CHAOS_ALL.indexOf(r) >= 0 || K.leg.LOYAL.indexOf(l) < 0) bad.push("loyal " + tag); }
+      if ((a === "drukhari") !== (r === "de")) bad.push("dark elves " + tag); else if (a === "drukhari") seen.de = 1;
+      if (a === "aeldari" && W.ELFOW.indexOf(r) < 0) bad.push("Aeldari " + tag); else if (a === "aeldari") seen.elf = 1;
+      if (W.ELFOW.indexOf(r) >= 0 && W.ELF40.indexOf(a) < 0) bad.push("elves " + tag);
+      if (a === "harlequins" && W.ELFOW.indexOf(r) < 0) seen.harlNoElf = 1;   // Harlequins need not be elves (owner)
+      if (a === "tyranids") { seen.tyr = 1; if (["liz", "skaven"].indexOf(r) < 0) bad.push("Tyranids " + tag); }
+      if ((a === "orks") !== (r === "orc")) bad.push("greenskins " + tag);
+      const o40 = W.own(st, d, null); if (W.FIXED.indexOf(o40) >= 0 && a !== o40) bad.push("fixed " + o40 + " " + tag);
+      if (r === "skaven") sk++; if (a === "dmech") dm++; if (r === "skaven" && a === "dmech") both++;
+    }
+    eq(bad, [], "no list breaks a link rule (300 made-up lists)");
+    eq(Object.keys(seen).sort().join(), "csm,de,elf,harlNoElf,loyal,tyr", "the lists reach Chaos, loyalists, Aeldari, Harlequins without elves, dark elves and Tyranids");
+    eq([W.LINK.GAP, W.FIXED.join()], [0.1, "orks,tyranids,harlequins"], "a race pulls the 40K faction only within 0.1; Orks, Tyranids and Harlequins never move");
+    ok(both > 0 && both < sk && both < dm, "Skaven and the Dark Mechanicum overlap, but only partly (" + both + " both; Skaven " + sk + ", Dark Mechanicum " + dm + ")");
+    eq(W.LINK.SK, 0.35, "Skaven ⇄ Dark Mechanicum pull: 0.35");
+    // the news entry for the day
+    K.help.open("news"); const top = f.d.querySelector("#helpNews h5"), tl = top.nextElementSibling;
+    ok(top.textContent === "12 октября 2026 · 40K, Old World и Легионы" && tl.querySelectorAll("li").length === 3 && /Скавены и Тёмный механикус/.test(tl.textContent), "«What's new»: the entry of Oct 12 on top, 3 points");
     ok(!f.errors.length, "no script errors");
     _sc.end();
   }

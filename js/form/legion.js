@@ -52,6 +52,11 @@
   }
   function choose(st, d, set) {
     if (!KC.dnd.devs(d)) return null;
+    /* v633 (owner): Chaos Space Marines in 40K → a traitor legion; loyalist Astartes → a loyal one (KC.wh.link) */
+    const side = KC.wh && KC.wh.link ? (KC.wh.link(st, d, set) || {}).side : null;
+    if (side) { const o = scores(st, set), pool = side === "loyal" ? LOYAL : TRAITOR, t = pool.slice().sort((a, b) => o[b] - o[a]);
+      if (side === "traitor" && o[t[0]] - o[t[2]] < RULE.ALPHA) return "al";
+      return t[0]; }
     const o = scores(st, set), t = LEGIONS.slice().sort((a, b) => o[b] - o[a]);
     const bl = t.find(l => LOYAL.indexOf(l) >= 0), bt = t.find(l => TRAITOR.indexOf(l) >= 0);
     if (t.indexOf(bl) < 2 && t.indexOf(bt) < 2 && Math.abs(o[bl] - o[bt]) < RULE.LOST) return KC.clusters.z(st, "protocol", set) >= 0 ? "ii" : "xi";

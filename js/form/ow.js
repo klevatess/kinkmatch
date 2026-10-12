@@ -46,10 +46,13 @@
       o[r] = n / d + BIAS[r]; });
     return o;
   }
-  function choose(st, d, set) {
+  /* the race on its own (no link to 40K) */
+  function own(st, d, set) {
     if (!KC.dnd.devs(d)) return null;
     const o = scores(st, set); return RACES.reduce((a, r) => (o[r] > o[a] ? r : a), RACES[0]);
   }
+  /* v632–v633 (owner): the race agrees with the 40K faction — KC.wh.link (Orks ⇔ Orcs, Chaos, elves, loyalists) */
+  function choose(st, d, set) { const l = KC.wh && KC.wh.link(st, d, set); return l ? l.r : own(st, d, set); }
   /* the Dwarfs' Book of Grudges: one page per "No" */
   const grudges = (st, set) => { let n = 0; Object.keys(st.items).forEach(id => { if ((!set || set.has(id)) && st.items[id].interest === "limit") n++; }); return n; };
   function pick(d, st, set) {
@@ -69,5 +72,5 @@
     const shared = a.main.map(m => m.id).filter(g => b.main.some(m => m.id === g));
     return { level: a.id === b.id ? "same" : shared.length ? "near" : "far", shared };
   }
-  KC.ow = { RACES, PROF, BIAS, FIG, scores, choose, grudges, pick, head, closeness };
+  KC.ow = { RACES, PROF, BIAS, FIG, scores, own, choose, grudges, pick, head, closeness };
 })(window.KC);

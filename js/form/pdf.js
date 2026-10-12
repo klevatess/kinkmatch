@@ -120,18 +120,34 @@
       const pdf = new window.jspdf.jsPDF("p", "pt", "a4");
       const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 24, imgW = pw - margin * 2;
       let page = 0;
+      /* v631: the sheet is drawn in pieces of 3 PDF pages. One canvas for the whole sheet broke on long lists (an
+         extended list is ~40 000 px tall): browsers cap a canvas (Chrome ~32 000 px high, iPhone ~16 million pixels in
+         all) and return it blank — every page after the portrait came out white (bug report, Oct 10). */
+      const SCALE = 2, MAXPX = 15e6;
       for (const sh of sheets) {
-        const canvas = await html2canvas(sh, { scale: 2, backgroundColor: "#ffffff", useCORS: true, windowWidth: sh.scrollWidth });
-        const ratio = imgW / canvas.width, sliceH = Math.floor((ph - margin * 2) / ratio);
-        for (let y = 0; y < canvas.height; page++) {
-          const h = Math.min(sliceH, canvas.height - y);
-          const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
-          const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
-          ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-          if (page > 0) pdf.addPage();
-          pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
-          y += h;
+        const W = sh.scrollWidth, H = sh.scrollHeight;
+        const pageCss = Math.floor((ph - margin * 2) * W / imgW);            /* CSS px of the sheet on one PDF page */
+        const chunkCss = Math.max(pageCss, Math.min(pageCss * 3, Math.floor(MAXPX / (W * SCALE * SCALE) / pageCss) * pageCss));
+        /* each piece: the sheet inside a window of the piece's height (overflow hidden), shifted up by the piece's top */
+        const clip = document.createElement("div");
+        clip.style.cssText = "position:fixed;left:-10000px;top:0;overflow:hidden;width:" + W + "px;background:" + sh.style.background;
+        const keep = sh.style.cssText; sh.style.position = "static"; sh.style.left = "0"; clip.appendChild(sh); document.body.appendChild(clip);
+        for (let y0 = 0; y0 < H; y0 += chunkCss) {
+          const hc = Math.min(chunkCss, H - y0);
+          clip.style.height = hc + "px"; sh.style.marginTop = -y0 + "px";
+          const canvas = await html2canvas(clip, { scale: SCALE, backgroundColor: "#ffffff", useCORS: true, windowWidth: W, width: W, height: hc });
+          const ratio = imgW / canvas.width, sliceH = Math.round(pageCss * canvas.width / W);
+          for (let y = 0; y < canvas.height; page++) {
+            const h = Math.min(sliceH, canvas.height - y);
+            const c = document.createElement("canvas"); c.width = canvas.width; c.height = h;
+            const ctx = c.getContext("2d"); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c.width, h);
+            ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+            if (page > 0) pdf.addPage();
+            pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, imgW, h * ratio);
+            y += h;
+          }
         }
+        sh.style.cssText = keep; document.body.appendChild(sh); clip.remove();
       }
       const fn = t("pdf.file") + (F.state.name ? "-" + F.state.name.replace(/\s+/g, "_") : "") + ".pdf";
       try { pdf.save(fn); } catch (e) { window.open(URL.createObjectURL(pdf.output("blob")), "_blank"); }
