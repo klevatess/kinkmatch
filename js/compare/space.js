@@ -180,7 +180,7 @@
     const sub = sg.kind === "even" ? KC.signs.evenText(sg) : sg.main.map(m => short(m.id)).join(" + ");
     const al = sg.dnd ? KC.dnd.alignment(st0, KC.portrait.compute(st0), null) : null;
     const wl = sg.wod ? KC.wod.lines(KC.wod.details(st0, KC.portrait.compute(st0), null, sg.line, sg.id), t) : null;
-    return '<div class="sg-mini' + (sg.dnd ? " sg-dnd" : sg.wod ? " sg-wod" : sg.wr ? " sg-wr" : sg.wh ? " sg-wh" : sg.leg ? " sg-leg" : sg.ow ? " sg-ow" : sg.wi ? " sg-wi" : sg.av ? " sg-av" : sg.rz ? " sg-rz" : "") + '"' + (sg.wod || nm ? ' data-id="' + sg.id + '"' : "") + '><div class="who">' + esc(who) + '</div><div class="nm">' + esc(name) + "</div>"
+    return '<div class="sg-mini' + (sg.dnd ? " sg-dnd" : sg.wod ? " sg-wod" : sg.wr ? " sg-wr" : sg.wh ? " sg-wh" : sg.leg ? " sg-leg" : sg.ow ? " sg-ow" : sg.wi ? " sg-wi" : sg.av ? " sg-av" : sg.rz ? " sg-rz" : sg.mb ? " sg-mb" : "") + '"' + (sg.wod || nm ? ' data-id="' + sg.id + '"' : "") + '><div class="who">' + esc(who) + '</div><div class="nm">' + esc(name) + "</div>"
       + (wl ? '<div class="rl">' + esc(wl.rl) + '</div><div class="grp">' + esc(wl.sub) + '</div><div class="grp">' + esc(sub) + "</div>" : sg.dnd ? '<div class="rl">' + esc(t("dnd.r." + KC.dnd.race(st0, null)) + " · " + t("dnd.lvlShort", { n: KC.dnd.level(st0, null) })) + '</div><div class="grp">' + esc(t("dnd.s." + sg.cls + "." + sg.sub)) + '</div><div class="grp">' + esc(sub) + '</div><div class="al">' + esc(t("dnd.al." + al)) + "</div>" : (nm && nm.rl ? '<div class="rl">' + esc(nm.rl) + "</div>" : "") + '<div class="grp">' + esc(sub) + "</div>")
       + h + labels + "</svg></div>";
   }
@@ -199,7 +199,7 @@
   function modeGroupHTML(P, md) {
     const M = KC[md];
     const rows = P.map(p => { const d = KC.portrait.compute(p.st), sg = M.pick(d, p.st, null);
-      if (!sg) return '<li><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(t("dnd.al.roll")) + "</span></li>";
+      if (!sg) return '<li><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(t(md === "mb" ? "mb.noRoleShort" : "dnd.al.roll")) + "</span></li>";   /* v637 */
       const h = M.head(sg, true, t), groups = sg.kind === "even" ? KC.signs.evenText(sg) : sg.main.map(m => short(m.id)).join(" + ");
       return '<li data-id="' + sg.id + '"><span class="who">' + esc(p.name) + '</span><span class="what">' + esc(h.name) + "</span>"
         + (h.rl ? '<span class="al">' + esc(h.rl) + "</span>" : "") + '<span class="sub">' + esc(groups) + "</span></li>"; });

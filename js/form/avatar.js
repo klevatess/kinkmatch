@@ -21,11 +21,14 @@
      by a local search over the weights with the shares kept equal on synthetic lists — the real lists stay local.
      v620: re-fitted again with a second list of one of those people (Earth / Lava); the hunt cluster joined Earth and Lava
      now reads sex + fluids */
-  const PROF = { water: "n.25 b.5 r.75 s-.25 x.75 v.25 w-.75", earth: "n-1.25 b.5 f-.2 r-.5 d1 s.75 x1.5 v1.25 w.75", fire: "r-1.5 s1 x.25", air: "n-.25 b-.5 f-.25 r.55 d.25 v.5 w.75" };
-  const CPROF = { water: "rope1 pet1 stage1 touch1 home1", earth: "classic1 cum1 devour1 iron1 protocol1 armor1 hunt1",
+  /* v639 (owner, Oct 16): Water is tenderness and fluids; three people he had named Water (v619) are Fire now — re-fitted
+     with Water held at tenderness + fluids and the hard-practice term included (local search over 17 lists the owner
+     named or that are obvious; real lists are never shipped) */
+  const PROF = { water: "n1 b-.25 d.25 x-.25 w.5", earth: "n-1.5 b1.5 f-.2 r-.5 d1.25 s1 x1.25 v1.5 w.75", fire: "n.25 b.5 r.75 s1.5 x1.25 v-.5 w-.25", air: "n-1.25 b-.5 f-.75 r.8 d.5 s-.25 x.25 v.75 w.5" };
+  const CPROF = { water: "home1 touch1 cum1 taboo1", earth: "classic1 cum1 devour1 iron1 protocol1 armor1 hunt1",
     fire: "spank1 extreme1 fire1 edge1 blood1", air: "watch1 public1 wild1 dark1" };
   const CW = 1.5;   /* the clusters' mean z × 1.5 is added to the groups' part */
-  const BIAS = { water: 1.01, earth: 1.24, fire: -1.8, air: -.45 };
+  const BIAS = { water: -.06, earth: 1.51, fire: .02, air: -1.47 };
   /* type thresholds: cluster z, the sex + fluids groups' deviations (lava), the electricity items' liked share (0–100) — v620 */
   const T = { blood: .55, healing: .35, vines: .5, lava: 20, metal: .3, sand: .6, combustion: 1.1, lightning: 58 };
   const ELEC = "electricity-tens electricity-violet-wand shock-collar electricity-internal electricity-genitals-external electricity-anal electricity-genital-internal vaginal-electrostimulation cbt-electrical".split(" ");
@@ -47,6 +50,16 @@
   let W = null, CWT = null;
   const init = () => { if (W) return; W = {}; CWT = {}; ELEMENTS.forEach(k => { W[k] = parse(PROF[k], true); CWT[k] = parse(CPROF[k], false); }); };
   /* raw scores without the bias (calibration) and with it */
+  /* v638 (owner, Oct 16): "lovers of hard practices get mostly Water and Healing — strange". HARD = the hard practices
+     (extreme, blood, edge play, fire clusters + the hardcore and marking sections + no-safeword); its liked share against
+     the owner's group (USUAL, 19 lists) gives zHard. Fire gets K × (zHard − FROM) when that is positive; Healing needs zHard
+     below NO_HEAL (a hard lover in Water gets Bloodbending or Vines instead). The seven people the owner named keep
+     their elements (checked locally). */
+  const HARD = { K: 5, FROM: 0.3, NO_HEAL: 0.5, USUAL: [39.9, 18.1], EXTRA: ["no-safeword-short", "no-safeword-long", "brutal-treatment", "reducing-to-tears", "pain-severe"] };
+  let HARDIDS = null;
+  const hardIds = () => { if (HARDIDS) return HARDIDS; const C = KC.clusters.ids(), cat = id => (KC.CATS.find(c => c.id === id) || { items: [] }).items.map(x => x[1]);
+    HARDIDS = Array.from(new Set([].concat(C.extreme, C.blood, C.edge, C.fire, cat("hardcore"), cat("marking"), HARD.EXTRA))); return HARDIDS; };
+  function zHard(st, set) { const r = KC.clusters.liked(st, hardIds(), set); return r.n < KC.clusters.MIN ? 0 : (r.v - HARD.USUAL[0]) / HARD.USUAL[1]; }
   function raw(d, st, set) {
     init(); const dv = KC.dnd.devs(d); if (!dv) return null;
     const o = {}, zc = {};
@@ -54,6 +67,7 @@
       let n = 0, den = 0; Object.keys(W[k]).forEach(g => { n += W[k][g] * (dv.dev[g] || 0); den += Math.abs(W[k][g]); });
       let cn = 0, cd = 0; Object.keys(CWT[k]).forEach(c => { if (zc[c] === undefined) zc[c] = KC.clusters.z(st, c, set); cn += CWT[k][c] * zc[c]; cd += Math.abs(CWT[k][c]); });
       o[k] = n / den + CW * cn / cd; });
+    o.fire += HARD.K * Math.max(0, zHard(st, set) - HARD.FROM);
     return o;
   }
   function scores(d, st, set) { const o = raw(d, st, set); if (!o) return null; ELEMENTS.forEach(k => { o[k] += BIAS[k]; }); return o; }
@@ -72,7 +86,8 @@
     const z = c => KC.clusters.z(st, c, set), dv = KC.dnd.devs(d);
     /* v619 (owner): Vines = ropes (plants that grab and bind); Lava = earth with raw passion (sex + fluids well above the
        list's mean, v620); Metal = iron when iron beats darkness; Sand = darkness and the senses (a sandstorm blinds) */
-    if (el === "water") return z("blood") >= T.blood && dv && (dv.dev.ds || 0) > 0 ? "blood" : z("home") >= T.healing ? "healing" : z("rope") >= T.vines ? "vines" : null;
+    if (el === "water") { const hard = zHard(st, set) >= HARD.NO_HEAL;
+      return (z("blood") >= T.blood || (hard && z("blood") >= 0)) && dv && (dv.dev.ds || 0) > 0 ? "blood" : !hard && z("home") >= T.healing ? "healing" : z("rope") >= T.vines ? "vines" : null; }
     if (el === "earth") return dv && (dv.dev["sex-penetration"] || 0) + (dv.dev["bodily-fluids"] || 0) >= T.lava ? "lava" : z("iron") >= T.metal && z("iron") >= z("dark") ? "metal" : z("dark") >= T.sand ? "sand" : null;
     if (el === "fire") { if (z("extreme") >= T.combustion && z("fire") >= 1) return "combustion"; const e = KC.clusters.liked(st, ELEC, set); return e.n >= 3 && e.v >= T.lightning ? "lightning" : null; }
     return null;
@@ -97,5 +112,5 @@
     const shared = a.main.map(m => m.id).filter(g => b.main.some(m => m.id === g));
     return { level: a.id === b.id ? "same" : shared.length ? "near" : "far", shared };
   }
-  KC.av = { ELEMENTS, PROF, CPROF, CW, BIAS, T, ELEC, SPIRIT, SPIRIT_MIN, SPIRIT_SHARE, AVATAR, RANK, FIG, raw, scores, choose, avatar, spirit, typeOf, pick, head, closeness };
+  KC.av = { ELEMENTS, PROF, CPROF, CW, BIAS, T, HARD, hardIds, zHard, ELEC, SPIRIT, SPIRIT_MIN, SPIRIT_SHARE, AVATAR, RANK, FIG, raw, scores, choose, avatar, spirit, typeOf, pick, head, closeness };
 })(window.KC);

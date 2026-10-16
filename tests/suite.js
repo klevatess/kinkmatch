@@ -1144,7 +1144,7 @@ const S = (title) => console.log("\n## " + title);
   /* v591: the "🎲 DnD" button reads the same everywhere */
   Object.keys(SAME_OK).forEach(l => { SAME_OK[l].push("dnd.toDnd", "wr.toWr"); });   /* v610: "⚔ Wr" is the same in every language */
   /* v597: World of Darkness proper names (clans, auspices, ranks, the Babylonian house names…) stay as in English */
-  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$|wh\.f\.|leg\.l\.|wh\.toWh$|ow\.r\.|ow\.toOw$|wi\.g\.|ext\.(ask[TB]|row\.[tb]|arrow\.[tb])$)/;   /* v610: faction and legion names are proper names (often the same as English) */
+  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$|wh\.f\.|leg\.l\.|wh\.toWh$|ow\.r\.|ow\.toOw$|wi\.g\.|mb\.(toMb$|m\.|al\.|fe\.|mn\.|fn\.)|ext\.(ask[TB]|row\.[tb]|arrow\.[tb])$)/;   /* v610: faction and legion names are proper names (often the same as English) */
   const packsUI = {}; ["en", "ru", "pt", "es", "ja", "th", "zh"].forEach(l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); packsUI[l] = box; });
   ["pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(packsUI.en).filter(k => packsUI[l][k] === packsUI.en[k] && SAME_OK[l].indexOf(k) < 0 && !WOD_SAME.test(k)), [], l + ": no interface string left in English"));
   ok(!/TEMPORARY/.test(["pt", "es", "ja", "th", "zh"].map(l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8")).join("")), "no TEMPORARY markers left");
@@ -3234,7 +3234,7 @@ const S = (title) => console.log("\n## " + title);
     const _sc = scope();
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
-    const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
+    const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false").replace("mb: true", "mb: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
     eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,wh,wr", "with ext and Avatar locked: ⚔ Wr (all four tabs, v632) and 📖 Re:Zero are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
@@ -3244,14 +3244,14 @@ const S = (title) => console.log("\n## " + title);
     const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
     K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
     ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb), "help: no extended-list or Avatar paragraphs");
-    const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
+    const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false").replace("mb: true", "mb: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
     f.KC.store.mine.sync(f.KC.form.state); f.d.getElementById("mineBtn").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true }));
     ok(f.d.getElementById("mineList").textContent.length > 0 && !/Обычная/.test(f.d.getElementById("mineList").textContent), "My lists: no «Обычная» mark while the extended list is locked");
     // an extended list made before the lock still opens and keeps its switch (way back to the plain list)
     const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
-    const g = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") }, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    const g = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false").replace("mb: true", "mb: false") }, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
     ok(!g.d.getElementById("extToggleBox").hidden && !g.d.getElementById("roleView").hidden, "an extended list keeps ⇅ and the role filter");
-    const c = open("compare", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") } }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
+    const c = open("compare", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false").replace("mb: true", "mb: false") } }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
     ok(!f.errors.length && !g.errors.length, "no script errors");
     _sc.end();
   }
@@ -3352,7 +3352,7 @@ const S = (title) => console.log("\n## " + title);
     ok(NEW.every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "new practices carry the green dot");
     // extended list unlocked
     const g = open("form", { locked: true }), KG = g.KC;
-    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "av,ext,leg,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero, (v624) the extended list and (v635) 🌀 Avatar are on; only the Witcher is locked");
+    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "av,ext,leg,mb,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero, (v624) the extended list, (v635) 🌀 Avatar and (v637) 🌫 Mistborn are on; only the Witcher is locked");
     ok(!g.d.getElementById("extToggleBox").hidden, "the ⇅ switch is back in the header");
     KG.help.open("news"); const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
     const i9 = h5.indexOf("9 октября 2026 · Расширенная анкета");   // v633: found by text, newer entries go above it
@@ -3559,6 +3559,89 @@ const S = (title) => console.log("\n## " + title);
     const bad = pages.filter(p => /migrateBar|mineMigrate|migrate\.(bar_html|go|later|yes)|переехал|moved to a new address/i.test(fs.readFileSync(RT + "/" + p, "utf8")));
     eq(bad, [], "no page carries the old site's move bar, its button or its texts (they are built by script in the old build only)");
     const f = open("form"); ok(!f.d.getElementById("migrateBar") && !f.errors.length, "the new site runs without them");
+    _sc.end();
+  }
+
+  S("v637: 🌫 Mistborn — the role picks the art, one metal table for both, Twinborn = one sign, no role = no sign");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC, MB = K.mb;
+    ok(K.FEATURES.mb && K.dnd.usable("mb") && /data-mode="mb"/.test(K.wod.switchHTML()), "shipped build: the 🌫 Mistborn button is there");
+    // the figures: 9 group stars, 3 different bright slots, lines only to existing stars — for every sign and every Twinborn pair
+    const badFig = [], chk = (n, F) => { const [P, E, L, B] = F, all = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) badFig.push(n + ": stars");
+      L.forEach(l => (l[0] === "d" ? l.slice(1) : l).forEach(i => { if (!(i >= 0 && i < all)) badFig.push(n + ": line " + i); })); };
+    MB.METALS.forEach(m => { chk("A." + m, MB.FIG.A[m]); chk("F." + m, MB.FIG.F[m]); MB.METALS.forEach(m2 => chk("twin " + m + "+" + m2, MB.twinFig(m, m2))); });
+    chk("mistborn", MB.FIG.mistborn); chk("feruchemist", MB.FIG.feruchemist);
+    eq(badFig, [], "16 + 16 signs, the two full ones and all 256 Twinborn signs are well formed");
+    const ids = new Set(); K.CATS.forEach(c => c.items.forEach(([, id]) => ids.add(id)));
+    eq(MB.METALS.filter(m => MB.METAL[m].split(" ").some(id => !ids.has(id))), [], "every metal's practices exist");
+    // each metal wins on a list that loves its practices (the same metal for Top and Bottom: one table)
+    const lover = m => { const st = K.store.blank(); ids.forEach(id => { st.items[id] = { interest: "maybe" }; }); MB.METAL[m].split(" ").forEach(id => { st.items[id] = { interest: "love" }; }); return st; };
+    const withRole = (st, r) => Object.assign({}, st, { meta: Object.assign({}, st.meta, { role: r }) });
+    const wins = MB.METALS.filter(m => { const st = lover(m), d = K.portrait.compute(st, null), a = MB.pick(d, withRole(st, "dom"), null), b = MB.pick(d, withRole(st, "sub"), null);
+      return a && b && a.art === "allo" && b.art === "feru" && a.metal === m && b.metal === m; });
+    eq(wins.length, 16, "each of the 16 metals wins on a list that loves its practices — as Allomancer (Top) and as Feruchemist (Bottom)");
+    const st0 = lover("steel"), d0 = K.portrait.compute(st0, null);
+    eq(MB.pick(d0, st0, null), null, "a plain list without a role: no sign");
+    const sgA = MB.pick(d0, withRole(st0, "dom"), null), hA = MB.head(sgA, false, (k, v) => K.i18n.t(k, v));
+    eq([hA.name, hA.rl], ["Стрелок", "Алломант · Сталь: отталкивает металл"], "Allomancer: the Misting name and its line (v640: Russian name)");
+    const sgF = MB.pick(d0, withRole(st0, "sub"), null);
+    eq(MB.head(sgF, false, (k, v) => K.i18n.t(k, v)).name, "Бегун", "Feruchemist: the Ferring name (v640: Russian name)");
+    // the full set: a list that loves everything
+    const allLove = K.store.blank(); ids.forEach(id => { allLove.items[id] = { interest: "love" }; });
+    const dl = K.portrait.compute(allLove, null);
+    eq([MB.pick(dl, withRole(allLove, "dom"), null).id, MB.pick(dl, withRole(allLove, "sub"), null).id], ["mistborn", "feruchemist"], "loving almost everything: Mistborn / Full Feruchemist");
+    // Twinborn: an extended list — Allomancy from the Top answers, Feruchemy from the Bottom answers
+    const ext = K.ext.fromPlain(withRole(lover("steel"), "dom"), "dom"); MB.METAL.copper.split(" ").forEach(id => { ext.items[id] = Object.assign({}, ext.items[id], { b: "love" }); });
+    Object.keys(ext.items).forEach(id => { if (!ext.items[id].b) ext.items[id].b = "maybe"; });
+    const tv = K.ext.view(ext, "t"), tw = MB.pick(K.portrait.compute(tv, null), tv, null, ext);
+    eq([tw.art, tw.metal, tw.metal2, tw.full], ["twin", "steel", "copper", false], "Twinborn: Steel from the Top answers, Copper from the Bottom answers, never the full set");
+    // the portrait: no role → "choose a role"; an extended list → one sign for both roles
+    const p1 = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "mb", "practices-checklist-v1": JSON.stringify(st0) }, session: {} } });
+    const s1 = p1.d.getElementById("portraitSection"); s1.open = true; s1.dispatchEvent(new p1.w.Event("toggle"));
+    ok(/Выберите роль/.test(p1.d.getElementById("portraitBody").textContent) && !p1.d.querySelector("#portraitBody .pt-sign svg"), "portrait, no role: «Выберите роль», no sign");
+    const p2 = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "mb", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    const s2 = p2.d.getElementById("portraitSection"); s2.open = true; s2.dispatchEvent(new p2.w.Event("toggle"));
+    const signs = p2.d.querySelectorAll("#portraitBody .pt-sign.pt-mb");
+    eq([signs.length, signs[0] && signs[0].dataset.art, p2.d.querySelectorAll("#portraitBody .pt-role").length, p2.d.querySelectorAll("#portraitBody [data-card]").length], [1, "twin", 2, 1], "extended list: one Twinborn sign, the two roles' bars under it, one picture button");
+    const lp = p2.KC.lore.provider(); ok(lp.length === 1 && lp[0].items.map(i => i.key).join() === "mb.twin,mb.al.steel,mb.fe.copper", "constellation guide: one entry — Twinborn, Coinshot, Archivist");
+    const c = open("compare", { locked: true }); ok(/data-mode="mb"/.test(c.KC.wod.switchHTML("pair")) && !!c.KC.mb && !c.errors.length, "compare page: the 🌫 mode");
+    ok(!f.errors.length && !p1.errors.length && !p2.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v638: Avatar — lovers of hard practices lean to Fire (and are never Healing); Mistborn signs without the dot clusters");
+  {
+    const _sc = scope();
+    const f = open("form"), K = f.KC, A = K.av;
+    eq([A.HARD.K, A.HARD.FROM, A.HARD.NO_HEAL, A.HARD.USUAL.join()], [5, .3, .5, "39.9,18.1"], "the hard-practice term: Fire + 5 × (zHard − 0.3), no Healing from zHard 0.5");
+    const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id))); const hard = new Set(A.hardIds());
+    ok(A.hardIds().length > 60 && A.hardIds().every(id => ids.indexOf(id) >= 0), "the hard practices exist (" + A.hardIds().length + ")");
+    let seed = 638; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647; let fire = 0, heal = 0;
+    for (let n = 0; n < 60; n++) { const st = K.store.blank(); ids.forEach(id => { const r = rnd(); st.items[id] = { interest: hard.has(id) ? (r < .75 ? "love" : "yes") : ["limit", "maybe", "yes", "love"][Math.floor(r * 4)] }; });
+      const p = A.pick(K.portrait.compute(st, null), st, null); if (p.id === "fire") fire++; if (p.type === "healing") heal++; }
+    ok(fire >= 54 && heal === 0, "60 made-up lists that love the hard practices: " + fire + " Fire, " + heal + " Healing");
+    const grey = K.mb.METALS.filter(m => K.mb.GROUP[m] < 3).map(m => K.mb.FIG.A[m][1].length);   /* Temporal signs carry a ring of 40 dots */
+    ok(Math.max.apply(null, grey) < 45, "Mistborn: no stippled clusters in the Allomantic signs (at most " + Math.max.apply(null, grey) + " grey stars outside the time ring)");
+    ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v640: Mistborn — Russian Misting / Ferring names from the official translation, English elsewhere");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC, MB = K.mb, tr = (k, v) => K.i18n.t(k, v);
+    const pack = l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); return box; };
+    const RU = pack("ru"), EN = pack("en");
+    eq(MB.METALS.filter(m => !RU["mb.mn." + m] || !RU["mb.fn." + m] || /[A-Za-z]/.test(RU["mb.mn." + m] + RU["mb.fn." + m])), [], "ru: every metal has a Russian Misting and Ferring name");
+    eq(MB.METALS.filter(m => EN["mb.mn." + m] !== MB.MISTING[m] || EN["mb.fn." + m] !== MB.FERRING[m]), [], "en: the names stay the Coppermind ones");
+    eq([RU["mb.mn.steel"], RU["mb.mn.zinc"], RU["mb.mn.brass"], RU["mb.mn.bronze"], RU["mb.fn.iron"], RU["mb.fn.pewter"], RU["mb.m.bendalloy"]], ["Стрелок", "Поджигатель", "Гасильщик", "Охотник", "Порхатель", "Бестия", "Темпосплав"], "ru: spot check against the Ars Arcanum table");
+    eq(MB.METALS.filter(m => RU["mb.al." + m].indexOf(RU["mb.mn." + m] + " · ") !== 0 || RU["mb.fe." + m].indexOf(RU["mb.fn." + m] + " · ") !== 0), [], "ru: the lore guide labels use the same names");
+    eq([MB.mn("steel", k => k), MB.fn("copper", null)], ["Coinshot", "Archivist"], "no translation: English names as fallback");
+    const sg = { art: "twin", metal: "steel", metal2: "copper", full: false };
+    eq(MB.head(sg, false, tr).rl, "Стрелок (Сталь) + Архивист (Медь)", "Twinborn line in Russian");
+    ok(!/Lurcher|Coinshot|Tineye|Thug|Rioter|Soother|Smoker|Seeker|Gnat|Pulser|Slider|Augur|Oracle|Skimmer|Steelrunner|Brute|Sparker|Firesoul|Sentry|Spinner|Subsumer|Bloodmaker|Pinnacle/.test(MB.METALS.map(m => K.i18n.t("mb.al." + m) + K.i18n.t("mb.fe." + m)).join()), "ru: no English power names left in the labels");
     _sc.end();
   }
 

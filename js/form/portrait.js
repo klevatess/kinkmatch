@@ -38,7 +38,8 @@
   const dndOn = () => mode() === "dnd";
   /* v610: the modes that need the list itself, not only the portrait (KC.dnd.WR) */
   /* v616: the ⚔ Wr / Witcher / Avatar modules take the template as a Set; since v618 the portrait never applies one (null) */
-  const figOf = d => mode() === "dnd" ? KC.dnd.pick(d) : mode() === "wod" ? KC.wod.pick(d) : KC.dnd.isWr(mode()) ? KC[mode()].pick(d, shownR(), null) : KC.signs.pick(d);
+  const figOf = d => mode() === "dnd" ? KC.dnd.pick(d) : mode() === "wod" ? KC.wod.pick(d) : mode() === "mb" ? KC.mb.pick(d, shownR(), null, whole())
+    : KC.dnd.isWr(mode()) ? KC[mode()].pick(d, shownR(), null) : KC.signs.pick(d);
   /* the title lines of a figure: over-title, name, sub-line and (DnD) the alignment line */
   function headOf(sg) {
     if (KC.dnd.wrOf(sg)) { const h = KC.dnd.wrOf(sg).head(sg, F.viewingShared, t);
@@ -106,8 +107,8 @@
       : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : sg.wr ? ' data-god="' + sg.id + '" data-mut="' + sg.mut + '"'
       : sg.wh ? ' data-faction="' + sg.id + '"' : sg.leg ? ' data-legion="' + sg.id + '"' : sg.ow ? ' data-race="' + sg.id + '"' : sg.wi ? ' data-school="' + sg.id + '" data-wsign="' + sg.wsign + '"'
       : sg.av ? ' data-el="' + sg.id + '" data-type="' + (sg.type || "") + '"' + (sg.avatar ? ' data-avatar="1"' : "")
-      : sg.rz ? ' data-sin="' + sg.id + '" data-rank="' + sg.rank + '"' : "";
-    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : sg.rz ? " pt-rz" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
+      : sg.rz ? ' data-sin="' + sg.id + '" data-rank="' + sg.rank + '"' : sg.mb ? ' data-art="' + sg.art + '" data-metal="' + sg.metal + '"' + (sg.metal2 ? ' data-metal2="' + sg.metal2 + '"' : "") + (sg.full ? ' data-full="1"' : "") : "";
+    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : sg.rz ? " pt-rz" : sg.mb ? " pt-mb" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
       + (hd.rl ? '<div class="sg-rl">' + esc(hd.rl) + "</div>" : "") + '<div class="sg-sub">' + esc(hd.sub) + "</div>"
       + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : KC.dnd.wrOf(sg) ? KC.wr.noticeHTML() : "") + "</div>";
   }
@@ -132,14 +133,15 @@
     if (sg.ow) return [k("ow.r." + sg.id)].concat(sg.grudges !== null && sg.grudges !== undefined ? [kv("ow.grudges", sg.grudges)] : []);
     if (sg.wi) return [k("wi.s." + sg.id), k("wi.g." + sg.wsign)];
     if (sg.rz) return [k("rz.s." + sg.id), { key: "rz.r." + sg.rank, vars: { s: t("rz.g." + sg.id) } }];
+    if (sg.mb) return [k(sg.full ? (sg.art === "allo" ? "mb.mistborn" : "mb.fullfer") : "mb." + sg.art)].concat(sg.full ? [] : sg.art === "twin" ? [k("mb.al." + sg.metal), k("mb.fe." + sg.metal2)] : [k((sg.art === "allo" ? "mb.al." : "mb.fe.") + sg.metal)]);
     if (sg.av) return sg.avatar ? [k("av.avatar"), k("av.e." + sg.id)] : [k("av.e." + sg.id)].concat(sg.type ? [k("av.t." + sg.type)] : []);
     return [];   /* the constellation itself: our own signs, nothing to look up */
   }
   KC.lore.provider = function () {
     const s = whole(), out = [];
-    (KC.ext.isExt(s) ? KC.ext.R : [null]).forEach(r => {
+    (KC.ext.isExt(s) ? (mode() === "mb" ? ["t"] : KC.ext.R) : [null]).forEach(r => {   /* v637: Mistborn — one Twinborn for both roles */
       PTR = r; const d = data(); const sg = d.answered ? figOf(d) : null;
-      if (sg) out.push({ title: r ? t("ext.row." + r) : "", items: loreOf(sg) });
+      if (sg) out.push({ title: r && mode() !== "mb" ? t("ext.row." + r) : "", items: loreOf(sg) });
     });
     PTR = null; return out;
   };
@@ -179,20 +181,24 @@
   /* v613: an extended list — the mode switch once, then "↑ Верх" and "↓ Низ", each with its own sign, bars and
      favourites, and its own picture card */
   function renderExt() {
-    let h = "", sw = "";
+    let h = "", sw = "", twin = "";
+    const mbOn = mode() === "mb";   /* v637 (owner): a switch is a Twinborn — one sign for both roles, one card */
     KC.ext.R.forEach(r => {
       PTR = r; const d = data(), st = shownR();
       if (!sw && d.answered) sw = modeSwitch(d);
+      if (mbOn && !twin && d.answered) twin = signSVG(d) + '<button class="btn ghost pt-card-r" type="button" data-card="' + r + '">' + esc(t("pt.card")) + "</button>";
       h += '<div class="pt-role" data-r="' + r + '"><h4 class="pt-role-h">' + esc(t("ext.row." + r)) + "</h4>"
-        + (d.answered ? one(d, st, r) + '<button class="btn ghost pt-card-r" type="button" data-card="' + r + '">' + esc(t("ext.card." + r)) + "</button>"
+        + (d.answered ? one(d, st, r, mbOn) + (mbOn ? "" : '<button class="btn ghost pt-card-r" type="button" data-card="' + r + '">' + esc(t("ext.card." + r)) + "</button>")
           : '<p class="pt-empty">' + esc(t("ext.ptEmpty")) + "</p>") + "</div>";
     });
     PTR = null;
-    body.innerHTML = sw + h;
+    body.innerHTML = sw + twin + h;
   }
   /* the sign, the bars and the favourites of one portrait */
-  function one(d, st, r) {
-    let h = signSVG(d)
+  function one(d, st, r, noSign) {
+    /* v637: Mistborn on a plain list without a role — no sign, only "choose a role" */
+    const noRole = mode() === "mb" && !KC.ext.isExt(whole()) && !KC.mb.art(st);
+    let h = (noSign ? "" : noRole ? '<div class="pt-sign pt-mb pt-mb-norole"><p class="pt-empty">' + esc(t("mb.noRole")) + "</p></div>" : signSVG(d))
       + '<div class="pt-bars">' + d.sections.map(s => '<div class="pt-row"><span class="pt-name">' + esc(KC.portrait.label(s.id)) + "</span>"
         + '<span class="pt-bar"><i style="width:' + (s.pct || 0) + '%"></i></span><span class="pt-pct">' + pctText(s.pct) + "</span></div>").join("") + "</div>"
       + '<p class="pt-how">' + esc(t("pt.how")) + "</p>";
