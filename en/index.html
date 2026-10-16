@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=635">
+<link rel="stylesheet" href="../css/style.css?v=636">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -102,13 +102,7 @@
 </header>
 
 <main class="wrap">
-  <div class="notice-bar migrate-bar" id="migrateBar" hidden>
-    <span data-i18n-html="migrate.bar_html"><b>The site has moved to a new address.</b> Move everything saved in this browser there with one tap: lists, received, templates, favourites and comparisons. Nothing is deleted here.</span>
-    <div class="row">
-      <button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go">Move to the new site</button>
-      <button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later">Later</button>
-    </div>
-  </div>
+  <!-- v636: the old site's "moved" bar is built by form/migrate.js only in the old build (no such text in the page for search engines) -->
 
   <div class="banner" id="sharedBanner">
     <span id="bannerText"></span>
@@ -232,7 +226,6 @@
     <p data-i18n="mine.p">The list you are working on is saved here automatically. Keep several (e.g. for different partners or roles) and switch between them.</p>
     <button class="btn primary" id="mineNew" style="width:100%;margin-bottom:8px" data-i18n="mine.new">＋ Start a new list</button>
     <button class="btn ghost" id="mineSaveNew" style="width:100%;margin-bottom:10px" data-i18n="mine.copy">Save a copy of the current one</button>
-    <button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden>Move to the new site</button>
     <div id="mineList"></div>
     <h4 class="sub-h"><span data-i18n="mine.tplH">My templates</span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open" title="Help" aria-label="Help">?</button></h4>
     <p class="sub-p" data-i18n="mine.tplP">Templates made from your lists. “Share” sends a template without answers. “Fill in” opens your list by that template.</p>
@@ -292,11 +285,11 @@
   <div class="modal">
     <h3 id="migrateH"></h3>
     <p id="migrateText"></p>
-    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes">Move</button>
+    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px"></button>
     <div class="modal-foot"><button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel">Cancel</button></div>
   </div>
 </div>
 
-<script src="../js/boot.js?v=635" data-page="form" data-v="635"></script>
+<script src="../js/boot.js?v=636" data-page="form" data-v="636"></script>
 </body>
 </html>

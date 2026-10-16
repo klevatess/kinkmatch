@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=635">
+<link rel="stylesheet" href="../css/style.css?v=636">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -102,13 +102,7 @@
 </header>
 
 <main class="wrap">
-  <div class="notice-bar migrate-bar" id="migrateBar" hidden>
-    <span data-i18n-html="migrate.bar_html"><b>O site mudou de endereço.</b> Leve para lá com um toque tudo o que está salvo neste navegador: listas, recebidas, modelos, favoritos e comparações. Nada é apagado aqui.</span>
-    <div class="row">
-      <button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go">Levar para o site novo</button>
-      <button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later">Depois</button>
-    </div>
-  </div>
+  <!-- v636: the old site's "moved" bar is built by form/migrate.js only in the old build (no such text in the page for search engines) -->
 
   <div class="banner" id="sharedBanner">
     <span id="bannerText"></span>
@@ -232,7 +226,6 @@
     <p data-i18n="mine.p">A lista em que você está trabalhando fica salva aqui automaticamente. Mantenha várias (por exemplo, para parceiros ou papéis diferentes) e alterne entre elas.</p>
     <button class="btn primary" id="mineNew" style="width:100%;margin-bottom:8px" data-i18n="mine.new">＋ Criar uma lista nova</button>
     <button class="btn ghost" id="mineSaveNew" style="width:100%;margin-bottom:10px" data-i18n="mine.copy">Salvar uma cópia da atual</button>
-    <button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden>Levar para o site novo</button>
     <div id="mineList"></div>
     <h4 class="sub-h"><span data-i18n="mine.tplH">Meus modelos</span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open" title="Ajuda" aria-label="Ajuda">?</button></h4>
     <p class="sub-p" data-i18n="mine.tplP">Modelos feitos a partir das suas listas. “Compartilhar” envia o modelo sem respostas. “Preencher” abre a sua lista por esse modelo.</p>
@@ -292,11 +285,11 @@
   <div class="modal">
     <h3 id="migrateH"></h3>
     <p id="migrateText"></p>
-    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes">Levar</button>
+    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px"></button>
     <div class="modal-foot"><button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel">Cancelar</button></div>
   </div>
 </div>
 
-<script src="../js/boot.js?v=635" data-page="form" data-v="635"></script>
+<script src="../js/boot.js?v=636" data-page="form" data-v="636"></script>
 </body>
 </html>

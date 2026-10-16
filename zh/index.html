@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=635">
+<link rel="stylesheet" href="../css/style.css?v=636">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -102,13 +102,7 @@
 </header>
 
 <main class="wrap">
-  <div class="notice-bar migrate-bar" id="migrateBar" hidden>
-    <span data-i18n-html="migrate.bar_html"><b>網站已搬到新網址。</b>一鍵把這個瀏覽器裡儲存的所有資料搬過去：清單、已收到、範本、最愛和比較。這裡的資料不會被刪除。</span>
-    <div class="row">
-      <button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go">搬到新網站</button>
-      <button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later">稍後</button>
-    </div>
-  </div>
+  <!-- v636: the old site's "moved" bar is built by form/migrate.js only in the old build (no such text in the page for search engines) -->
 
   <div class="banner" id="sharedBanner">
     <span id="bannerText"></span>
@@ -232,7 +226,6 @@
     <p data-i18n="mine.p">你正在填的清單會自動儲存在這裡。可以同時保留好幾份（例如給不同伴侶或不同角色），並隨時切換。</p>
     <button class="btn primary" id="mineNew" style="width:100%;margin-bottom:8px" data-i18n="mine.new">＋ 建立新清單</button>
     <button class="btn ghost" id="mineSaveNew" style="width:100%;margin-bottom:10px" data-i18n="mine.copy">儲存目前清單的副本</button>
-    <button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden>搬到新網站</button>
     <div id="mineList"></div>
     <h4 class="sub-h"><span data-i18n="mine.tplH">我的範本</span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open" title="說明" aria-label="說明">?</button></h4>
     <p class="sub-p" data-i18n="mine.tplP">從你的清單做成的範本。「分享」會傳送不含答案的範本。「填寫」會打開你依這個範本填的清單。</p>
@@ -292,11 +285,11 @@
   <div class="modal">
     <h3 id="migrateH"></h3>
     <p id="migrateText"></p>
-    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes">搬過來</button>
+    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px"></button>
     <div class="modal-foot"><button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel">取消</button></div>
   </div>
 </div>
 
-<script src="../js/boot.js?v=635" data-page="form" data-v="635"></script>
+<script src="../js/boot.js?v=636" data-page="form" data-v="636"></script>
 </body>
 </html>

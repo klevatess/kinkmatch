@@ -1396,9 +1396,9 @@ const S = (title) => console.log("\n## " + title);
     eq([op.d.getElementById("migrateBar").hidden, op.d.getElementById("mineMigrate").hidden, op.KC.migrate.sender()], [false, false, true], "old build: bar at the top + button in My lists");
     ok(/moved to a new address/.test(op.d.getElementById("migrateBar").textContent), "bar text (EN, the chosen language)");
     let np = newPage();
-    eq([np.d.getElementById("migrateBar").hidden, np.d.getElementById("mineMigrate").hidden, np.KC.migrate.sender()], [true, true, false], "new build: no bar, no button");
+    eq([np.d.getElementById("migrateBar"), np.d.getElementById("mineMigrate"), np.KC.migrate.sender()], [null, null, false], "new build: no bar, no button (v636: not even in the HTML)");
     const oldOnNew = open("form", { patch: OLDB, base: NEWBASE });
-    eq(oldOnNew.d.getElementById("migrateBar").hidden, true, "even the old build hides the bar when opened on the new address");
+    ok(!oldOnNew.d.getElementById("migrateBar"), "even the old build shows no bar when opened on the new address");
     click(op.w, op.d.getElementById("migrateLater"));
     eq(op.d.getElementById("migrateBar").hidden, true, "“Later” hides the bar…");
     eq(oldPage({ storage: op.storage() }).d.getElementById("migrateBar").hidden, true, "…for this visit (session)");
@@ -3548,6 +3548,17 @@ const S = (title) => console.log("\n## " + title);
     ok(h0.textContent === "16 октября 2026 · Аватар" && h0.nextElementSibling.querySelectorAll("li").length === 2, "«What's new»: the entry of Oct 16 on top, 2 points");
     const c = open("compare", { locked: true }); ok(/data-mode="av"/.test(c.KC.wod.switchHTML("pair")), "compare page: 🌀 Avatar is there");
     ok(!f.errors.length && !c.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v636: Safe Browsing — no \u201cthe site moved, move your data\u201d text in the pages' HTML");
+  {
+    const _sc = scope();
+    const RT = require("./harness").ROOT;
+    const pages = ["index.html", "compare.html"].concat(["ru", "en", "es", "pt", "ja", "th", "zh"].map(l => l + "/index.html"));
+    const bad = pages.filter(p => /migrateBar|mineMigrate|migrate\.(bar_html|go|later|yes)|переехал|moved to a new address/i.test(fs.readFileSync(RT + "/" + p, "utf8")));
+    eq(bad, [], "no page carries the old site's move bar, its button or its texts (they are built by script in the old build only)");
+    const f = open("form"); ok(!f.d.getElementById("migrateBar") && !f.errors.length, "the new site runs without them");
     _sc.end();
   }
 

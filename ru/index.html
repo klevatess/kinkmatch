@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=635">
+<link rel="stylesheet" href="../css/style.css?v=636">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -102,13 +102,7 @@
 </header>
 
 <main class="wrap">
-  <div class="notice-bar migrate-bar" id="migrateBar" hidden>
-    <span data-i18n-html="migrate.bar_html"><b>Сайт переехал на новый адрес.</b> Перенесите туда одним нажатием всё, что сохранено в этом браузере: анкеты, полученные, шаблоны, избранное и сравнения. Здесь ничего не удалится.</span>
-    <div class="row">
-      <button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go">Перенести на новый сайт</button>
-      <button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later">Позже</button>
-    </div>
-  </div>
+  <!-- v636: the old site's "moved" bar is built by form/migrate.js only in the old build (no such text in the page for search engines) -->
 
   <div class="banner" id="sharedBanner">
     <span id="bannerText"></span>
@@ -232,7 +226,6 @@
     <p data-i18n="mine.p">Анкета, с которой вы работаете, сохраняется сюда автоматически. Можно вести несколько (например, для разных партнёров или ролей) и переключаться между ними.</p>
     <button class="btn primary" id="mineNew" style="width:100%;margin-bottom:8px" data-i18n="mine.new">＋ Создать новую анкету</button>
     <button class="btn ghost" id="mineSaveNew" style="width:100%;margin-bottom:10px" data-i18n="mine.copy">Сохранить копию текущей</button>
-    <button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden>Перенести на новый сайт</button>
     <div id="mineList"></div>
     <h4 class="sub-h"><span data-i18n="mine.tplH">Мои шаблоны</span> <button class="help-q" type="button" data-help="tpl" data-i18n-title="help.open" title="Справка" aria-label="Справка">?</button></h4>
     <p class="sub-p" data-i18n="mine.tplP">Шаблоны из ваших анкет. «Поделиться» — отправить шаблон без ответов. «Заполнить» — открыть вашу анкету по этому шаблону.</p>
@@ -292,11 +285,11 @@
   <div class="modal">
     <h3 id="migrateH"></h3>
     <p id="migrateText"></p>
-    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px" data-i18n="migrate.yes">Перенести</button>
+    <button class="btn primary" id="migrateYes" type="button" style="width:100%;margin-bottom:8px"></button>
     <div class="modal-foot"><button class="btn ghost" id="migrateNo" type="button" style="width:100%" data-i18n="cancel">Отмена</button></div>
   </div>
 </div>
 
-<script src="../js/boot.js?v=635" data-page="form" data-v="635"></script>
+<script src="../js/boot.js?v=636" data-page="form" data-v="636"></script>
 </body>
 </html>

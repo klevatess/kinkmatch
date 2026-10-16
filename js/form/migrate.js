@@ -14,6 +14,13 @@
     location.href = M.link();
   }
   if (M.sender()) {
+    /* v636: built here, only in the old build — a "the site moved, move your data" text in the page's HTML made
+       Google Safe Browsing flag the new site as deceptive */
+    const main = document.querySelector("main.wrap"), mineNew = KC.$("mineSaveNew");
+    main.insertAdjacentHTML("afterbegin", '<div class="notice-bar migrate-bar" id="migrateBar" hidden><span data-i18n-html="migrate.bar_html"></span><div class="row">'
+      + '<button class="btn primary" id="migrateGo" type="button" data-i18n="migrate.go"></button><button class="btn ghost" id="migrateLater" type="button" data-i18n="migrate.later"></button></div></div>');
+    mineNew.insertAdjacentHTML("afterend", '<button class="btn primary" id="mineMigrate" type="button" style="width:100%;margin-bottom:10px" data-i18n="migrate.go" hidden></button>');
+    KC.i18n.apply(KC.$("migrateBar")); KC.i18n.apply(KC.$("mineMigrate").parentNode);
     const bar = KC.$("migrateBar"), mb = KC.$("mineMigrate");
     let later = false; try { later = sessionStorage.getItem(SKIP) === "1"; } catch (e) {}
     bar.hidden = later; mb.hidden = false;
@@ -31,7 +38,7 @@
   function show(text, withYes) {
     KC.$("migrateH").textContent = t("migrate.h");
     KC.$("migrateText").textContent = text;
-    KC.$("migrateYes").hidden = !withYes;
+    KC.$("migrateYes").hidden = !withYes; KC.$("migrateYes").textContent = t("migrate.yes");
     KC.$("migrateNo").textContent = t(withYes ? "cancel" : "notice.ok");
     modal.open();
   }
