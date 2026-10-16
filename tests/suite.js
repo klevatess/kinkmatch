@@ -3229,13 +3229,13 @@ const S = (title) => console.log("\n## " + title);
     _sc.end();
   }
 
-  S("v621: things locked with KC.FEATURES (v624: the extended list is unlocked — locked here by a patch to keep testing the switch)");
+  S("v621: things locked with KC.FEATURES (v624 / v635: the extended list and Avatar are unlocked — locked here by a patch to keep testing the switch)");
   {
     const _sc = scope();
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
-    const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
-    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,wh,wr", "with ext locked: ⚔ Wr (all four tabs, v632) and 📖 Re:Zero are on");
+    const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,wh,wr", "with ext and Avatar locked: ⚔ Wr (all four tabs, v632) and 📖 Re:Zero are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
     ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
@@ -3244,14 +3244,14 @@ const S = (title) => console.log("\n## " + title);
     const groups = K.lore.provider(); ok(!groups.some(g => g.items.some(it => /^(wi|av)\./.test(it.key))), "constellation guide: nothing from a locked mode");
     K.help.open("answer"); const hb = d.getElementById("helpBody").textContent, hn = d.getElementById("helpNews");
     ok(!/Расширенная анкета/.test(hb) && !/🌀 Аватар/.test(hb), "help: no extended-list or Avatar paragraphs");
-    const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
+    const e0 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") } }); e0.KC.help.open("lore"); ok(/Мир Тьмы, ⚔ Wr\)/.test(e0.d.getElementById("helpLore").textContent), "constellation guide, empty portrait: the hint names ⚔ Wr again (unlocked, v623)");
     f.KC.store.mine.sync(f.KC.form.state); f.d.getElementById("mineBtn").dispatchEvent(new f.w.MouseEvent("click", { bubbles: true }));
     ok(f.d.getElementById("mineList").textContent.length > 0 && !/Обычная/.test(f.d.getElementById("mineList").textContent), "My lists: no «Обычная» mark while the extended list is locked");
     // an extended list made before the lock still opens and keeps its switch (way back to the plain list)
     const ext = K.ext.fromPlain(K.store.normalize(plain), "dom");
-    const g = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") }, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
+    const g = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") }, storage: { local: { "checklist-lang": "ru", "practices-checklist-v1": JSON.stringify(ext) }, session: {} } });
     ok(!g.d.getElementById("extToggleBox").hidden && !g.d.getElementById("roleView").hidden, "an extended list keeps ⇅ and the role filter");
-    const c = open("compare", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false") } }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
+    const c = open("compare", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false") } }); ok(!c.errors.length && !/data-mode="(av|wi)"/.test(c.KC.wod.switchHTML("pair")), "compare page: no locked modes");
     ok(!f.errors.length && !g.errors.length, "no script errors");
     _sc.end();
   }
@@ -3352,7 +3352,7 @@ const S = (title) => console.log("\n## " + title);
     ok(NEW.every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "new practices carry the green dot");
     // extended list unlocked
     const g = open("form", { locked: true }), KG = g.KC;
-    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "ext,leg,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero and (v624) the extended list are on");
+    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "av,ext,leg,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero, (v624) the extended list and (v635) 🌀 Avatar are on; only the Witcher is locked");
     ok(!g.d.getElementById("extToggleBox").hidden, "the ⇅ switch is back in the header");
     KG.help.open("news"); const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
     const i9 = h5.indexOf("9 октября 2026 · Расширенная анкета");   // v633: found by text, newer entries go above it
@@ -3516,9 +3516,38 @@ const S = (title) => console.log("\n## " + title);
     ok(both > 0 && both < sk && both < dm, "Skaven and the Dark Mechanicum overlap, but only partly (" + both + " both; Skaven " + sk + ", Dark Mechanicum " + dm + ")");
     eq(W.LINK.SK, 0.35, "Skaven ⇄ Dark Mechanicum pull: 0.35");
     // the news entry for the day
-    K.help.open("news"); const top = f.d.querySelector("#helpNews h5"), tl = top.nextElementSibling;
-    ok(top.textContent === "12 октября 2026 · 40K, Old World и Легионы" && tl.querySelectorAll("li").length === 3 && /Скавены и Тёмный механикус/.test(tl.textContent), "«What's new»: the entry of Oct 12 on top, 3 points");
+    K.help.open("news"); const top = [...f.d.querySelectorAll("#helpNews h5")].find(x => /^12 октября/.test(x.textContent)), tl = top && top.nextElementSibling;   // v635: found by date
+    ok(!!top && top.textContent === "12 октября 2026 · 40K, Old World и Легионы" && tl.querySelectorAll("li").length === 3 && /Скавены и Тёмный механикус/.test(tl.textContent), "«What's new»: the entry of Oct 12, 3 points");
     ok(!f.errors.length, "no script errors");
+    _sc.end();
+  }
+
+  S("v634: Google Search Console verification tag and other spellings of the name (search engines only)");
+  {
+    const _sc = scope();
+    const RT = require("./harness").ROOT, TAG = '<meta name="google-site-verification" content="UapiNQQrD2xVz3CRF46T2LpeUzE7QeTJz54C1WmtzVk">';
+    const pages = ["index.html"].concat(["ru", "en", "es", "pt", "ja", "th", "zh"].map(l => l + "/index.html"));
+    // the tag must stay for good: Search Console checks it again from time to time
+    eq(pages.filter(p => fs.readFileSync(RT + "/" + p, "utf8").split(TAG).length !== 2), [], "the verification tag is on the root page and all 7 language pages, once each");
+    const bad = pages.filter(p => { const m = fs.readFileSync(RT + "/" + p, "utf8").match(/<script type="application\/ld\+json">([^<]*)<\/script>/); const d = m && JSON.parse(m[1]);
+      return !d || d.name !== "Kinkosmos" || (d.alternateName || []).join() !== "Kink Kosmos,Кинкосмос"; });
+    eq(bad, [], "structured data: name Kinkosmos, also known as «Kink Kosmos» and «Кинкосмос»");
+    ok(!/googletagmanager|google-analytics|gtag\(/.test(pages.map(p => fs.readFileSync(RT + "/" + p, "utf8")).join("")), "no analytics: the tag is only a static string");
+    _sc.end();
+  }
+
+  S("v635: 🌀 Avatar unlocked; its help names the elements as fitted in v619–v620; news of Oct 16");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av" }, session: {} } }), K = f.KC, d = f.d;
+    ok(K.FEATURES.av && K.dnd.usable("av") && !K.FEATURES.wi, "shipped build: Avatar on, the Witcher still locked");
+    ok(/data-mode="av"/.test(K.wod.switchHTML()) && !/data-mode="wi"/.test(K.wod.switchHTML()), "portrait mode buttons: 🌀, no 🗡");
+    K.help.open("answer"); const hb = d.getElementById("helpBody").textContent;
+    ok(/🌀 Аватар/.test(hb) && /Вода — бондаж и ролевые игры вместе с сексом/.test(hb) && !/нежность и жидкости/.test(hb), "help: the Avatar paragraph is back, with the elements as they are fitted now");
+    K.help.open("news"); const h0 = d.querySelector("#helpNews h5");
+    ok(h0.textContent === "16 октября 2026 · Аватар" && h0.nextElementSibling.querySelectorAll("li").length === 2, "«What's new»: the entry of Oct 16 on top, 2 points");
+    const c = open("compare", { locked: true }); ok(/data-mode="av"/.test(c.KC.wod.switchHTML("pair")), "compare page: 🌀 Avatar is there");
+    ok(!f.errors.length && !c.errors.length, "no script errors");
     _sc.end();
   }
 
