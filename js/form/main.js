@@ -8,7 +8,8 @@
   let linkLang = null, tplLink = null;
   const hash = location.hash.replace(/^#/, "");
   /* Kinkoverse (the Telegram bot) links: "&go=stars" opens the list right at «Мой портрет» with its constellation */
-  let GO = null, EMBED = false; try { const q = new URLSearchParams(hash); GO = q.get("go"); EMBED = q.get("embed") === "1"; } catch (e) {}
+  let GO = null, EMBED = false, FILL = false, OWN = false;
+  try { const q = new URLSearchParams(hash); GO = q.get("go"); EMBED = q.get("embed") === "1"; FILL = q.get("embed") === "fill"; OWN = q.get("own") === "1"; } catch (e) {}
   /* v641: "&embed=1" — the bot shows only «Мой портрет» of the person's OWN list inside the Telegram app: the page is
      cut down to that block, the list is not stored under «Received», the wording is «mine», and the picture card gets
      «Send to Telegram» (the picture goes to the bot, which sends it to the person to forward). */
@@ -22,9 +23,19 @@
   F.embed = EMBED && !!F.parentOrigin && /(^|&)a=/.test(hash);
   F.toParent = msg => { if (F.parentOrigin) try { parent.postMessage(msg, F.parentOrigin); } catch (e) {} };
   if (F.embed) document.documentElement.classList.add("kv-embed");
+  /* v646: "&embed=fill" — the bot's «Заполнить анкету здесь»: the whole form, the list from the link (the person's saved
+     list or draft) opened as THEIR OWN list to edit, no link: an empty list; the bot's own bar does «Готово». Compare,
+     Received, My lists, Share, PDF and the portrait are hidden. The page tells the bot the number of answers after every
+     change, sends a draft every 7 changes and when it is hidden, and the finished link on «done». A switch that reloads
+     the page (plain ⇄ extended, a list from My lists) comes back into this mode with "&own=1" (the list just saved here). */
+  F.embedFill = FILL && !!F.parentOrigin;
+  if (F.embedFill) document.documentElement.classList.add("kv-fill");
   /* only a list/template link counts; anything else after "#" (e.g. the counter's #toggle-goatcounter)
      opens my own list and is left alone */
-  if (hash && /(^|&)(a|n|m|i|ti|fi|k)=/.test(hash)) {
+  if (F.embedFill && !/(^|&)a=/.test(hash)) {
+    F.state = OWN ? S.loadOwn() : S.blank();
+    history.replaceState(null, "", location.pathname + location.search);
+  } else if (hash && /(^|&)(a|n|m|i|ti|fi|k)=/.test(hash)) {
     const d = KC.codec.decode(hash);
     linkLang = d.lang;
     F.linkDamaged = !!d.damaged;
@@ -42,6 +53,7 @@
     /* favourites of this list live on this device under its id (or its content) */
     if (!d.damaged) F.favKey = S.favs.keyOf(F.sharedCode);
     history.replaceState(null, "", location.pathname + location.search);
+    if (F.embedFill) { F.viewingShared = false; tplLink = null; F.sharedBy = null; F.favKey = null; }
   } else {
     F.state = S.loadOwn();
     /* first run after update: an existing filled-in list goes into My lists */
@@ -171,6 +183,34 @@
       });
       F.toParent({ kind: "kinkosmos-ready", cmds: ["share", "card"] });
     }
+  } else if (F.embedFill) {
+    F.homeUrl = () => location.pathname + "?lang=" + KC.i18n.lang + "#embed=fill&own=1";
+    F.saveNow();   /* the list from the link becomes this page's own list (needed by the reloads above) */
+    const answered = () => { let n = 0; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (KC.ext.answered(F.state, id)) n++; })); return n; };
+    /* a draft every 7 NEW answers (owner), and on leaving if anything changed (an answer, the role, a name) */
+    let last = F.shareLink(), lastN = answered(), changes = 0, ready = false;
+    const draft = force => {
+      const link = F.shareLink(); if (!force && link === last) return;
+      last = link; changes = 0; F.toParent({ kind: "kinkosmos-draft", link, n: answered() });
+    };
+    const upd = F.updateProgress;
+    F.updateProgress = function () {
+      upd.apply(this, arguments);
+      if (!ready) return;
+      const n = answered(); if (n === lastN) return;
+      if (n > lastN) changes += n - lastN;
+      lastN = n; F.toParent({ kind: "kinkosmos-count", n });
+      if (changes >= 7) draft();
+    };
+    document.addEventListener("visibilitychange", () => { if (document.hidden) draft(); });
+    window.addEventListener("pagehide", () => draft());
+    window.addEventListener("message", e => {
+      if (e.origin !== F.parentOrigin || !e.data || e.data.kind !== "kinkosmos-cmd") return;
+      if (e.data.cmd === "done") { last = F.shareLink(); changes = 0; F.toParent({ kind: "kinkosmos-done", link: last, n: answered() }); }
+      if (e.data.cmd === "flush") draft();
+    });
+    ready = true;
+    F.toParent({ kind: "kinkosmos-ready", mode: "fill", n: answered() });
   } else if (GO === "stars") setTimeout(() => {
     const sec = KC.$("portraitSection"); if (!sec) return;
     sec.open = true;
