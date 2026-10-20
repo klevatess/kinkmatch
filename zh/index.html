@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=640">
+<link rel="stylesheet" href="../css/style.css?v=644">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -144,6 +144,7 @@
     <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legend.yes_html"><b>可以</b> — 樂意</span></span>
     <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"><b>超愛</b> — 非常喜歡／癖好</span></span>
     <span><span class="new-dot"></span> <span data-i18n="legend.new">新項目，舊版清單裡沒有</span></span>
+    <span class="legend-skip" data-i18n-html="legend.skip_html">如果某個項目與你無關（不是你的性別、角色或性向），直接<b>跳過</b>即可。跳過不影響契合度，「不要」則會影響。</span>
   </div>
 
   <details class="about" id="aboutSection">
@@ -290,6 +291,6 @@
   </div>
 </div>
 
-<script src="../js/boot.js?v=640" data-page="form" data-v="640"></script>
+<script src="../js/boot.js?v=644" data-page="form" data-v="644"></script>
 </body>
 </html>

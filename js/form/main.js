@@ -7,6 +7,13 @@
   /* 1. whose list: someone's link (#...) or my own saved one */
   let linkLang = null, tplLink = null;
   const hash = location.hash.replace(/^#/, "");
+  /* Kinkoverse (the Telegram bot) links: "&go=stars" opens the list right at «Мой портрет» with its constellation */
+  let GO = null, EMBED = false; try { const q = new URLSearchParams(hash); GO = q.get("go"); EMBED = q.get("embed") === "1"; } catch (e) {}
+  /* v641: "&embed=1" — the bot shows only «Мой портрет» of the person's OWN list inside the Telegram app: the page is
+     cut down to that block, the list is not stored under «Received», the wording is «mine», and the picture card gets
+     «Send to Telegram» (the picture goes to the bot, which sends it to the person to forward). */
+  F.embed = EMBED && /(^|&)a=/.test(hash);
+  if (F.embed) document.documentElement.classList.add("kv-embed");
   /* only a list/template link counts; anything else after "#" (e.g. the counter's #toggle-goatcounter)
      opens my own list and is left alone */
   if (hash && /(^|&)(a|n|m|i|ti|fi|k)=/.test(hash)) {
@@ -73,7 +80,7 @@
   if (miss.length) console.warn("[kinkcheck] js/lang/" + KC.i18n.lang + ".practices.js lacks " + miss.length + " items (outdated file?):", miss);
 
   /* 4. opened from a link: remember it under "Received", show banner */
-  if (F.viewingShared) {
+  if (F.viewingShared && !F.embed) {
     /* a damaged link shows wrong answers: warn, never store it */
     F.receivedResult = F.linkDamaged ? { status: "damaged" } : S.received.add(F.sharedCode, F.state.name);
     KC.stats.event("open-link");
@@ -136,4 +143,22 @@
 
   /* modules that need the page fully drawn first (e.g. the "moved from the old site" question) */
   (F.onReady || []).forEach(f => { try { f(); } catch (e) { console.error(e); } });
+  if (F.embed) {
+    const sec = KC.$("portraitSection");
+    if (sec) {
+      sec.open = true; document.body.prepend(sec);
+      Array.from(document.body.children).forEach(el => { if (el !== sec && !el.classList.contains("overlay") && el.tagName !== "SCRIPT") el.style.display = "none"; });
+      /* the bot's app sizes its frame to the page */
+      const size = () => { try { parent.postMessage({ kind: "kinkosmos-size", h: document.documentElement.scrollHeight }, "*"); } catch (e) {} };
+      if (window.ResizeObserver) new ResizeObserver(size).observe(document.body);
+      sec.addEventListener("toggle", () => { if (!sec.open) sec.open = true; size(); });
+      size();
+    }
+  } else if (GO === "stars") setTimeout(() => {
+    const sec = KC.$("portraitSection"); if (!sec) return;
+    sec.open = true;
+    /* below the sticky header, whatever its height (on phones it wraps to ~185 px, more than the CSS scroll-padding) */
+    const head = document.querySelector("header.top"), off = (head ? head.getBoundingClientRect().height : 0) + 8;
+    window.scrollTo({ top: Math.max(0, sec.getBoundingClientRect().top + window.scrollY - off), behavior: "smooth" });
+  }, 250);
 })(window.KC);

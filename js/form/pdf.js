@@ -7,8 +7,44 @@
   const P = { bg: "#f5f1ec", panel: "#fffdfb", ink: "#241c22", muted: "#8a7d84", line: "#e6ddd6", accent: "#8a2d47" };
   const PILL = { limit: ["#f6e2e0", "#b23b3b"], maybe: ["#f6ecda", "#b9852a"], yes: ["#e0f0e6", "#2f7d54"], love: ["#f4e0ec", "#9d2f68"] };
   const serif = "font-family:Fraunces,Georgia,serif;font-weight:600;";
+  /* v641: the site's name, address and a QR code on the sheet, so a printed list leads back to the site (owner).
+     v642: the QR leads to the list itself (below); this precomputed site QR is the offline fallback.
+     The site QR is precomputed (29×29, error correction M, for SITE.url — tools: python qrcode); each row = 29 bits in hex. */
+  const SITE = { name: "Kinkosmos", url: "https://klevatess.github.io/kinkmatch/", short: "klevatess.github.io/kinkmatch" };
+  const QR = "1fd7707f 1049d341 174d1c5d 1756b65d 1757745d 10500f41 1fd5557f 00126900 1172def9 173c7c7f 1c6fe5f1 149cb84b 0cf589a2 04b3fcff 12e9294d 1c1f6fc3 00cfeb82 10b13c7b 06e8e465 05399f53 1e66adf9 001eff11 1fd6375d 10464d12 1759ebfa 1740bc81 174ca00f 104d7fdb 1fd769ca".split(" ");
+  F.qrMatrix = () => QR.map(h => { const n = parseInt(h, 16), r = []; for (let x = 0; x < QR.length; x++) r.push(Math.floor(n / Math.pow(2, QR.length - 1 - x)) % 2); return r; });
+  /* v642 (owner): the QR leads to the list itself (its share link), so a printed sheet opens the filled-in form.
+     Drawn with qrcodejs (KC.lib "qr", fetched with the PDF); without it (offline) the site QR above is used.
+     Size: about 0.7 mm per module on A4 (1 CSS px of the 760 px sheet ≈ 0.254 mm), never under 150 px (≈ 38 mm).
+     In the PDF the code is redrawn over the picture as vector squares, so it prints sharp (html2canvas blurs it). */
+  const QR_PX = 2.8, QR_MIN = 150;
+  F.linkQR = link => {
+    if (!link || !window.QRCode) return null;
+    for (const lv of ["M", "L"]) {
+      try {
+        const q = new QRCode(document.createElement("div"), { text: link, width: 64, height: 64, correctLevel: QRCode.CorrectLevel[lv] });
+        const o = q._oQRCode, n = o.getModuleCount(), m = [];
+        for (let y = 0; y < n; y++) { const r = []; for (let x = 0; x < n; x++) r.push(o.isDark(y, x) ? 1 : 0); m.push(r); }
+        return m;
+      } catch (e) { /* too long for this level — try the next */ }
+    }
+    return null;
+  };
+  /* an SVG picture (no canvas needed), 4 modules of white border */
+  const qrSVG = m => {
+    const q = 4, n = m.length + q * 2; let d = "";
+    m.forEach((r, y) => r.forEach((v, x) => { if (v) d += "M" + (x + q) + " " + (y + q) + "h1v1h-1z"; }));
+    return { n, src: "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n + " " + n + '" width="' + n * 8 + '" height="' + n * 8 + '" shape-rendering="crispEdges"><rect width="' + n + '" height="' + n + '" fill="#fff"/><path d="' + d + '" fill="#000"/></svg>') };
+  };
+  const qrBlock = link => {
+    const m = F.linkQR(link), url = m ? link : SITE.url, g = qrSVG(m || F.qrMatrix()), px = Math.max(QR_MIN, Math.round(g.n * QR_PX));
+    F.lastQR = m || F.qrMatrix();
+    return '<img data-pdflink="1" data-qr="' + (m ? "list" : "site") + '" data-url="' + esc(url) + '" src="' + g.src + '" alt="" style="width:' + px + "px;height:" + px + 'px;flex:none;border-radius:6px;">';
+  };
+  const siteLine = () => esc(SITE.name) + ' · <span data-pdflink="1" style="color:' + P.accent + ';">' + esc(SITE.short) + "</span>";
+  F.SITE = SITE;
 
-  F.buildSheet = function () {
+  F.buildSheet = function (opt) {
     const st = F.shown(), sub = KC.i18n.lang !== "en", tp = F.tpl(), set = F.tplSet();
     const favs = {}; F.favList().forEach(id => { favs[id] = 1; });
     /* "only favourites and limits" (PDF window, off by default) wins over the ♥ toggle; favourites stay in it
@@ -37,7 +73,11 @@
     if (st.name) idbits.push(esc(t("pdf.name")) + ": <b>" + esc(st.name) + "</b>");
     if (st.safeword) idbits.push(esc(t("pdf.safeword")) + ": <b>" + esc(st.safeword) + "</b>");
 
-    let html = '<div style="' + card + '"><div style="' + serif + "font-size:27px;color:" + P.accent + ';line-height:1.1;">' + esc(t("app.title")) + "</div>";
+    let html = '<div style="' + card + '"><div style="display:flex;gap:18px;align-items:flex-start;"><div style="flex:1;min-width:0;">'
+      /* v642 (owner): the site name on top, the sheet's title under it, then the address */
+      + '<div style="' + serif + "font-size:27px;color:" + P.accent + ';line-height:1.1;">' + esc(SITE.name) + "</div>"
+      + '<div style="' + serif + 'font-size:18px;margin-top:3px;line-height:1.2;">' + esc(t("app.title")) + "</div>"
+      + '<div style="margin-top:3px;font-size:12.5px;"><span data-pdflink="1" style="color:' + P.accent + ';">' + esc(SITE.short) + "</span></div>";
     if (idbits.length) html += '<div style="margin-top:8px;font-size:13px;color:' + P.muted + ';">' + idbits.join("&nbsp;&nbsp;·&nbsp;&nbsp;") + "</div>";
     if (metaLine.length) html += '<div style="margin-top:5px;font-size:12.5px;color:' + P.muted + ';">' + metaLine.join("&nbsp;·&nbsp;") + "</div>";
     const scope = [];
@@ -45,7 +85,8 @@
     if (onlyFav) scope.push(esc(t("pdf.onlyFav")));
     if (favLim) scope.push(esc(t("pdf.onlyFavLimits")));
     if (scope.length) html += '<div style="margin-top:5px;font-size:12.5px;color:' + P.accent + ';font-weight:600;">' + scope.join("&nbsp;·&nbsp;") + "</div>";
-    html += '<div style="margin-top:12px;">' + ["love", "yes", "maybe", "limit"].map(pill).join("&nbsp;") + "</div></div>";
+    html += '<div style="margin-top:12px;">' + ["love", "yes", "maybe", "limit"].map(pill).join("&nbsp;") + "</div></div>"
+      + qrBlock(opt && opt.qrLink) + "</div></div>";
 
     const limits = [];
     KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (inScope(id) && isLimit(id)) limits.push(id); }));
@@ -87,7 +128,8 @@
     if (st.comments) html += tcard(t("pdf.comments"), st.comments);
     if (st.allergies) html += tcard(t("pdf.allergies"), st.allergies);
     if (!any && !limits.length) html += '<div style="' + card + "color:" + P.muted + ';">' + esc(t("pdf.empty")) + "</div>";
-    html += '<div style="text-align:center;margin-top:4px;font-size:11px;color:' + P.muted + ';">' + esc(t("pdf.footer")) + "</div>";
+    html += '<div style="text-align:center;margin-top:4px;font-size:11px;color:' + P.muted + ';">' + esc(t("pdf.footer")) + "</div>"
+      + '<div style="text-align:center;margin-top:2px;font-size:11px;color:' + P.muted + ';">' + siteLine() + "</div>";
     w.innerHTML = html; return w;
   };
 
@@ -111,7 +153,9 @@
     const btn = this, old = btn.textContent; btn.disabled = true; btn.textContent = t("pdf.busy");
     KC.stats.event("pdf");
     /* "Add the portrait as the first page" (off every time the window opens): its own page(s) before the list */
-    const sheets = (KC.$("pdfPortrait").checked && F.buildPortraitSheet ? [].concat(F.buildPortraitSheet()) : []).concat([F.buildSheet()]);
+    try { await KC.lib("qr"); } catch (e) { /* offline: the sheet gets the site QR */ }
+    let qrLink = null; try { qrLink = F.shareLink(); } catch (e) {}
+    const sheets = (KC.$("pdfPortrait").checked && F.buildPortraitSheet ? [].concat(F.buildPortraitSheet()) : []).concat([F.buildSheet({ qrLink })]);
     const sheet = sheets[sheets.length - 1];
     sheets.forEach(sh => document.body.appendChild(sh));
     try {
@@ -120,6 +164,7 @@
       const pdf = new window.jspdf.jsPDF("p", "pt", "a4");
       const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), margin = 24, imgW = pw - margin * 2;
       let page = 0;
+      const links = [], qrs = [];   /* v641: the site address and the QR are clickable in the PDF: [page, x, y, w, h] in PDF points */
       /* v631: the sheet is drawn in pieces of 3 PDF pages. One canvas for the whole sheet broke on long lists (an
          extended list is ~40 000 px tall): browsers cap a canvas (Chrome ~32 000 px high, iPhone ~16 million pixels in
          all) and return it blank — every page after the portrait came out white (bug report, Oct 10). */
@@ -127,6 +172,9 @@
       for (const sh of sheets) {
         const W = sh.scrollWidth, H = sh.scrollHeight;
         const pageCss = Math.floor((ph - margin * 2) * W / imgW);            /* CSS px of the sheet on one PDF page */
+        { const top = sh.getBoundingClientRect(), k = imgW / W;
+          sh.querySelectorAll("[data-pdflink]").forEach(el => { const r = el.getBoundingClientRect(), y = r.top - top.top;
+            links.push([page + Math.floor(y / pageCss), margin + (r.left - top.left) * k, margin + (y % pageCss) * k, r.width * k, r.height * k, el.getAttribute("data-url") || SITE.url]); if (el.hasAttribute("data-qr")) qrs.push(links[links.length - 1]); }); }
         const chunkCss = Math.max(pageCss, Math.min(pageCss * 3, Math.floor(MAXPX / (W * SCALE * SCALE) / pageCss) * pageCss));
         /* each piece: the sheet inside a window of the piece's height (overflow hidden), shifted up by the piece's top */
         const clip = document.createElement("div");
@@ -149,6 +197,12 @@
         }
         sh.style.cssText = keep; document.body.appendChild(sh); clip.remove();
       }
+      /* the QR as vector squares over its picture (white quiet zone of 4 modules, dark runs merged per row) */
+      qrs.forEach(([p, x, y, w]) => { const m = F.lastQR; if (!m || p >= page) return; const n = m.length + 8, u = w / n;
+        pdf.setPage(p + 1); pdf.setFillColor(255, 255, 255); pdf.rect(x, y, w, w, "F"); pdf.setFillColor(0, 0, 0);
+        m.forEach((r, j) => { for (let i = 0; i < r.length;) { if (!r[i]) { i++; continue; } let e = i; while (e < r.length && r[e]) e++;
+          pdf.rect(x + (i + 4) * u, y + (j + 4) * u, (e - i) * u + 0.01, u + 0.01, "F"); i = e; } }); });
+      links.forEach(([p, x, y, w, h, url]) => { if (p < page) { pdf.setPage(p + 1); pdf.link(x, y, w, h, { url }); } });
       const fn = t("pdf.file") + (F.state.name ? "-" + F.state.name.replace(/\s+/g, "_") : "") + ".pdf";
       try { pdf.save(fn); } catch (e) { window.open(URL.createObjectURL(pdf.output("blob")), "_blank"); }
       KC.toast(t("toast.pdfReady"));

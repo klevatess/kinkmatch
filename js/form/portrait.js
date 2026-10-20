@@ -42,15 +42,15 @@
     : KC.dnd.isWr(mode()) ? KC[mode()].pick(d, shownR(), null) : KC.signs.pick(d);
   /* the title lines of a figure: over-title, name, sub-line and (DnD) the alignment line */
   function headOf(sg) {
-    if (KC.dnd.wrOf(sg)) { const h = KC.dnd.wrOf(sg).head(sg, F.viewingShared, t);
+    if (KC.dnd.wrOf(sg)) { const h = KC.dnd.wrOf(sg).head(sg, F.viewingShared && !F.embed, t);
       return { over: h.over, name: h.name, rl: h.rl, sub: signSub(sg), al: null }; }
     if (sg.wod) {
       const dt = KC.wod.details(shownR(), data(), null, sg.line, sg.id), ln = KC.wod.lines(dt, t);
-      return { over: t((F.viewingShared ? "wod.of." : "wod.mine.") + sg.line), name: t("wod." + sg.line + "." + sg.id), sub: ln.sub + " · " + signSub(sg), rl: ln.rl, al: null, dt };
+      return { over: t((F.viewingShared && !F.embed ? "wod.of." : "wod.mine.") + sg.line), name: t("wod." + sg.line + "." + sg.id), sub: ln.sub + " · " + signSub(sg), rl: ln.rl, al: null, dt };
     }
-    if (!sg.dnd) return { over: t(F.viewingShared ? "sign.of" : "sign.mine"), name: t("sign." + sg.id), sub: signSub(sg), al: null };
+    if (!sg.dnd) return { over: t(F.viewingShared && !F.embed ? "sign.of" : "sign.mine"), name: t("sign." + sg.id), sub: signSub(sg), al: null };
     const st = shownR(), set = null, al = KC.dnd.alignment(st, data(), set), race = KC.dnd.race(st, set), lv = KC.dnd.level(st, set);
-    return { over: t(F.viewingShared ? "dnd.of" : "dnd.mine"), name: t("dnd.c." + sg.cls), sub: t("dnd.s." + sg.cls + "." + sg.sub) + " · " + signSub(sg),
+    return { over: t(F.viewingShared && !F.embed ? "dnd.of" : "dnd.mine"), name: t("dnd.c." + sg.cls), sub: t("dnd.s." + sg.cls + "." + sg.sub) + " · " + signSub(sg),
       rl: t("dnd.r." + race) + " · " + t("dnd.lvl", { n: lv }), race, lv,
       al: { name: t("dnd.al." + al), quip: t("dnd.aq." + al) }, alKey: al };
   }
@@ -166,7 +166,7 @@
   /* ---------- the block on the page ---------- */
   function title() {
     const nm = F.state.name;
-    KC.$("portraitTitle").textContent = F.viewingShared ? (nm ? t("pt.of", { name: nm }) : t("pt.of0")) : t("pt.mine");
+    KC.$("portraitTitle").textContent = F.viewingShared && !F.embed ? (nm ? t("pt.of", { name: nm }) : t("pt.of0")) : t("pt.mine");
   }
   F.renderPortrait = function () {
     title(); ptLang = KC.i18n.lang;
@@ -389,7 +389,8 @@
     /* in DnD mode the "sign" switch is the class */
     const lab = k => t(k === "sign" && mode() !== "sign" ? "card.o." + mode() : "card.o." + k);
     KC.$("cardOpts").innerHTML = OPTS.map(([k, on]) => '<label class="only-toggle"><input type="checkbox" id="cardO_' + k + '"' + (on ? " checked" : "") + "> " + esc(lab(k)) + "</label>").join("");
-    KC.$("cardShare").hidden = !(navigator.canShare && window.File);
+    KC.$("cardShare").hidden = !F.embed && !(navigator.canShare && window.File);
+    if (F.embed) KC.$("cardShare").textContent = t("card.tg");
     cardModal.open(); preview();
   }
   KC.$("cardOpts").addEventListener("change", preview);
@@ -403,6 +404,15 @@
   });
   KC.$("cardShare").addEventListener("click", () => {
     const cv = F.drawCard(readOpts()); KC.stats.event("card");
+    if (F.embed) {   /* v641: to the Kinkoverse bot — the picture and the title of the mode shown, e.g. «Созвездие: Василиск» */
+      const keep = PTR; PTR = CARD_R; let hd = null;
+      try { const sg = figOf(data()); hd = sg ? headOf(sg) : null; } finally { PTR = keep; }
+      const ext = KC.ext.isExt(whole());
+      try { parent.postMessage({ kind: "kinkosmos-share", png: cv.toDataURL("image/png"), mode: mode(), role: ext ? CARD_R : "",
+        title: hd ? t("card.o." + mode()) + ": " + hd.name : "", sub: hd ? hd.sub : "" }, "*"); } catch (e) {}
+      cardModal.close && cardModal.close();
+      return;
+    }
     cv.toBlob(b => {
       if (!b) return; const f = new File([b], fileName(), { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => {});

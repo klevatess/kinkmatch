@@ -49,7 +49,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=640">
+<link rel="stylesheet" href="../css/style.css?v=644">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -144,6 +144,7 @@
     <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legend.yes_html"><b>Да</b> — с удовольствием</span></span>
     <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"><b>Обожаю</b> — очень люблю / фетиш</span></span>
     <span><span class="new-dot"></span> <span data-i18n="legend.new">новые пункты — их раньше не было в списке</span></span>
+    <span class="legend-skip" data-i18n-html="legend.skip_html">Если пункт не про вас — не ваш пол, роль или ориентация — просто <b>пропустите</b> его. Пропуск не влияет на совпадение, а «Нет» влияет.</span>
   </div>
 
   <details class="about" id="aboutSection">
@@ -290,6 +291,6 @@
   </div>
 </div>
 
-<script src="../js/boot.js?v=640" data-page="form" data-v="640"></script>
+<script src="../js/boot.js?v=644" data-page="form" data-v="644"></script>
 </body>
 </html>

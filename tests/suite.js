@@ -3645,6 +3645,36 @@ const S = (title) => console.log("\n## " + title);
     _sc.end();
   }
 
+  S("v641: PDF — the site's name, address and a QR code on the sheet");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC, F = K.form;
+    eq([F.SITE.name, F.SITE.url, F.SITE.short], ["Kinkosmos", "https://klevatess.github.io/kinkmatch/", "klevatess.github.io/kinkmatch"], "the site the sheet points to");
+    const m = F.qrMatrix(), N = m.length;
+    ok(N === 29 && m.every(r => r.length === 29), "QR: 29 × 29 modules (version 3)");
+    const finder = (x0, y0) => [0, 1, 2, 3, 4, 5, 6].every(y => [0, 1, 2, 3, 4, 5, 6].every(x => m[y0 + y][x0 + x] === ((x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4)) ? 1 : 0)));
+    ok(finder(0, 0) && finder(N - 7, 0) && finder(0, N - 7), "QR: the three corner squares are in place");
+    ok([...Array(N - 16).keys()].every(i => m[6][8 + i] === (i % 2 ? 0 : 1) && m[8 + i][6] === (i % 2 ? 0 : 1)), "QR: the timing lines alternate");
+    const sh = F.buildSheet(), html = sh.innerHTML;
+    ok(/<img[^>]+data-qr="site"[^>]+src="data:image\/svg\+xml;base64,/.test(html), "the sheet header carries the QR picture (no link given: the site QR)");
+    eq((html.match(/klevatess\.github\.io\/kinkmatch</g) || []).length, 2, "the address is on the sheet twice — under the title and in the footer");
+    eq(sh.querySelectorAll("[data-pdflink]").length, 3, "three clickable spots in the PDF: the address twice and the QR");
+    _sc.end();
+  }
+
+  S("v642: PDF — Kinkosmos on top, the sheet title under it; the QR leads to the list and is big enough to scan");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true }), K = f.KC, F = K.form;
+    const sh = F.buildSheet(), tx = sh.textContent;
+    ok(tx.indexOf("Kinkosmos") >= 0 && tx.indexOf("Kinkosmos") < tx.indexOf(K.i18n.t("app.title")), "the header: Kinkosmos first, then the sheet title");
+    const img = sh.querySelector("img[data-qr]");
+    ok(parseInt(img.style.width, 10) >= 150, "the QR is at least 150 px wide (≈ 38 mm on A4)");
+    eq(img.getAttribute("data-url"), F.SITE.url, "without the QR library (offline) the QR and its PDF link lead to the site");
+    eq(F.linkQR("https://example.org/#x"), null, "no QR library: no list QR (falls back)");
+    _sc.end();
+  }
+
   S("calibration constants — v624: the hand-tuned and fitted numbers in one place (update here when re-fitting)");
   {
     const _sc = scope();
