@@ -12,7 +12,15 @@
   /* v641: "&embed=1" — the bot shows only «Мой портрет» of the person's OWN list inside the Telegram app: the page is
      cut down to that block, the list is not stored under «Received», the wording is «mine», and the picture card gets
      «Send to Telegram» (the picture goes to the bot, which sends it to the person to forward). */
-  F.embed = EMBED && /(^|&)a=/.test(hash);
+  /* v645: only the bot's own app may embed the page (its address below; add the bot's own domain here when it gets one).
+     Messages go to that exact address, never to "*". Opened by anything else, the page shows as usual. */
+  const EMBED_ORIGINS = ["https://kvbot.toxinstreet.workers.dev"];
+  const DEV = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/;
+  let parentOrigin = "";
+  try { parentOrigin = (location.ancestorOrigins && location.ancestorOrigins[0]) || (document.referrer ? new URL(document.referrer).origin : ""); } catch (e) {}
+  F.parentOrigin = window.parent !== window && (EMBED_ORIGINS.indexOf(parentOrigin) >= 0 || DEV.test(parentOrigin)) ? parentOrigin : "";
+  F.embed = EMBED && !!F.parentOrigin && /(^|&)a=/.test(hash);
+  F.toParent = msg => { if (F.parentOrigin) try { parent.postMessage(msg, F.parentOrigin); } catch (e) {} };
   if (F.embed) document.documentElement.classList.add("kv-embed");
   /* only a list/template link counts; anything else after "#" (e.g. the counter's #toggle-goatcounter)
      opens my own list and is left alone */
@@ -149,10 +157,19 @@
       sec.open = true; document.body.prepend(sec);
       Array.from(document.body.children).forEach(el => { if (el !== sec && !el.classList.contains("overlay") && el.tagName !== "SCRIPT") el.style.display = "none"; });
       /* the bot's app sizes its frame to the page */
-      const size = () => { try { parent.postMessage({ kind: "kinkosmos-size", h: document.documentElement.scrollHeight }, "*"); } catch (e) {} };
+      /* modal: a window (the picture card) is open — the bot then fits the frame to the screen so the window is in view */
+      const size = () => F.toParent({ kind: "kinkosmos-size", h: document.documentElement.scrollHeight, modal: !!document.querySelector(".overlay.show") });
       if (window.ResizeObserver) new ResizeObserver(size).observe(document.body);
+      if (window.MutationObserver) document.querySelectorAll(".overlay").forEach(o => new MutationObserver(size).observe(o, { attributes: true, attributeFilter: ["class"] }));
       sec.addEventListener("toggle", () => { if (!sec.open) sec.open = true; size(); });
       size();
+      /* v645: the bot's own buttons on top («Поделиться созвездием», «Сохранить картинкой») drive the page */
+      window.addEventListener("message", e => {
+        if (e.origin !== F.parentOrigin || !e.data || e.data.kind !== "kinkosmos-cmd") return;
+        if (e.data.cmd === "share" && F.embedShare) F.embedShare();
+        if (e.data.cmd === "card" && F.embedCard) F.embedCard();
+      });
+      F.toParent({ kind: "kinkosmos-ready", cmds: ["share", "card"] });
     }
   } else if (GO === "stars") setTimeout(() => {
     const sec = KC.$("portraitSection"); if (!sec) return;

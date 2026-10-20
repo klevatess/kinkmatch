@@ -390,7 +390,11 @@
     const lab = k => t(k === "sign" && mode() !== "sign" ? "card.o." + mode() : "card.o." + k);
     KC.$("cardOpts").innerHTML = OPTS.map(([k, on]) => '<label class="only-toggle"><input type="checkbox" id="cardO_' + k + '"' + (on ? " checked" : "") + "> " + esc(lab(k)) + "</label>").join("");
     KC.$("cardShare").hidden = !F.embed && !(navigator.canShare && window.File);
-    if (F.embed) KC.$("cardShare").textContent = t("card.tg");
+    if (F.embed) {   /* v645: in the bot, «Send to Telegram» is the main button and comes first (downloads rarely work there) */
+      const sh = KC.$("cardShare"), sv = KC.$("cardSave");
+      sh.textContent = t("card.tg"); sh.className = "btn primary"; sv.className = "btn ghost";
+      if (sv.previousElementSibling !== sh) sv.parentNode.insertBefore(sh, sv);
+    }
     cardModal.open(); preview();
   }
   KC.$("cardOpts").addEventListener("change", preview);
@@ -404,21 +408,30 @@
   });
   KC.$("cardShare").addEventListener("click", () => {
     const cv = F.drawCard(readOpts()); KC.stats.event("card");
-    if (F.embed) {   /* v641: to the Kinkoverse bot — the picture and the title of the mode shown, e.g. «Созвездие: Василиск» */
-      const keep = PTR; PTR = CARD_R; let hd = null;
-      try { const sg = figOf(data()); hd = sg ? headOf(sg) : null; } finally { PTR = keep; }
-      const ext = KC.ext.isExt(whole());
-      try { parent.postMessage({ kind: "kinkosmos-share", png: cv.toDataURL("image/png"), mode: mode(), role: ext ? CARD_R : "",
-        title: hd ? t("card.o." + mode()) + ": " + hd.name : "", sub: hd ? hd.sub : "" }, "*"); } catch (e) {}
-      cardModal.close && cardModal.close();
-      return;
-    }
+    if (F.embed) { toBot(cv); cardModal.close && cardModal.close(); return; }
     cv.toBlob(b => {
       if (!b) return; const f = new File([b], fileName(), { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f] }).catch(() => {});
       else KC.$("cardSave").click();
     }, "image/png");
   });
+
+  /* v641/v645: to the Kinkoverse bot (embed only) — the picture and the title of the mode shown, e.g. «Созвездие: Василиск» */
+  function toBot(cv) {
+    const keep = PTR; PTR = CARD_R; let hd = null;
+    try { const sg = figOf(data()); hd = sg ? headOf(sg) : null; } finally { PTR = keep; }
+    const ext = KC.ext.isExt(whole());
+    F.toParent({ kind: "kinkosmos-share", png: cv.toDataURL("image/png"), mode: mode(), role: ext ? CARD_R : "",
+      title: hd ? t("card.o." + mode()) + ": " + hd.name : "", sub: hd ? hd.sub : "" });
+  }
+  /* v645: the bot's «Поделиться созвездием» — straight to Telegram with a picture that names NO practices (figure, groups,
+     role only; «Обожаю» / limits / name off). An extended list: the role with more answers. «Сохранить картинкой» opens
+     the usual picture window with all options. */
+  {   /* defined always: form/main.js (loaded last) decides F.embed and only then listens for the bot's commands */
+    const roleOf = () => { if (!KC.ext.isExt(whole())) return "t"; const n = r => Object.keys(KC.ext.view(whole(), r).items).length; return n("b") > n("t") ? "b" : "t"; };
+    F.embedShare = () => { CARD_R = roleOf(); toBot(F.drawCard({ sign: true, bars: true, role: true, love: false, exp: false, limits: false, name: false })); };
+    F.embedCard = () => { CARD_R = roleOf(); openCard(); };
+  }
 
   /* ---------- the PDF page (first page when "Add the portrait" is ticked) ---------- */
   /* v613: an extended list gives two pages, one per role */
