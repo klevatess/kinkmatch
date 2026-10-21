@@ -26,7 +26,7 @@
   /* v646: "&embed=fill" — the bot's «Заполнить анкету здесь»: the whole form, the list from the link (the person's saved
      list or draft) opened as THEIR OWN list to edit, no link: an empty list; the bot's own bar does «Готово». Compare,
      Received, My lists, Share, PDF and the portrait are hidden. The page tells the bot the number of answers after every
-     change, sends a draft every 7 changes and when it is hidden, and the finished link on «done». A switch that reloads
+     change, sends a draft every 15 new answers and when it is hidden, and the finished link on «done». A switch that reloads
      the page (plain ⇄ extended, a list from My lists) comes back into this mode with "&own=1" (the list just saved here). */
   F.embedFill = FILL && !!F.parentOrigin;
   if (F.embedFill) document.documentElement.classList.add("kv-fill");
@@ -187,7 +187,7 @@
     F.homeUrl = () => location.pathname + "?lang=" + KC.i18n.lang + "#embed=fill&own=1";
     F.saveNow();   /* the list from the link becomes this page's own list (needed by the reloads above) */
     const answered = () => { let n = 0; KC.CATS.forEach(c => c.items.forEach(([, id]) => { if (KC.ext.answered(F.state, id)) n++; })); return n; };
-    /* a draft every 7 NEW answers (owner), and on leaving if anything changed (an answer, the role, a name) */
+    /* a draft every 15 NEW answers (owner), and on leaving if anything changed (an answer, the role, a name) */
     let last = F.shareLink(), lastN = answered(), changes = 0, ready = false;
     const draft = force => {
       const link = F.shareLink(); if (!force && link === last) return;
@@ -200,7 +200,7 @@
       const n = answered(); if (n === lastN) return;
       if (n > lastN) changes += n - lastN;
       lastN = n; F.toParent({ kind: "kinkosmos-count", n });
-      if (changes >= 7) draft();
+      if (changes >= 15) draft();   /* owner, 2026-10-21: every 15 (was 7) — fewer requests */
     };
     document.addEventListener("visibilitychange", () => { if (document.hidden) draft(); });
     window.addEventListener("pagehide", () => draft());
