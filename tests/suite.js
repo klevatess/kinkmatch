@@ -3719,7 +3719,7 @@ const S = (title) => console.log("\n## " + title);
     eq([W.PROF.vamp.ventrue[1], W.PROF.vamp.lasombra[1], W.PROF.demon.devils[1], W.PROF.demon.malefactors[1]], [-0.2, -0.11, 1.26, -1.16], "v605 biases: Ventrue, Lasombra, Devils, Malefactors");
     eq([W.PROF.vamp.ventrue[0], W.PROF.vamp.lasombra[0], W.PROF.demon.devils[0], W.PROF.demon.malefactors[0]], ["D1 F.4", "B.8 D.8", "D1 R.3 V.3", "B1 F.8"], "their profiles (only the biases were hand-tuned)");
     eq([K.wr.EXCESS.W, K.wr.EXCESS.L0, K.wr.BIAS.slaanesh], [4, 49, -6.05], "Slaanesh: excess weight 4, from 49 % Yes + Love, bias −6.05 (owner, Oct 3)");
-    eq([+K.tes.BIAS.khajiit.toFixed(2), +K.mtg.BIAS.gruul.toFixed(2), +K.mtg.CBIAS.G.toFixed(2), K.tes.CW], [-0.53, -1.86, -1.3, 5], "v648 TES / MTG biases (fitted on the bot's file, Oct 24; Khajiit kept higher)");
+    eq([+K.tes.BIAS.khajiit.toFixed(2), +K.tes.BIAS.dunmer.toFixed(2), +K.tes.BIAS.imperial.toFixed(2), +K.mtg.BIAS.gruul.toFixed(2), +K.mtg.CBIAS.G.toFixed(2), K.tes.CW], [-0.68, -0.83, -0.48, -1.86, -1.3, 5], "v648 TES / MTG biases (fitted on the bot's file, Oct 24; Khajiit kept higher; v650: Dunmer ⇄ Imperial, Imperials rarer)");
     eq([K.av.T.healing, K.av.T.metal, K.av.T.lightning, K.av.T.blood, K.av.T.lava, K.av.T.combustion], [.35, .3, 58, .55, 20, 1.1], "Avatar type thresholds (v620; lava = sex + fluids)");
     _sc.end();
   }

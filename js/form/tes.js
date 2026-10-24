@@ -4,7 +4,8 @@
    one of the 13 constellations of Tamriel, chosen separately by the clusters (as the Witcher's Sign), so any race can get any sign.
    Race = the groups (dev against the bot's lists) + CW × the clusters (KC.clusters.bot) + a bias; sign = the clusters + a bias.
    Biases fitted (local script, Oct 24) on the bot's calibration file — 40 people, an extended list's roles ½ each — at 90 %
-   of the weight, synthetic lists 10 %: every race 2.5–4 of the 40, Khajiit kept higher on purpose (owner: target 5.5 of 40),
+   of the weight, synthetic lists 10 %: Khajiit kept higher on purpose (owner: target 5.5 of 40); v650 (owner): Dunmer ⇄ Imperial swapped and Imperials
+   a little rarer (targets 4 and 2 of 40; got 5 and 1.5), the other races 2–4.5;
    every sign 2–4. Fan-made, unofficial. Switch: KC.FEATURES.tes. Names "tes.r.<race>", "tes.b.<sign>". */
 (function (KC) {
   const RACES = ["altmer","bosmer","dunmer","nord","imperial","breton","redguard","orsimer","khajiit","argonian","falmer","dwemer"];
@@ -14,7 +15,7 @@
   const PROF = { altmer: "d1 r.25", bosmer: "x.5 s.25 v.25", dunmer: "s1 d.5", nord: "x1 s.5", imperial: "d.5 r.5 b.25", breton: "r1 n.5", redguard: "s.75 v.5", orsimer: "b.5 s.5 x.5", khajiit: "n.5 f.5 x.25", argonian: "w1 f.25", falmer: "b1 w.5 n-.5", dwemer: "f1 b.5" };
   const CPROF = { altmer: "protocol1 worship1 look1", bosmer: "hunt1 wild1 devour1 feast.5", dunmer: "fire1 blood1 property.5", nord: "cold1 spank1 classic.5", imperial: "armor1 protocol.5 service1 wardrobe1", breton: "words1 stage1 look.5", redguard: "edge1 public1 armor.5", orsimer: "iron1 size1 extreme.5", khajiit: "pet1 touch1 orgasm1", argonian: "devour1 taboo1 cum.5", falmer: "dark1 stasis1 filth1", dwemer: "machines1 lab1 iron.5" };
   const SPROF = { warrior: "spank1 armor1 hunt.5", mage: "words1 lab1", thief: "public1 taboo1", serpent: "blood1 extreme1", lady: "home1 touch1 worship.5", steed: "wild1 cold1", lord: "protocol1 property1", apprentice: "service1 object1", atronach: "machines1 fire1 stasis.5", ritual: "vows1 penance1", lover: "classic1 cum1 orgasm.5", shadow: "dark1 watch1", tower: "iron1 rope1" };
-  const BIAS = { altmer: 0.168442, bosmer: 0.182157, dunmer: -1.132485, nord: 1.426154, imperial: 1.526484, breton: -2.070243, redguard: 0.264454, orsimer: 2.376181, khajiit: -0.531492, argonian: -1.981423, falmer: -0.459493, dwemer: 0.231262 };
+  const BIAS = { altmer: 0.084426, bosmer: 0.481743, dunmer: -0.832895, nord: 1.726019, imperial: -0.483949, breton: -1.770759, redguard: 0.563913, orsimer: 2.675632, khajiit: -0.682522, argonian: -1.681961, falmer: -0.159964, dwemer: 0.080318 };
   const SBIAS = { warrior: 0.594593, mage: 0.031093, thief: -0.070121, serpent: -0.538212, lady: -0.531397, steed: -0.870114, lord: 0.328437, apprentice: 0.245272, atronach: 0.616944, ritual: -0.080395, lover: -0.472926, shadow: 0.596928, tower: 0.1499 };
   /* [9 stars of the groups, grey stars, lines ("d" first = dashed), 3 bright slots], 100×100 */
   const FIG = {
