@@ -13,7 +13,7 @@ window.KC = window.KC || {};
      and its help / "What's new" lines. Everything stays in the code; the owner unlocks one thing per version for a post.
      A list that is already extended still opens and keeps its ⇅ switch, so one can get back to the plain list.
      v623 (owner, Oct 7): ⚔ Wr (Chaos gods) unlocked; rz = Re:Zero sins, new and on. v624 (owner, Oct 9): ext unlocked. */
-  KC.FEATURES = { ext: true, wr: true, wh: true, leg: true, ow: true, wi: false, av: true, rz: true, mb: true };
+  KC.FEATURES = { ext: true, wr: true, wh: true, leg: true, ow: true, wi: false, av: true, rz: true, mb: true, tes: true, mtg: false };
 
   KC.el = function (tag, cls, text) {
     const e = document.createElement(tag);

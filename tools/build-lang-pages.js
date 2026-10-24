@@ -24,8 +24,11 @@ const LANGS = [
   ["pt", { hreflang: "pt-BR", locale: "pt_BR" }],
   ["ja", { hreflang: "ja", locale: "ja_JP" }],
   ["th", { hreflang: "th", locale: "th_TH" }],
-  ["zh", { hreflang: "zh-Hant", locale: "zh_TW" }],
 ];
+/* v648 (owner): Traditional Chinese is hidden. Its old page /zh/ is kept as a small page that sends visitors to the
+   English page (noindex, canonical /en/), so old search results and bookmarks still land somewhere. */
+const HIDDEN = ["zh"];
+const hiddenPage = l => '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="robots" content="noindex">\n<link rel="canonical" href="' + X_DEFAULT + '">\n<meta http-equiv="refresh" content="0; url=../en/">\n<title>Kinkosmos</title>\n<script>location.replace("../en/" + location.hash);</script>\n</head>\n<body><p><a href="../en/">Kinkosmos</a></p></body>\n</html>\n';
 const pageUrl = l => SITE + l + "/";
 /* for languages without a page, and the address the root page points to (v609): the English page */
 const X_DEFAULT = pageUrl("en");
@@ -124,6 +127,7 @@ function build(root) {
   const index = withHreflang(fs.readFileSync(path.join(root, "index.html"), "utf8"));
   const out = { "index.html": index, "sitemap.xml": sitemap() };
   LANGS.forEach(([l, o]) => { out[l + "/index.html"] = langPage(index, l, o, loadPack(root, l)); });
+  HIDDEN.forEach(l => { out[l + "/index.html"] = hiddenPage(l); });
   return out;
 }
 

@@ -107,8 +107,9 @@
       : sg.wod ? ' data-line="' + sg.line + '" data-id="' + sg.id + '" data-lv="' + hd.dt.lv + '"' : sg.wr ? ' data-god="' + sg.id + '" data-mut="' + sg.mut + '"'
       : sg.wh ? ' data-faction="' + sg.id + '"' : sg.leg ? ' data-legion="' + sg.id + '"' : sg.ow ? ' data-race="' + sg.id + '"' : sg.wi ? ' data-school="' + sg.id + '" data-wsign="' + sg.wsign + '"'
       : sg.av ? ' data-el="' + sg.id + '" data-type="' + (sg.type || "") + '"' + (sg.avatar ? ' data-avatar="1"' : "")
-      : sg.rz ? ' data-sin="' + sg.id + '" data-rank="' + sg.rank + '"' : sg.mb ? ' data-art="' + sg.art + '" data-metal="' + sg.metal + '"' + (sg.metal2 ? ' data-metal2="' + sg.metal2 + '"' : "") + (sg.full ? ' data-full="1"' : "") : "";
-    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : sg.rz ? " pt-rz" : sg.mb ? " pt-mb" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
+      : sg.rz ? ' data-sin="' + sg.id + '" data-rank="' + sg.rank + '"' : sg.mb ? ' data-art="' + sg.art + '" data-metal="' + sg.metal + '"' + (sg.metal2 ? ' data-metal2="' + sg.metal2 + '"' : "") + (sg.full ? ' data-full="1"' : "")
+      : sg.tes ? ' data-race="' + sg.id + '" data-bsign="' + sg.bsign + '"' : sg.mtg ? ' data-combo="' + sg.id + '" data-dom="' + sg.dom + '"' : "";
+    return '<div class="pt-sign' + (sg.dnd ? " pt-dnd" : sg.wod ? " pt-wod" : sg.wr ? " pt-wr" : sg.wh ? " pt-wh" : sg.leg ? " pt-leg" : sg.ow ? " pt-ow" : sg.wi ? " pt-wi" : sg.av ? " pt-av" : sg.rz ? " pt-rz" : sg.mb ? " pt-mb" : sg.tes ? " pt-tes" : sg.mtg ? " pt-mtg" : "") + '"' + attrs + '><div class="sg-over">' + esc(hd.over) + '</div><div class="sg-name">' + esc(hd.name) + "</div>"
       + (hd.rl ? '<div class="sg-rl">' + esc(hd.rl) + "</div>" : "") + '<div class="sg-sub">' + esc(hd.sub) + "</div>"
       + (hd.al ? '<div class="sg-al"><b>' + esc(hd.al.name) + "</b> — " + esc(hd.al.quip) + "</div>" : "") + g + "</svg>" + (sg.wod ? KC.wod.noticeHTML() : KC.dnd.wrOf(sg) ? KC.wr.noticeHTML() : "") + "</div>";
   }
@@ -134,6 +135,8 @@
     if (sg.wi) return [k("wi.s." + sg.id), k("wi.g." + sg.wsign)];
     if (sg.rz) return [k("rz.s." + sg.id), { key: "rz.r." + sg.rank, vars: { s: t("rz.g." + sg.id) } }];
     if (sg.mb) return [k(sg.full ? (sg.art === "allo" ? "mb.mistborn" : "mb.fullfer") : "mb." + sg.art)].concat(sg.full ? [] : sg.art === "twin" ? [k("mb.al." + sg.metal), k("mb.fe." + sg.metal2)] : [k((sg.art === "allo" ? "mb.al." : "mb.fe.") + sg.metal)]);
+    if (sg.tes) return [k("tes.r." + sg.id), k("tes.b." + sg.bsign)];   /* v648 */
+    if (sg.mtg) return [k("mtg.c." + sg.id), k("mtg.col." + sg.dom)];
     if (sg.av) return sg.avatar ? [k("av.avatar"), k("av.e." + sg.id)] : [k("av.e." + sg.id)].concat(sg.type ? [k("av.t." + sg.type)] : []);
     return [];   /* the constellation itself: our own signs, nothing to look up */
   }

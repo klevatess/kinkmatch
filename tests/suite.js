@@ -51,7 +51,7 @@ const S = (title) => console.log("\n## " + title);
   eq(["squirting","underwear-sniffing","wearing-partners-underwear","hand-feeding","masks","blind-stranger","period-play"].map(where), ["fetishes","fetishes","fetishes","fetishes","fetishes","role-play","bodily-fluids"], "7 new practices in their sections");
   eq(["harness-leather", "harness-rope"].map(id => KC.i18n.item(id, "ru").name), ["Харнесс кожаный", "Харнесс верёвочный"], "RU: harness, not «упряжь»");
   eq(KC.CATS.find(c => c.id === "fetishes").items.some(([, id]) => id === "nerd-hikikomori") && KC.CATS.find(c => c.id === "marking").items.some(([, id]) => id === "humiliating-body-writing"), true, "new items in the requested sections");
-  ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => {
+  ["ru", "en", "pt", "es", "ja", "th"].forEach(l => {
     const own = ids.filter(id => !KC.i18n.has("items", id, l)); eq(own, [], l + ": every item defined in its OWN file (no silent English fallback)");
     const ownC = KC.CATS.filter(c => !KC.i18n.has("cats", c.id, l)).map(c => c.id); eq(ownC, [], l + ": every category in its own file");
   });
@@ -60,7 +60,7 @@ const S = (title) => console.log("\n## " + title);
   eq(ids.filter(id => (!CYR.test(KC.i18n.item(id, "ru").name) && RU_LATIN_OK.indexOf(id) < 0) || !CYR.test(KC.i18n.item(id, "ru").desc)), [], "every RU name and hint contains Russian text");
   eq(ids.filter(id => /Брат-плей|Жестокое обращение|Митенки|Дрочка|Извоз/.test(KC.i18n.item(id, "ru").name)), [], "RU: known mistranslations stay fixed");
   eq(KC.i18n.item("brat-taming", "ru").name, "Укрощение / сопротивление", "RU: user-chosen name kept");
-  ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => {
+  ["ru", "en", "pt", "es", "ja", "th"].forEach(l => {
     const miss = ids.filter(id => { const it = KC.i18n._pick("items", id, l); return !it || !it[0] || !it[1]; });
     eq(miss.length, 0, l + ": every item has name+hint (" + miss.slice(0, 3) + ")");
     const mc = KC.CATS.filter(c => !KC.i18n._pick("cats", c.id, l)); eq(mc.length, 0, l + ": every category named");
@@ -70,7 +70,7 @@ const S = (title) => console.log("\n## " + title);
   // ui key parity
   const src = l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8").match(/"([a-zA-Z0-9_.]+)":/g).map(s => s.slice(1, -2));
   const kr = src("ru"), ke = src("en");
-  ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => { const ks = src(l); eq(ks.filter((k, i) => ks.indexOf(k) !== i), [], l + ": no duplicate interface keys (a later key would silently overwrite an earlier one)"); });
+  ["ru", "en", "pt", "es", "ja", "th"].forEach(l => { const ks = src(l); eq(ks.filter((k, i) => ks.indexOf(k) !== i), [], l + ": no duplicate interface keys (a later key would silently overwrite an earlier one)"); });
   eq(kr.filter(k => ke.indexOf(k) < 0), [], "keys in ru missing from en");
   eq(ke.filter(k => kr.indexOf(k) < 0), [], "keys in en missing from ru");
   const kp = src("pt");
@@ -86,8 +86,7 @@ const S = (title) => console.log("\n## " + title);
   eq(ids.filter(id => { const it = KC.i18n.item(id, "th"); return !TH.test(it.name) || !TH.test(it.desc); }), [], "every TH name and hint is actually Thai");
   eq(KC.CATS.filter(c => !TH.test(KC.i18n.cat(c.id, "th"))).map(c => c.id), [], "every TH category name is Thai");
   const kzh = src("zh");
-  eq(ke.filter(k => kzh.indexOf(k) < 0), [], "keys in en missing from zh");
-  eq(kzh.filter(k => ke.indexOf(k) < 0), [], "keys in zh missing from en");
+  eq(kzh.filter(k => ke.indexOf(k) < 0), [], "keys in zh missing from en (v648: zh is hidden and frozen — it may lack newer keys)");
   const HAN = /[\u4e00-\u9fff]/;
   eq(ids.filter(id => { const it = KC.i18n.item(id, "zh"); return !HAN.test(it.name) || !HAN.test(it.desc); }), [], "every ZH name and hint is actually Chinese");
   eq(KC.CATS.filter(c => !HAN.test(KC.i18n.cat(c.id, "zh"))).map(c => c.id), [], "every ZH category name is Chinese");
@@ -105,7 +104,7 @@ const S = (title) => console.log("\n## " + title);
   eq((esSrc.match(/\b(vosotros|os interesa|acordad|mirándoos|bragas|magreo|moratones|coger|correrse)\b/gi) || []), [], "ES has no Spain/LatAm-only forms");
   const ptEnLeft = ids.filter(id => KC.i18n.item(id, "pt").desc === KC.i18n.item(id, "en").desc); eq(ptEnLeft, [], "PT hints are translated (not English copies)");
   // every profile option has labels in both
-  KC.PROFILE.forEach(f => f.opts.filter(Boolean).forEach(o => ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => { KC.i18n.set(l); ok(KC.i18n.optLabel(f.id, o) !== "profile." + f.id + "." + o, l + " label " + f.id + "." + o); })));
+  KC.PROFILE.forEach(f => f.opts.filter(Boolean).forEach(o => ["ru", "en", "pt", "es", "ja", "th"].forEach(l => { KC.i18n.set(l); ok(KC.i18n.optLabel(f.id, o) !== "profile." + f.id + "." + o, l + " label " + f.id + "." + o); })));
   // every t() key used in code exists
   const used = new Set();
   require("child_process").execSync("grep -rhoP \"(?<![A-Za-z.])t\\(\\\"[a-zA-Z0-9_.]+\\\"|data-i18n[a-z-]*=\\\"[a-zA-Z0-9_.]+\\\"\" " + require("./harness").ROOT).toString().split("\n").forEach(s => { const m = s.match(/"([^"]+)"/); if (m && !/\.$/.test(m[1])) used.add(m[1]); });
@@ -227,9 +226,9 @@ const S = (title) => console.log("\n## " + title);
   eq(open("form", { hash: noLg, navLang: "en-US" }).KC.i18n.lang, "en", "no lg, English browser -> EN");
   const es = open("form", { hash: ruLink.replace("lg=ru", "lg=es") });
   eq(es.KC.i18n.lang, "es", "lg=es opens in Spanish");
-  eq([...es.d.querySelectorAll("#langSw .lang-menu button")].map(b => b.dataset.lang), ["ru", "en", "es", "ja", "pt", "th", "zh"], "switcher shows all seven languages (v627: in the drop-down menu)");
+  eq([...es.d.querySelectorAll("#langSw .lang-menu button")].map(b => b.dataset.lang), ["ru", "en", "es", "ja", "pt", "th"], "switcher shows the six languages (v627: in the drop-down menu; v648: Chinese hidden)");
   eq(es.d.querySelector("#langSw .lang-cur").textContent, "ES", "…the button shows the current one");
-  eq(["zh-TW", "zh-HK", "zh-CN", "zh"].map(nl => open("form", { navLang: nl }).KC.i18n.lang), ["zh", "zh", "zh", "zh"], "Chinese browsers (any region) -> ZH");
+  eq(["zh-TW", "zh-HK", "zh-CN", "zh"].map(nl => open("form", { navLang: nl }).KC.i18n.lang), ["en", "en", "en", "en"], "Chinese browsers (any region) -> EN (v648: Chinese hidden)");
   eq(open("form", { navLang: "th-TH" }).KC.i18n.lang, "th", "Thai browser -> TH");
   eq(open("form", { navLang: "ja-JP" }).KC.i18n.lang, "ja", "Japanese browser -> JA");
   eq(open("form", { navLang: "es-MX" }).KC.i18n.lang, "es", "Spanish browser -> ES");
@@ -676,8 +675,7 @@ const S = (title) => console.log("\n## " + title);
   const cjs = c.d.getElementById("cmpSearch"); cjs.value = "緊縛"; cjs.dispatchEvent(new c.w.Event("input"));
   eq(c.d.querySelectorAll(".rrow").length, 1, "JA search finds 緊縛 (shibari)");
   cjs.value = ""; cjs.dispatchEvent(new c.w.Event("input"));
-  click(c.w, c.d.querySelector('#langSw button[data-lang="zh"]'));
-  eq(titles().slice(0, 2), ["契合：雙方都願意", "討論：Anna 選了「也許」"], "ZH compare groups");
+  ok(!c.d.querySelector('#langSw button[data-lang="zh"]'), "compare: no ZH button (v648: Chinese hidden)");
   // TH form
   const tp = open("form", { storage: { local: Object.assign({}, own.local, { "checklist-lang": "th" }), session: {} } });
   eq(tp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "ผ้าปิดตา", "TH name");
@@ -689,19 +687,10 @@ const S = (title) => console.log("\n## " + title);
   ok(/ลิมิตเด็ดขาด/.test(tp.KC.form.buildSheet().textContent), "TH PDF sheet");
   const tsb = tp.d.getElementById("search"); tsb.value = "แส้"; tsb.dispatchEvent(new tp.w.Event("input"));
   ok(tp.d.querySelectorAll(".item:not(.filtered-out)").length >= 4, "TH search works (no word spaces in Thai)");
-  // ZH form
-  const zp = open("form", { storage: { local: Object.assign({}, own.local, { "checklist-lang": "zh" }), session: {} } });
-  eq(zp.d.documentElement.lang, "zh-Hant", "<html lang> is zh-Hant (Traditional glyphs)");
-  eq(zp.d.querySelector('.item[data-id="blindfolds"] .main').textContent, "眼罩", "ZH name");
-  eq(zp.d.querySelector('.item[data-id="blindfolds"] .sub').textContent, "Blindfolds", "ZH page shows English subtitle");
-  eq(zp.d.querySelector('.item[data-id="hugging"] .scale button.sel').textContent, "超愛", "ZH scale + answer");
-  eq(zp.d.getElementById("progress").textContent, "已勾選 4／527 項", "ZH progress");
-  ok(/lg=zh/.test(zp.KC.form.shareLink()), "ZH link carries lg=zh");
-  eq(open("form", { hash: zp.KC.form.shareLink().split("#")[1], storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "zh", "ZH link opens in Chinese");
-  ok(/硬限制/.test(zp.KC.form.buildSheet().textContent), "ZH PDF sheet");
-  const zsb = zp.d.getElementById("search"); zsb.value = "鞭"; zsb.dispatchEvent(new zp.w.Event("input"));
-  ok(zp.d.querySelectorAll(".item:not(.filtered-out)").length >= 5, "ZH search works (no word spaces in Chinese)");
-  eq(zp.KC.i18n.sep(), "", "ZH joins sentences without a space");
+  // ZH (v648, owner): hidden — a saved choice or a link with lg=zh falls back like any language we have no pack for
+  const zp = open("form", { storage: { local: Object.assign({}, own.local, { "checklist-lang": "zh" }), session: {} }, navLang: "de-DE" });
+  eq(zp.KC.i18n.lang, "en", "saved ZH choice -> EN (Chinese hidden)");
+  eq(open("form", { hash: ruLink.replace("lg=ru", "lg=zh"), storage: { local: { "checklist-lang": "ru" }, session: {} } }).KC.i18n.lang, "ru", "lg=zh link -> the saved language");
   // JA form
   p = open("form", { storage: { local: Object.assign({}, own.local, { "checklist-lang": "ja" }), session: {} } });
   eq(p.d.querySelector('.item[data-id="face-sitting"] .main').textContent, "顔面騎乗", "JA name");
@@ -1144,14 +1133,14 @@ const S = (title) => console.log("\n## " + title);
   /* v591: the "🎲 DnD" button reads the same everywhere */
   Object.keys(SAME_OK).forEach(l => { SAME_OK[l].push("dnd.toDnd", "wr.toWr"); });   /* v610: "⚔ Wr" is the same in every language */
   /* v597: World of Darkness proper names (clans, auspices, ranks, the Babylonian house names…) stay as in English */
-  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$|wh\.f\.|leg\.l\.|wh\.toWh$|ow\.r\.|ow\.toOw$|wi\.g\.|mb\.(toMb$|m\.|al\.|fe\.|mn\.|fn\.)|ext\.(ask[TB]|row\.[tb]|arrow\.[tb])$)/;   /* v610: faction and legion names are proper names (often the same as English) */
+  const WOD_SAME = /^(wod\.(vamp|wolf|fey|demon\.a|aus|rank|sect|breed)\.|sp\.wod\.grp\.vamp$|wod\.of\.vamp$|wod\.(gnosis|glamour)$|wh\.f\.|leg\.l\.|wh\.toWh$|ow\.r\.|ow\.toOw$|wi\.g\.|mb\.(toMb$|m\.|al\.|fe\.|mn\.|fn\.)|ext\.(ask[TB]|row\.[tb]|arrow\.[tb])$|tes\.toTes$|mtg\.toMtg$|tes\.r\.|mtg\.c\.)/;   /* v648: TES races and MTG guild / clan names are proper names */   /* v610: faction and legion names are proper names (often the same as English) */
   const packsUI = {}; ["en", "ru", "pt", "es", "ja", "th", "zh"].forEach(l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); packsUI[l] = box; });
-  ["pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(packsUI.en).filter(k => packsUI[l][k] === packsUI.en[k] && SAME_OK[l].indexOf(k) < 0 && !WOD_SAME.test(k)), [], l + ": no interface string left in English"));
+  ["pt", "es", "ja", "th"].forEach(l => eq(Object.keys(packsUI.en).filter(k => packsUI[l][k] === packsUI.en[k] && SAME_OK[l].indexOf(k) < 0 && !WOD_SAME.test(k)), [], l + ": no interface string left in English"));
   ok(!/TEMPORARY/.test(["pt", "es", "ja", "th", "zh"].map(l => fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8")).join("")), "no TEMPORARY markers left");
   const helpKeys = Object.keys(packsUI.en).filter(k => /^help\..*_html$/.test(k));
   eq(helpKeys.filter(k => !/[\u0E00-\u0E7F]/.test(packsUI.th[k])), [], "TH help texts are Thai");
   eq(helpKeys.filter(k => !/[\u3040-\u30ff\u4e00-\u9faf]/.test(packsUI.ja[k])), [], "JA help texts are Japanese");
-  eq(helpKeys.filter(k => !/[\u4e00-\u9fff]/.test(packsUI.zh[k])), [], "ZH help texts are Chinese");
+  eq(helpKeys.filter(k => packsUI.zh[k] != null && !/[\u4e00-\u9fff]/.test(packsUI.zh[k])), [], "ZH help texts are Chinese (v648: frozen, newer keys missing)");
   const ph2 = x => (x.match(/\{\w+\}/g) || []).sort().join();
   ["pt", "es", "ja", "th", "zh", "ru"].forEach(l => eq(Object.keys(packsUI.en).filter(k => packsUI[l] && packsUI[l][k] != null && ph2(packsUI[l][k]) !== ph2(packsUI.en[k])), [], l + ": same {placeholders} as English"));
 
@@ -1269,7 +1258,7 @@ const S = (title) => console.log("\n## " + title);
   ["form", "compare"].forEach(pgName => {
     const lp = open(pgName, { storage: { local: { "checklist-lang": "ru" }, session: {} } }), el = lp.d.querySelector(".foot-legal");
     ok(el && /подтверждаете, что вам исполнилось 18 лет/.test(el.textContent) && /Не является пропагандой упоминаемых практик; сервис носит развлекательный характер\./.test(el.textContent), pgName + ": 18+ line and disclaimer under the footer");
-    lp.KC.i18n.set("zh"); lp.KC.i18n.apply(lp.d); ok(/18 歲/.test(lp.d.querySelector(".foot-legal").textContent), pgName + ": translated (ZH)");
+    lp.KC.i18n.set("th"); lp.KC.i18n.apply(lp.d); ok(/18/.test(lp.d.querySelector(".foot-legal").textContent), pgName + ": translated (TH)");
   });
 
   S("v569: damaged saved data never breaks a page");
@@ -1299,7 +1288,7 @@ const S = (title) => console.log("\n## " + title);
       ["rattan", "hot-wax-high-temp", "pressure-points", "rough-grabbing", "gentle-touch", "leash-walk-outside", "bottle-neck-vaginal", "bottle-neck-anal"], "each placed next to its related item");
     eq(K.i18n.item("rattan", "ru").name, "Ротанг", "RU: Ротанг");
     ok(/законы|Законы/.test(K.i18n.item("leash-walk-outside", "ru").desc) && /стран/.test(K.i18n.item("leash-walk-outside", "ru").desc), "leash walk hint: laws and attitudes differ by country");
-    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(Object.keys(want).filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": new items translated"));
+    ["ru", "en", "pt", "es", "ja", "th"].forEach(l => eq(Object.keys(want).filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": new items translated"));
     eq([K.i18n.item("spanking-leather-slappers", "ru").name, K.i18n.item("spanking-leather-slappers", "en").name], ["Шлепки кожаными паддлами", "Spanking – leather paddles"], "leather slappers renamed to leather paddles (id kept)");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
     eq(Object.keys(want).filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dot any more (dots only from 497)");
@@ -1314,7 +1303,7 @@ const S = (title) => console.log("\n## " + title);
     eq([codeOf["other-sub-serves-you"], codeOf["urination-in-front"]], [475, 476], "codes 475, 476");
     eq([next["used-as-toy-for-other-sub"], next["urination-in-front"], next["omorashi"]], ["other-sub-serves-you", "omorashi", "public-omorashi"], "placed next to related items");
     eq([K.i18n.item("other-sub-serves-you", "ru").name, K.i18n.item("urination-in-front", "ru").name], ["Вас удовлетворяет другой сабмиссив по принуждению", "Мочеиспускание при партнёре / во время сессии"], "RU names");
-    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(["other-sub-serves-you", "urination-in-front"].filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
+    ["ru", "en", "pt", "es", "ja", "th"].forEach(l => eq(["other-sub-serves-you", "urination-in-front"].filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
     eq(["other-sub-serves-you", "urination-in-front"].filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dots (only from 497)");
     _sc.end();
@@ -1330,7 +1319,7 @@ const S = (title) => console.log("\n## " + title);
       ["begging", "forced-begging-acts", 485], ["menthol-balm-labia", "menthol-eye-drops", 486], ["vacbed", "fuck-box", 487]];
     eq(want.filter(([a, id, c]) => codeOf[id] !== c || next[a] !== id).map(w => w[1]), [], "codes 477–487, each placed after its related item");
     const ids = want.map(w => w[1]);
-    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(ids.filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
+    ["ru", "en", "pt", "es", "ja", "th"].forEach(l => eq(ids.filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && it.desc === K.i18n.item(id, "en").desc); }), [], l + ": translated"));
     eq([K.i18n.item("dutch-rudder", "ru").name, K.i18n.item("forced-self-degradation", "ru").name], ["Голландский штурвал", "Принуждение называть себя уничижительно"], "RU names (typos fixed)");
     ok(/Спасибо, что вставили в меня фаллоимитатор/.test(K.i18n.item("forced-thanking", "ru").desc) && /Пожалуйста, трахните меня/.test(K.i18n.item("forced-begging-acts", "ru").desc), "owner's examples in the hints");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
@@ -1347,7 +1336,7 @@ const S = (title) => console.log("\n## " + title);
     eq(want.filter(([a, id, c]) => codeOf[id] !== c || next[a] !== id).map(w => w[1]), [], "codes 488–492, each placed after its related item");
     eq(want.map(w => catOf[w[1]]), ["impact-rough-play", "impact-rough-play", "fetishes", "bodily-fluids", "role-play"], "sections");
     const ids = want.map(w => w[1]);
-    ["ru", "en", "pt", "es", "ja", "th", "zh"].forEach(l => eq(ids.filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && (it.desc === K.i18n.item(id, "en").desc || it.name === K.i18n.item(id, "en").name)); }), [], l + ": translated"));
+    ["ru", "en", "pt", "es", "ja", "th"].forEach(l => eq(ids.filter(id => { const it = K.i18n.item(id, l); return !it.name || !it.desc || (l !== "en" && (it.desc === K.i18n.item(id, "en").desc || it.name === K.i18n.item(id, "en").name)); }), [], l + ": translated"));
     eq(ids.map(id => K.i18n.item(id, "ru").name), ["Бастинадо (удары по ступням)", "Удары по ладоням", "Нуру-массаж", "Омораси (терпеть до последнего)", "Фантазия об оплодотворении (breeding)"], "RU names");
     const dn = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }).d;
     eq(ids.filter(id => dn.querySelector('.item[data-id="' + id + '"] .new-dot')), [], "v615: no green dots (only from 497)");
@@ -1693,7 +1682,7 @@ const S = (title) => console.log("\n## " + title);
 
     // what's new — v624: one structural check instead of a snapshot of the entries per version (every new entry broke them):
     // every entry dated with one list under it, no empty points, the same shape in all 7 languages, the newest on top
-    const hp = open("form"), NL = ["ru", "en", "pt", "es", "ja", "th", "zh"], shape = {};
+    const hp = open("form"), NL = ["ru", "en", "pt", "es", "ja", "th"], shape = {};
     NL.forEach(l => {
       hp.KC.i18n.set(l); hp.KC.help.open("news");
       const s3 = hp.d.getElementById("helpNews"), h5 = s3.querySelectorAll("h5"), uls = s3.querySelectorAll("ul");
@@ -1792,9 +1781,9 @@ const S = (title) => console.log("\n## " + title);
     ok(SIGNS.every(s => s[2].length === 9 && s[2].every(p2 => p2[0] >= 0 && p2[0] <= 100 && p2[1] >= 0 && p2[1] <= 100)), "every sign has exactly 9 stars inside its box (one per portrait group)");
     ok(SIGNS.every(s => { const used = new Set(); s[3].forEach(l => l.forEach(i => { if (i !== "d") used.add(i); })); return used.size === 9; }), "every star is joined to the figure (no loose stars)");
     ok(SIGNS.every(s => s[4].length === (s[0] === "*" ? 3 : s[0].length)), "bright stars: 1 for a single sign, 2 for a pair, 3 for the Chimera");
-    const tr = {}; ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); tr[l] = box; });
+    const tr = {}; ["ru", "en", "es", "pt", "ja", "th"].forEach(l => { const box = {}; new Function("KC", fs.readFileSync(require("./harness").ROOT + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); tr[l] = box; });
     const need = SIGNS.map(s => "sign." + s[1]).concat(SG.GROUPS.map(g => "pt.s." + g), ["sign.mine", "sign.of", "sign.even", "sp.sys.h", "sp.sys.legend_html", "sp.sys.tap_html", "sp.sys.tune", "sp.pair.h", "sp.pair.common", "sp.pair.sim", "sp.pair.cap", "sp.pair.stars", "sp.pair.both", "rl.leadPair_html", "rl.leadGroup_html", "tpl.nebula", "seo.desc"]);
-    eq(Object.keys(tr).map(l => need.filter(k => !tr[l][k])), [[], [], [], [], [], [], []], "all new texts exist in all 7 languages");
+    eq(Object.keys(tr).map(l => need.filter(k => !tr[l][k])), [[], [], [], [], [], []], "all new texts exist in all six languages (v648: zh hidden)");
     // which sign
     const D = pcts => ({ sections: Object.keys(pcts).map(id => ({ id, pct: pcts[id] })).sort((a, b) => (b.pct === null ? -1 : b.pct) - (a.pct === null ? -1 : a.pct)) });
     const all = (o) => Object.assign({ intimacy: 10, bondage: 10, fetishes: 10, "role-play": 10, ds: 10, sm: 10, "sex-penetration": 10, "voyeurism-exhibitionism": 10, "bodily-fluids": 10 }, o);
@@ -1862,7 +1851,7 @@ const S = (title) => console.log("\n## " + title);
     click(n.w, th); ok(!n.d.querySelector("#mineTplList .nb-open"), "second tap closes it");
     // search tags
     const html = fs.readFileSync(require("./harness").ROOT + "/index.html", "utf8");
-    ok(/<meta name="description"/.test(html) && /og:image" content="https:\/\/klevatess\.github\.io\/kinkmatch\/img\/og\.png"/.test(html) && (html.match(/hreflang=/g) || []).length === 8 && /<meta name="rating" content="adult">/.test(html), "index.html: description, preview image, 7 languages + default, adult rating");
+    ok(/<meta name="description"/.test(html) && /og:image" content="https:\/\/klevatess\.github\.io\/kinkmatch\/img\/og\.png"/.test(html) && (html.match(/hreflang=/g) || []).length === 7 && /<meta name="rating" content="adult">/.test(html), "index.html: description, preview image, 6 languages + default, adult rating (v648)");
     ok(fs.existsSync(require("./harness").ROOT + "/img/og.png") && fs.existsSync(require("./harness").ROOT + "/img/favicon.svg") && fs.existsSync(require("./harness").ROOT + "/sitemap.xml"), "preview image, icon and sitemap are in the site");
     ok(p.d.title === tr.en["seo.title"] && /^Kinkosmos — /.test(p.d.title) && p.d.querySelector('meta[name="description"]').getAttribute("content") === tr.en["seo.desc"], "page title = the search title of the language (v608); the description follows the language");
     eq(p.d.querySelector('link[rel="canonical"]').href, "https://klevatess.github.io/kinkmatch/en/", "the root page points search engines to the English page (v609)");
@@ -1934,7 +1923,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, DD = K.dnd, SG = K.signs;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const keys = Object.keys(DD.VAR);
     eq(keys.length, 46, "46 variants: 9 single, 36 pairs, the Chimera");
     const count = {}; keys.forEach(k => { count[DD.VAR[k][0]] = (count[DD.VAR[k][0]] || 0) + 1; });
@@ -2077,7 +2066,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, DD = K.dnd;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     // race: 27 clusters over 7 axes; every item id exists, no item in two clusters, 13 races
     const all = new Set(); K.CATS.forEach(c => c.items.forEach(([, id]) => all.add(id)));
     const seen = {}, bad = []; Object.keys(DD.CL).forEach(k => DD.CL[k][1].split(" ").forEach(id => { if (!all.has(id)) bad.push(id); seen[id] = (seen[id] || 0) + 1; }));
@@ -2152,7 +2141,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, W = K.wod, DD = K.dnd;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     eq(W.LINES, ["vamp", "wolf", "fey", "demon"], "four lines");
     eq(W.LINES.map(L => Object.keys(W.FIG[L]).length), [12, 12, 12, 7], "12 clans, 12 tribes, 12 kiths (v604: + Selkies, Clurichauns), 7 houses");
     ok(!W.FIG.vamp.ghoul && !W.FIG.wolf.furies && !W.FIG.vamp.salubri && !W.FIG.vamp.caitiff && !W.FIG.vamp.ravnos, "no Ghouls, Black Furies, Salubri, Caitiff, Ravnos (owner)");
@@ -2259,7 +2248,7 @@ const S = (title) => console.log("\n## " + title);
   S("v600: one language per page; World of Darkness recalibrated; share window: Send…, answers in the link; empty-link events");
   {
     const _sc = scope();
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     // boot.js: one language
     const w0 = { document: {} }; new Function("window", "document", fs.readFileSync(require("./harness").ROOT + "/js/boot.js", "utf8"))(w0, {});
     const M = w0.KC_MANIFEST;
@@ -2382,7 +2371,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, DD = K.dnd, W = K.wod;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     const catOf = {}; K.CATS.forEach(c => c.items.forEach(([, id]) => { catOf[id] = c.id; }));
     const mk = (fn, meta) => { const it = {}; ids.forEach((id, i) => { const v = fn(id, i); if (v) it[id] = { interest: v }; }); return { items: it, meta: meta || {} }; };
@@ -2451,7 +2440,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, DD = K.dnd, W = K.wod;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const codeOf = {}, next = {}, catOf = {};
     K.CATS.forEach(c => c.items.forEach(([n, id], i) => { codeOf[id] = n; catOf[id] = c.id; if (i + 1 < c.items.length) next[id] = c.items[i + 1][1]; }));
     const want = [["homage-with-tongue", "floor-licking", 493, "humiliation"], ["trash-play", "hair-as-mop", 494, "humiliation"], ["outdoor-sex", "abandoned-building-sex", 495, "voyeurism-exhibitionism"],
@@ -2531,10 +2520,11 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const ROOTDIR = require("./harness").ROOT, SITE = "https://klevatess.github.io/kinkmatch/";
-    const B = require(ROOTDIR + "/tools/build-lang-pages.js"), LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const B = require(ROOTDIR + "/tools/build-lang-pages.js"), LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const tr = {}; LANGS.forEach(l => { const box = {}; new Function("KC", fs.readFileSync(ROOTDIR + "/js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(box, o) }); tr[l] = box; });
     const items = {}; LANGS.forEach(l => { const box = {}; new Function("KC", fs.readFileSync(ROOTDIR + "/js/lang/" + l + ".practices.js", "utf8"))({ addLang: (x, part, o) => { if (part === "items") Object.assign(box, o); } }); items[l] = box; });
-    eq(B.LANGS, LANGS, "the tool makes a page for all seven languages");
+    eq(B.LANGS, LANGS, "the tool makes a page for the six languages (v648: zh/ is only a redirect)");
+    { const z = fs.readFileSync(ROOTDIR + "/zh/index.html", "utf8"); ok(/noindex/.test(z) && /url=\.\.\/en\//.test(z) && /canonical" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/"/.test(z), "zh/ sends visitors to /en/ (noindex, canonical /en/)"); }
     // the files on disk are what the tool makes now (catches "changed index.html or a translation, forgot to rebuild")
     const out = B.build(ROOTDIR);
     eq(Object.keys(out).filter(f => !fs.existsSync(ROOTDIR + "/" + f) || fs.readFileSync(ROOTDIR + "/" + f, "utf8") !== out[f]), [], "language pages, index.html hreflang and sitemap.xml are up to date (else: node tools/build-lang-pages.js)");
@@ -2546,7 +2536,7 @@ const S = (title) => console.log("\n## " + title);
     ok(/<html lang="en">/.test(idx) && /<link rel="canonical" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/">/.test(idx) && /og:title" content="Kinkosmos — чек-лист BDSM-практик \/ BDSM checklist"/.test(idx), "root page: English head, canonical → /en/ (v609), the preview stays Russian + English");
     const sm = fs.readFileSync(ROOTDIR + "/sitemap.xml", "utf8");
     eq([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]), LANGS.map(l => SITE + l + "/"), "sitemap: the seven language pages only (the root points to /en/, v609)");
-    ok((sm.match(/hreflang="x-default" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/"/g) || []).length === 7, "sitemap: every address carries the full language list, default = /en/");
+    ok((sm.match(/hreflang="x-default" href="https:\/\/klevatess\.github\.io\/kinkmatch\/en\/"/g) || []).length === LANGS.length, "sitemap: every address carries the full language list, default = /en/");
     LANGS.forEach(l => {
       const h = fs.readFileSync(ROOTDIR + "/" + l + "/index.html", "utf8"), t = tr[l], url = SITE + l + "/";
       const bad = [];
@@ -2590,7 +2580,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, R = K.wr;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     eq(R.GODS, ["khorne", "nurgle", "tzeentch", "slaanesh", "rat"], "five patrons");
     const bad = [];
     R.GODS.forEach(id => { const [P, E, Ln, B] = R.FIG[id], n = P.length + E.length;
@@ -2671,7 +2661,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, H = K.wh, L = K.leg, R = K.wr, C = K.clusters;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     eq([H.FACTIONS.length, L.LEGIONS.length, Object.keys(C.USUAL).length], [14, 18, 42], "14 factions, 18 legions, 42 clusters");
     const bad = [];
     Object.keys(H.FIG).concat(Object.keys(L.FIG).map(k => "L" + k)).forEach(key => { const F = key[0] === "L" && L.FIG[key.slice(1)] ? L.FIG[key.slice(1)] : H.FIG[key];
@@ -2758,7 +2748,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, O = K.ow, V = K.wi, C = K.clusters;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     eq([O.RACES.length, V.SCHOOLS.length, V.SIGNS.length], [17, 6, 5], "17 races (with Kislev, Cathay and the Warriors of Chaos), 6 schools, 5 signs");
     const bad = [];
     [[O, O.RACES], [V, V.SCHOOLS]].forEach(([M, keys]) => keys.forEach(k => { const F = M.FIG[k]; if (!F) { bad.push(k + ": no sign"); return; } const [P, E, Ln, B] = F, n = P.length + E.length;
@@ -2825,7 +2815,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const f = open("form"), K = f.KC, X = K.ext;
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     const V = ["limit", "maybe", "yes", "love"];
     // links: random extended lists survive a link exactly; plain links keep their old format
@@ -2937,14 +2927,14 @@ const S = (title) => console.log("\n## " + title);
   S("v614: six new practices, «Всё и сразу», the «Описание созвездий» tab");
   {
     const _sc = scope();
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const f = open("form"), K = f.KC;
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     // 1. practices
     const NEWP = { "forced-floor-eating": 500, "sucking-cum-from-vagina": 501, "foreign-language-talk": 502, "pet-food-eating": 503, "dressage-training": 504, "double-penetration-one-hole": 505 };
     const code = {}; K.CATS.forEach(c => c.items.forEach(([cd, id]) => { code[id] = cd; }));
     eq(Object.keys(NEWP).filter(id => code[id] !== NEWP[id]), [], "six new practices: codes 500–505");
-    eq(LANGS.map(l => Object.keys(NEWP).filter(id => { const it = K.i18n.item(id, l); return !it || !it.name || it.name === id || !it.desc; }).length), [0, 0, 0, 0, 0, 0, 0], "…named and described in all 7 languages");
+    eq(LANGS.map(l => Object.keys(NEWP).filter(id => { const it = K.i18n.item(id, l); return !it || !it.name || it.name === id || !it.desc; }).length), [0, 0, 0, 0, 0, 0], "…named and described in all six languages");
     const inCl = id => Object.keys(K.clusters.ids()).filter(k => K.clusters.ids()[k].indexOf(id) >= 0).sort();
     eq([inCl("forced-floor-eating"), inCl("sucking-cum-from-vagina"), inCl("foreign-language-talk"), inCl("pet-food-eating"), inCl("dressage-training"), inCl("double-penetration-one-hole")],
       [["feast", "filth"], ["cum", "devour"], ["words"], ["filth", "pet"], ["pet"], ["size"]], "…each is in the clusters it fits");
@@ -2962,7 +2952,7 @@ const S = (title) => console.log("\n## " + title);
     LANGS.forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (lg, d) => Object.assign(o, d) }); L[l] = o; });
     const rk = Object.keys(L.ru).sort();
     eq(LANGS.map(l => Object.keys(L[l]).sort().join("|") === rk.join("|")), LANGS.map(() => true), "lore: the same " + rk.length + " keys in all 7 languages");
-    eq(LANGS.map(l => rk.filter(k => !L[l][k] || L[l][k].length < 40).length), [0, 0, 0, 0, 0, 0, 0], "lore: no empty or tiny text");
+    eq(LANGS.map(l => rk.filter(k => !L[l][k] || L[l][k].length < 40).length), [0, 0, 0, 0, 0, 0], "lore: no empty or tiny text");
     eq(rk.filter(k => !K.i18n.has("ui", k, "ru")).slice(0, 5), [], "lore: every key is an interface key");
     ok(Object.keys(L.ru).every(k => (L.ru[k].match(/[.!?…]/g) || []).length >= 2), "lore: at least two sentences each");
     const needL = ["lore.h", "lore.none", "lore.loading", "lore.offline", "lore.lead", "lore.note"], missL = [];
@@ -3043,7 +3033,7 @@ const S = (title) => console.log("\n## " + title);
   S("v616: 🌀 Avatar — elements, types, spirit energy, the Avatar; fix: ⚔ Wr modes with a template");
   {
     const _sc = scope();
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const f = open("form"), K = f.KC, A = K.av;
     const ids = []; K.CATS.forEach(c => c.items.forEach(([, id]) => ids.push(id)));
     // figures: 9 group stars, valid lines, bright slots among the 9; the Avatar: the centre + two in the native symbol
@@ -3122,7 +3112,7 @@ const S = (title) => console.log("\n## " + title);
   S("v617: starter templates; labels of every figure the same size; Avatar types more often");
   {
     const _sc = scope();
-    const LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const f = open("form", { storage: { local: { "checklist-lang": "ru" }, session: {} } }), K = f.KC, T = K.store.tpl;
     const ids = new Set(); K.CATS.forEach(c => c.items.forEach(([, id]) => ids.add(id)));
     eq(K.STARTERS.map(x => x.key), ["vanilla", "rough", "light", "smnosex", "humil", "extra"], "six starter templates (owner's five + Extra)");
@@ -3235,7 +3225,7 @@ const S = (title) => console.log("\n## " + title);
     const plain = { items: {}, meta: { role: "dom" } }; let _n = 0;
     open("form").KC.CATS.forEach(c => c.items.forEach(([, id]) => { plain.items[id] = { interest: ["yes", "love", "maybe", "limit"][_n++ % 4] }; }));
     const f = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("ext: true", "ext: false").replace("av: true", "av: false").replace("mb: true", "mb: false") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "av", "practices-checklist-v1": JSON.stringify(plain) }, session: {} } }), K = f.KC, d = f.d;
-    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,wh,wr", "with ext and Avatar locked: ⚔ Wr (all four tabs, v632) and 📖 Re:Zero are on");
+    eq(Object.keys(K.FEATURES).filter(k => K.FEATURES[k]).sort().join(), "leg,ow,rz,tes,wh,wr", "with ext and Avatar locked: ⚔ Wr (all four tabs, v632), 📖 Re:Zero and (v648) 🐉 TES are on");
     ok(d.getElementById("extToggleBox").hidden && d.getElementById("extMake").hidden, "plain list: no ⇅ in the header, no «Сделать расширенную»");
     const so = d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new f.w.Event("toggle"));
     ok(K.dnd.mode() === "sign" && !d.querySelector(".pt-wib, .pt-avb, .pt-av") && !!d.querySelector("#portraitBody .pt-mode"), "portrait: no 🗡 / 🌀 buttons, a device that chose Avatar sees the constellation");
@@ -3276,7 +3266,7 @@ const S = (title) => console.log("\n## " + title);
   S("v623: ⚔ Wr (Chaos gods) unlocked with its tab row; 📖 Re:Zero sins: seven sins, three ranks, Sloth from unanswered items");
   {
     const _sc = scope();
-    const fsx = require("fs"), LANGS = ["ru", "en", "es", "pt", "ja", "th", "zh"];
+    const fsx = require("fs"), LANGS = ["ru", "en", "es", "pt", "ja", "th"];
     const f = open("form"), K = f.KC, R = K.rz;
     eq(R.SINS.length + "/" + R.RACE.length + "/" + R.RANKS.join(), "7/6/follower,archbishop,witch", "seven sins (six compete, Sloth from U), three ranks");
     const bad = [];
@@ -3346,13 +3336,13 @@ const S = (title) => console.log("\n## " + title);
     ok(back.items["enema-retention"].interest === "yes" && back.items["blood-play"].interest === "limit", "moved items keep their answers in links");
     // texts
     const fsx = require("fs"), miss = [];
-    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+    ["ru", "en", "es", "pt", "ja", "th"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
       if (!o.cats.hardcore) miss.push(l + ": section name"); NEW.forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); }); });
     eq(miss, [], "names and hints in all 7 languages");
     ok(NEW.every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "new practices carry the green dot");
     // extended list unlocked
     const g = open("form", { locked: true }), KG = g.KC;
-    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "av,ext,leg,mb,ow,rz,wh,wr", "shipped build: ⚔ Wr with its tabs (v632), 📖 Re:Zero, (v624) the extended list, (v635) 🌀 Avatar and (v637) 🌫 Mistborn are on; only the Witcher is locked");
+    eq(Object.keys(KG.FEATURES).filter(k => KG.FEATURES[k]).sort().join(), "av,ext,leg,mb,ow,rz,tes,wh,wr", "shipped build (v648: + 🐉 TES): ⚔ Wr with its tabs (v632), 📖 Re:Zero, (v624) the extended list, (v635) 🌀 Avatar and (v637) 🌫 Mistborn are on; only the Witcher is locked");
     ok(!g.d.getElementById("extToggleBox").hidden, "the ⇅ switch is back in the header");
     KG.help.open("news"); const h5 = [...g.d.querySelectorAll("#helpNews h5")].map(x => x.textContent);
     const i9 = h5.indexOf("9 октября 2026 · Расширенная анкета");   // v633: found by text, newer entries go above it
@@ -3371,7 +3361,7 @@ const S = (title) => console.log("\n## " + title);
     eq(Object.keys(NEW).filter(id => code[id] !== NEW[id][0] || at[id] !== NEW[id][1]), [], "codes 518–522, each in its section; 517 (food in the anus, v625) retired in v626");
     ok(K.RETIRED_CODES.indexOf(517) >= 0 && !code["food-insertion-anal"] && K.codec.decode(K.codec.encode({ items: { "food-insertion": { interest: "yes" } }, meta: {} })).items["food-insertion"].interest === "yes", "517 is retired (never reused); links still work");
     const fsx = require("fs"), miss = [];
-    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+    ["ru", "en", "es", "pt", "ja", "th"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
       Object.keys(NEW).forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); });
       if (/анус|anus|ano\b|ânus|アナル|ทวาร|肛門/i.test(o.items["food-insertion"][0])) miss.push(l + ": food-insertion still names the anus");
       ["no-safeword-short", "no-safeword-long"].forEach(id => { if (o.items[id] && o.items[id][1].length < (/ja|zh/.test(l) ? 70 : 150)) miss.push(l + ": " + id + " has no safety instructions"); });
@@ -3394,7 +3384,7 @@ const S = (title) => console.log("\n## " + title);
     ok(tg.classList.contains("on"), "folded while the search filters the list: a dot on the arrow");
     sb.value = ""; sb.dispatchEvent(new w.Event("input")); ok(!tg.classList.contains("on"), "…and it goes when nothing filters");
     const ls = d.getElementById("langSw"), cur = ls.querySelector(".lang-cur");
-    ok(!!cur && /RU/.test(cur.textContent) && ls.querySelectorAll(".lang-menu .lang-btn").length === 7 && !ls.classList.contains("open"), "languages: one button with the current language, the seven in a closed menu");
+    ok(!!cur && /RU/.test(cur.textContent) && ls.querySelectorAll(".lang-menu .lang-btn").length === 6 && !ls.classList.contains("open"), "languages: one button with the current language, the six in a closed menu (v648)");
     click(w, cur); ok(ls.classList.contains("open") && cur.getAttribute("aria-expanded") === "true", "the button opens the menu");
     click(w, d.body); ok(!ls.classList.contains("open"), "a click elsewhere closes it");
     const intro = d.querySelector(".intro").textContent;
@@ -3447,7 +3437,7 @@ const S = (title) => console.log("\n## " + title);
     const NEW = { "pubic-hair-fetish": [523, "fetishes"], "fully-shaved-fetish": [524, "fetishes"], "primal-play": [525, "role-play"], "cock-slapping": [526, "humiliation"], "emetophilia": [527, "hardcore"] };
     eq(Object.keys(NEW).filter(id => code[id] !== NEW[id][0] || at[id] !== NEW[id][1]), [], "codes 523–527, each in its section");
     const fsx = require("fs"), miss = [];
-    ["ru", "en", "es", "pt", "ja", "th", "zh"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
+    ["ru", "en", "es", "pt", "ja", "th"].forEach(l => { const o = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".practices.js", "utf8"))({ addLang: (lg, k, d) => { o[k] = Object.assign(o[k] || {}, d); } });
       Object.keys(NEW).forEach(id => { const v = o.items[id]; if (!v || !v[0] || !v[1]) miss.push(l + ":" + id); }); });
     eq(miss, [], "names and hints in all 7 languages");
     ok(Object.keys(NEW).every(id => f.d.querySelector('.item[data-id="' + id + '"][data-new="1"]')), "with the green dot");
@@ -3526,7 +3516,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const RT = require("./harness").ROOT, TAG = '<meta name="google-site-verification" content="UapiNQQrD2xVz3CRF46T2LpeUzE7QeTJz54C1WmtzVk">';
-    const pages = ["index.html"].concat(["ru", "en", "es", "pt", "ja", "th", "zh"].map(l => l + "/index.html"));
+    const pages = ["index.html"].concat(["ru", "en", "es", "pt", "ja", "th"].map(l => l + "/index.html"));
     // the tag must stay for good: Search Console checks it again from time to time
     eq(pages.filter(p => fs.readFileSync(RT + "/" + p, "utf8").split(TAG).length !== 2), [], "the verification tag is on the root page and all 7 language pages, once each");
     const bad = pages.filter(p => { const m = fs.readFileSync(RT + "/" + p, "utf8").match(/<script type="application\/ld\+json">([^<]*)<\/script>/); const d = m && JSON.parse(m[1]);
@@ -3555,7 +3545,7 @@ const S = (title) => console.log("\n## " + title);
   {
     const _sc = scope();
     const RT = require("./harness").ROOT;
-    const pages = ["index.html", "compare.html"].concat(["ru", "en", "es", "pt", "ja", "th", "zh"].map(l => l + "/index.html"));
+    const pages = ["index.html", "compare.html"].concat(["ru", "en", "es", "pt", "ja", "th"].map(l => l + "/index.html"));
     const bad = pages.filter(p => /migrateBar|mineMigrate|migrate\.(bar_html|go|later|yes)|переехал|moved to a new address/i.test(fs.readFileSync(RT + "/" + p, "utf8")));
     eq(bad, [], "no page carries the old site's move bar, its button or its texts (they are built by script in the old build only)");
     const f = open("form"); ok(!f.d.getElementById("migrateBar") && !f.errors.length, "the new site runs without them");
@@ -3675,6 +3665,52 @@ const S = (title) => console.log("\n## " + title);
     _sc.end();
   }
 
+  S("v648: 🐉 TES races + birthsigns (unlocked), 🃏 MTG guilds and clans (locked); the bot's measuring stick; Chinese hidden");
+  {
+    const _sc = scope();
+    const f = open("form", { locked: true, storage: { local: { "checklist-lang": "ru" }, session: {} } }), K = f.KC;
+    ok(K.FEATURES.tes && K.dnd.usable("tes") && /data-mode="tes"/.test(K.wod.switchHTML()), "shipped build: the 🐉 TES button is there");
+    ok(!K.FEATURES.mtg && !K.dnd.usable("mtg") && !/data-mode="mtg"/.test(K.wod.switchHTML()) && !K.FEATURES.wi, "shipped build: 🃏 MTG and 🗡 Witcher locked");
+    eq([K.tes.RACES.length, K.tes.SIGNS.length, Object.keys(K.mtg.COMBOS).length, K.mtg.COLORS.length], [12, 13, 20, 5], "12 races, 13 birthsigns, 20 colour combinations, 5 colours");
+    eq(Object.keys(K.mtg.COMBOS).filter(k => K.mtg.COMBOS[k].length === 2).length, 10, "10 two-colour guilds, 10 three-colour shards and clans");
+    const badFig = [], chk = (n, F) => { const [P, E, L, B] = F, all = P.length + E.length;
+      if (P.length !== 9 || new Set(B).size !== 3 || B.some(i => i < 0 || i > 8)) badFig.push(n + ": stars");
+      if (L.some(l => (l[0] === "d" ? l.slice(1) : l).some(i => i < 0 || i >= all))) badFig.push(n + ": lines");
+      if ([...P, ...E].some(p => p[0] < 0 || p[0] > 100 || p[1] < 0 || p[1] > 100)) badFig.push(n + ": box"); };
+    K.tes.RACES.forEach(r => chk("tes." + r, K.tes.FIG[r])); Object.keys(K.mtg.COMBOS).forEach(c => chk("mtg." + c, K.mtg.FIG[c]));
+    eq(badFig, [], "every figure: 9 group stars, 3 different bright slots, lines only to existing stars, inside 100×100");
+    // texts: every name in the six languages, every name described in the six guide files
+    const names = K.tes.RACES.map(r => "tes.r." + r).concat(K.tes.SIGNS.map(b => "tes.b." + b), Object.keys(K.mtg.COMBOS).map(c => "mtg.c." + c), K.mtg.COLORS.map(c => "mtg.col." + c));
+    const fsx = require("fs"), miss = [];
+    ["ru", "en", "es", "pt", "ja", "th"].forEach(l => {
+      const ui = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lang/" + l + ".ui.js", "utf8"))({ addLang: (x, part, o) => Object.assign(ui, o) });
+      const lore = {}; new Function("KC", fsx.readFileSync(__dirname + "/../js/lore/" + l + ".lore.js", "utf8"))({ addLore: (x, o) => Object.assign(lore, o) });
+      names.concat(["tes.toTes", "tes.mine", "tes.their", "tes.sign", "card.o.tes", "sp.tes.h", "sp.tes.grp", "sp.tes.same", "sp.tes.near", "sp.tes.far", "help.tes_html", "help.compareTes_html",
+        "mtg.toMtg", "mtg.mine", "mtg.their", "mtg.dom", "card.o.mtg", "sp.mtg.h", "sp.mtg.grp", "sp.mtg.same", "sp.mtg.near", "sp.mtg.far", "help.mtg_html", "help.compareMtg_html"]).forEach(k => { if (!ui[k]) miss.push(l + " ui " + k); });
+      names.forEach(k => { if (!lore[k] || lore[k].length < (l === "ja" ? 40 : 60)) miss.push(l + " lore " + k); });
+    });
+    eq(miss, [], "names, lines and help in ru/en/es/pt/ja/th; a guide text for every race, birthsign, combination and colour");
+    // a made-up list: the portrait in TES mode shows a race and its birthsign line; the guide describes both
+    const st0 = { items: {}, meta: { role: "dom" } }; let _n = 0;
+    K.CATS.forEach(c => c.items.forEach(([, id]) => { st0.items[id] = { interest: ["yes", "love", "maybe", "limit", "yes"][_n++ % 5] }; }));
+    const p1 = open("form", { locked: true, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "tes", "practices-checklist-v1": JSON.stringify(st0) }, session: {} } });
+    const so = p1.d.getElementById("portraitSection"); so.open = true; so.dispatchEvent(new p1.w.Event("toggle"));
+    const sg = p1.d.querySelector(".pt-sign.pt-tes");
+    ok(!!sg && /^Знак рождения: /.test(sg.querySelector(".sg-rl").textContent) && sg.querySelector(".sg-over").textContent === "Ваша раса", "portrait: race name and «Знак рождения: …»");
+    const lg = p1.KC.lore.provider(); ok(lg.length === 1 && lg[0].items.length === 2 && /^tes\.r\./.test(lg[0].items[0].key) && /^tes\.b\./.test(lg[0].items[1].key), "constellation guide: the race and the birthsign");
+    // MTG unlocked: the figure, the dominant colour inside the combination
+    const p2 = open("form", { locked: true, patch: { "core/kc.js": src => src.replace("mtg: false", "mtg: true") }, storage: { local: { "checklist-lang": "ru", "checklist-dnd": "mtg", "practices-checklist-v1": JSON.stringify(st0) }, session: {} } });
+    const so2 = p2.d.getElementById("portraitSection"); so2.open = true; so2.dispatchEvent(new p2.w.Event("toggle"));
+    const sm = p2.d.querySelector(".pt-sign.pt-mtg");
+    ok(!!sm && p2.KC.mtg.COMBOS[sm.dataset.combo].indexOf(sm.dataset.dom) >= 0 && /^Доминирует: /.test(sm.querySelector(".sg-rl").textContent), "MTG portrait: a combination and «Доминирует: …», a colour of that combination");
+    // the bot's stick: only the new modes use it; the old USUAL is unchanged
+    eq([K.clusters.USUAL.pet[0], K.clusters.BOT.pet[0], K.clusters.BOTG.intimacy], [56, 44, 5], "old USUAL kept (pet 56); the bot's stick (pet 44; tenderness dev +5)");
+    // compare: pair and company in TES
+    const c = open("compare", { locked: true }); ok(!c.errors.length && /data-mode="tes"/.test(c.KC.wod.switchHTML("pair")) && /Расы компании|The company's races/.test(c.KC.space.modeGroupHTML([{ name: "A", st: st0 }, { name: "B", st: st0 }], "tes")), "compare page: 🐉 TES pair switch and «Расы компании»");
+    ok(!f.errors.length && !p1.errors.length && !p2.errors.length, "no script errors");
+    _sc.end();
+  }
+
   S("calibration constants — v624: the hand-tuned and fitted numbers in one place (update here when re-fitting)");
   {
     const _sc = scope();
@@ -3683,6 +3719,7 @@ const S = (title) => console.log("\n## " + title);
     eq([W.PROF.vamp.ventrue[1], W.PROF.vamp.lasombra[1], W.PROF.demon.devils[1], W.PROF.demon.malefactors[1]], [-0.2, -0.11, 1.26, -1.16], "v605 biases: Ventrue, Lasombra, Devils, Malefactors");
     eq([W.PROF.vamp.ventrue[0], W.PROF.vamp.lasombra[0], W.PROF.demon.devils[0], W.PROF.demon.malefactors[0]], ["D1 F.4", "B.8 D.8", "D1 R.3 V.3", "B1 F.8"], "their profiles (only the biases were hand-tuned)");
     eq([K.wr.EXCESS.W, K.wr.EXCESS.L0, K.wr.BIAS.slaanesh], [4, 49, -6.05], "Slaanesh: excess weight 4, from 49 % Yes + Love, bias −6.05 (owner, Oct 3)");
+    eq([+K.tes.BIAS.khajiit.toFixed(2), +K.mtg.BIAS.gruul.toFixed(2), +K.mtg.CBIAS.G.toFixed(2), K.tes.CW], [-0.53, -1.86, -1.3, 5], "v648 TES / MTG biases (fitted on the bot's file, Oct 24; Khajiit kept higher)");
     eq([K.av.T.healing, K.av.T.metal, K.av.T.lightning, K.av.T.blood, K.av.T.lava, K.av.T.combustion], [.35, .3, 58, .55, 20, 1.1], "Avatar type thresholds (v620; lava = sex + fluids)");
     _sc.end();
   }

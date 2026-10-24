@@ -18,7 +18,7 @@
     ja: { label: "JA", name: "日本語",     locale: "ja-JP", enabled: true  },
     pt: { label: "PT", name: "Português (Brasil)", locale: "pt-BR", enabled: true  },
     th: { label: "TH", name: "ไทย",       locale: "th-TH", enabled: true  },
-    zh: { label: "ZH", name: "繁體中文",   locale: "zh-TW", enabled: true, html: "zh-Hant" },  // html: <html lang> so browsers pick Traditional glyphs
+    zh: { label: "ZH", name: "繁體中文",   locale: "zh-TW", enabled: false, html: "zh-Hant" },  // v648 (owner): hidden — not in the switcher, never detected; files kept, not updated  // html: <html lang> so browsers pick Traditional glyphs
   };
   const DEFAULT = "en";          // for visitors whose browser language is not enabled (boot.js fallback() has the exceptions)
   const FALLBACK = ["en", "ru"]; // missing text -> try these packs
@@ -74,7 +74,7 @@
       let q = null; try { q = new URLSearchParams(location.search).get("lang"); } catch (e) {}
       const nav = (navigator.language || "").slice(0, 2).toLowerCase();
       const cands = [hashLang, q, KC.ls.raw(KC.KEYS.lang), nav];
-      for (const c of cands) { if (c && I.known(c)) return I.usable(c) ? c : "en"; }
+      for (const c of cands) { if (c && I.usable(c)) return c; }   /* v648: a known but hidden language (zh) is skipped, as in boot.js */
       const M = window.KC_MANIFEST;
       return M && M.fallback ? M.fallback(nav) : DEFAULT;
     },

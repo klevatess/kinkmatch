@@ -8,7 +8,7 @@
    (<html data-page-lang>, the /ru/ /en/ … pages, v608) -> the link's lg= (form page, a list or template link only)
    -> ?lang= -> the saved choice -> the browser -> fallback(): English, Russian for Belarusian/Kazakh browsers. */
 (function () {
-  var LANGS = ["ru", "en", "es", "ja", "pt", "th", "zh"];
+  var LANGS = ["ru", "en", "es", "ja", "pt", "th"];   /* v648 (owner): Traditional Chinese hidden — its files stay, but nothing loads or picks it */
   /* browser language we have no pack for -> English; these read Russian more often (owner, v608: Ukrainian -> English) */
   var RU_READERS = ["be", "kk"];
   function fallback(nav) { return RU_READERS.indexOf(nav) >= 0 ? "ru" : "en"; }
@@ -20,8 +20,8 @@
       "@lang",
       "core/ext.js", "core/lore.js", "core/codec.js", "core/store.js", "core/match.js", "core/help.js", "core/stats.js", "core/migrate.js", "core/portrait.js",
     ],
-    form:    ["form/render.js", "form/events.js", "form/pdf.js", "form/share.js", "form/library.js", "form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "form/mistborn.js", "form/portrait.js", "form/nebula.js", "form/migrate.js", "form/main.js"],
-    compare: ["form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "form/mistborn.js", "compare/space.js", "compare/main.js", "compare/roulette.js"],
+    form:    ["form/render.js", "form/events.js", "form/pdf.js", "form/share.js", "form/library.js", "form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "form/mistborn.js", "form/tes.js", "form/mtg.js", "form/portrait.js", "form/nebula.js", "form/migrate.js", "form/main.js"],
+    compare: ["form/signs.js", "form/dnd.js", "form/wod.js", "form/clusters.js", "form/wr.js", "form/wh.js", "form/legion.js", "form/ow.js", "form/witcher.js", "form/avatar.js", "form/rezero.js", "form/mistborn.js", "form/tes.js", "form/mtg.js", "compare/space.js", "compare/main.js", "compare/roulette.js"],
     LANGS: LANGS,
     fallback: fallback,   /* also used by KC.i18n.detect, so both pick the same */
     /* the files of one language; English practice names are needed on every page (the grey line under a name) */

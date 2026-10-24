@@ -51,5 +51,18 @@
       n++; if (v === "yes" || v === "love") yl++; if (v === "love") love++; if (v === "limit") no++; }));
     return { n, yesLove: n ? 100 * yl / n : 0, love: n ? 100 * love / n : 0, no: n ? 100 * no / n : 0 };
   }
-  KC.clusters = { NEW, USUAL, MIN, ids, liked, z, strong, shares };
+  /* v648: the bot's measuring stick, used only by the modes added from v648 on (🃏 MTG, 🐉 TES): every cluster's usual value
+     and spread, and every group's usual dev (KC.dnd.devs), measured on the Kinkoverse bot's calibration file (Oct 24, 40 people,
+     53 lists with ≥ 60 answers). The older modes keep USUAL above, so their results do not move. */
+  const BOT = {protocol:[38,23], pet:[44,20], service:[42,20], object:[44,24], words:[45,21], look:[47,19], wardrobe:[51,20], worship:[43,22], rope:[47,25], iron:[36,22], dark:[41,21], touch:[50,20], spank:[48,24], extreme:[24,22], lab:[34,22], edge:[40,25], orgasm:[59,20], public:[48,21], watch:[51,21], wild:[31,24], feast:[24,20], taboo:[35,23], home:[74,11], size:[37,21], company:[49,26], classic:[62,15], cum:[48,20], fire:[32,21], penance:[35,26], machines:[45,25], flesh:[26,20], stasis:[37,25], hunt:[46,26], devour:[39,21], filth:[24,22], vows:[37,22], stage:[55,18], property:[41,23], blood:[25,17], cold:[29,25], pack:[50,28], armor:[40,22]};
+  const BOTG = {"bondage":-5,"ds":-1,"sm":-6,"fetishes":3,"role-play":-1,"sex-penetration":1,"intimacy":5,"voyeurism-exhibitionism":0,"bodily-fluids":0};
+  /* portrait d + list -> { dev: group -> dev − its usual dev, z(cluster) } on the bot's stick, or null (no groups) */
+  function bot(d, st, set) {
+    const v = KC.dnd.devs(d); if (!v) return null;
+    const dev = {}; Object.keys(v.dev).forEach(g => { dev[g] = v.dev[g] - (BOTG[g] || 0); });
+    const zc = {};
+    const zf = k => { if (zc[k] === undefined) { const r = liked(st, ids()[k], set), u = BOT[k]; zc[k] = r.n < MIN ? 0 : (r.v - u[0]) / u[1]; } return zc[k]; };
+    return { dev, z: zf };
+  }
+  KC.clusters = { NEW, USUAL, MIN, ids, liked, z, strong, shares, BOT, BOTG, bot };
 })(window.KC);
