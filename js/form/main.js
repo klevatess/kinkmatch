@@ -8,8 +8,8 @@
   let linkLang = null, tplLink = null;
   const hash = location.hash.replace(/^#/, "");
   /* Kinkoverse (the Telegram bot) links: "&go=stars" opens the list right at «Мой портрет» with its constellation */
-  let GO = null, EMBED = false, FILL = false, OWN = false;
-  try { const q = new URLSearchParams(hash); GO = q.get("go"); EMBED = q.get("embed") === "1"; FILL = q.get("embed") === "fill"; OWN = q.get("own") === "1"; } catch (e) {}
+  let GO = null, EMBED = false, OTHER = false, FILL = false, OWN = false;
+  try { const q = new URLSearchParams(hash); GO = q.get("go"); EMBED = q.get("embed") === "1"; OTHER = q.get("embed") === "other"; FILL = q.get("embed") === "fill"; OWN = q.get("own") === "1"; } catch (e) {}
   /* v641: "&embed=1" — the bot shows only «Мой портрет» of the person's OWN list inside the Telegram app: the page is
      cut down to that block, the list is not stored under «Received», the wording is «mine», and the picture card gets
      «Send to Telegram» (the picture goes to the bot, which sends it to the person to forward). */
@@ -20,9 +20,14 @@
   let parentOrigin = "";
   try { parentOrigin = (location.ancestorOrigins && location.ancestorOrigins[0]) || (document.referrer ? new URL(document.referrer).origin : ""); } catch (e) {}
   F.parentOrigin = window.parent !== window && (EMBED_ORIGINS.indexOf(parentOrigin) >= 0 || DEV.test(parentOrigin)) ? parentOrigin : "";
-  F.embed = EMBED && !!F.parentOrigin && /(^|&)a=/.test(hash);
+  /* v649: "&embed=other" — the same cut-down «Портрет» block for SOMEONE ELSE's list (a neighbour in the bot): the
+     wording is «Портрет: name», and there is no picture card and no sending to Telegram (it is not the viewer's list). */
+  F.embed = (EMBED || OTHER) && !!F.parentOrigin && /(^|&)a=/.test(hash);
+  F.embedOther = F.embed && OTHER;
+  F.embedOwn = F.embed && !OTHER;
   F.toParent = msg => { if (F.parentOrigin) try { parent.postMessage(msg, F.parentOrigin); } catch (e) {} };
   if (F.embed) document.documentElement.classList.add("kv-embed");
+  if (F.embedOther) document.documentElement.classList.add("kv-other");
   /* v646: "&embed=fill" — the bot's «Заполнить анкету здесь»: the whole form, the list from the link (the person's saved
      list or draft) opened as THEIR OWN list to edit, no link: an empty list; the bot's own bar does «Готово». Compare,
      Received, My lists, Share, PDF and the portrait are hidden. The page tells the bot the number of answers after every
@@ -176,12 +181,12 @@
       sec.addEventListener("toggle", () => { if (!sec.open) sec.open = true; size(); });
       size();
       /* v645: the bot's own buttons on top («Поделиться созвездием», «Сохранить картинкой») drive the page */
-      window.addEventListener("message", e => {
+      if (!F.embedOther) window.addEventListener("message", e => {
         if (e.origin !== F.parentOrigin || !e.data || e.data.kind !== "kinkosmos-cmd") return;
         if (e.data.cmd === "share" && F.embedShare) F.embedShare();
         if (e.data.cmd === "card" && F.embedCard) F.embedCard();
       });
-      F.toParent({ kind: "kinkosmos-ready", cmds: ["share", "card"] });
+      F.toParent({ kind: "kinkosmos-ready", cmds: F.embedOther ? [] : ["share", "card"] });
     }
   } else if (F.embedFill) {
     F.homeUrl = () => location.pathname + "?lang=" + KC.i18n.lang + "#embed=fill&own=1";

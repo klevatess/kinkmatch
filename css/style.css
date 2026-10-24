@@ -861,6 +861,7 @@ body.filters-off .subbar{display:none}
 /* v641: the Kinkoverse bot shows only «Мой портрет» of a list inside the Telegram app (?embed in the link) */
 .kv-embed body{padding:0 8px 8px; background:var(--bg)}
 .kv-embed #portraitSection{margin:8px 0 0}
+.kv-other #ptCard,.kv-other .pt-card-r{display:none!important}
 
 /* v646: the Kinkoverse bot's «Заполнить анкету здесь» (?embed=fill): the form only */
 .kv-fill #compareBtn,.kv-fill #savedBtn,.kv-fill #mineBtn,.kv-fill #shareBtn,.kv-fill #pdfBtn,
