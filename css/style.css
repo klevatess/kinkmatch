@@ -870,4 +870,18 @@ body.filters-off .subbar{display:none}
    asked in the bot), no favourites ♥, the short legend; the site itself is unchanged */
 .legend.legend-fill{display:none}
 .kv-fill .legend.legend-fill{display:flex}
-.kv-fill .legend:not(.legend-fill),.kv-fill #tplSel,.kv-fill section.intro,.kv-fill .fav-toggle,.kv-fill button[data-act="fav"]{display:none!important}
+.kv-fill .legend:not(.legend-fill),.kv-fill #tplSel,.kv-fill section.intro,.kv-fill .fav-toggle:not(.ext-tg),.kv-fill button[data-act="fav"]{display:none!important}
+
+/* v651: the bot's form (embed=fill) — a low header: no brand, no language, no theme / fold buttons; «?» and the
+   progress in one line (the role filter of an extended list joins it); search · Раздел · Все пункты in one line,
+   always shown (the fold choice of the site does not apply here). The site itself is unchanged. */
+.kv-fill .brand-row .brand,.kv-fill .brand-row .lang-sw,.kv-fill #themeBtn,.kv-fill #filtToggle{display:none!important}
+.kv-fill .top-inner{flex-wrap:nowrap!important;padding:6px 14px!important;row-gap:0!important;gap:8px}
+.kv-fill .brand-row{flex:1 1 auto!important;flex-wrap:nowrap!important;min-width:0;gap:8px}
+.kv-fill .brand-row .progress-inline{order:0!important;flex:1 1 auto!important;flex-basis:auto!important;font-size:12.5px!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv-fill .top-actions{display:flex!important;flex:0 0 auto!important;width:auto!important;flex-wrap:nowrap!important;margin:0!important}
+.kv-fill .top-actions #roleView{flex:0 0 auto!important;max-width:150px}
+.kv-fill .subbar,.kv-fill body.filters-off .subbar{display:flex!important;flex-wrap:nowrap!important;gap:6px!important;row-gap:0!important}
+.kv-fill .subbar .search{order:0!important;flex:1 1 auto!important;min-width:0!important}
+.kv-fill .subbar select.jump{order:0!important;flex:0 1 auto!important;width:auto;max-width:min(27%,200px)!important;min-width:0;padding:8px 6px!important;font-size:14px!important}
+.kv-fill .subbar .search input{padding-left:30px}
