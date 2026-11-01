@@ -47,7 +47,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=650">
+<link rel="stylesheet" href="../css/style.css?v=651">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -143,6 +143,15 @@
     <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"><b>ชอบมาก</b> — ชอบมาก ๆ / เฟติช</span></span>
     <span><span class="new-dot"></span> <span data-i18n="legend.new">รายการใหม่ ที่ยังไม่มีในลิสต์เวอร์ชันก่อน</span></span>
     <span class="legend-skip" data-i18n-html="legend.skip_html">ถ้าข้อไหนไม่เกี่ยวกับคุณ — ไม่ใช่เพศ บทบาท หรือรสนิยมของคุณ — ให้<b>ข้าม</b>ไปเลย การข้ามไม่มีผลต่อความเข้ากัน แต่ «ไม่» มีผล</span>
+  </div>
+  <!-- v651: the short legend of the bot's form (embed=fill) — the full one above stays on the site -->
+  <div class="legend legend-fill">
+    <span><span class="swatch" style="background:var(--limit)"></span><span data-i18n-html="legendF.limit_html"><b>ไม่</b> — หยุด</span></span>
+    <span><span class="swatch" style="background:var(--maybe)"></span><span data-i18n-html="legendF.maybe_html"><b>อาจจะ</b> — ขึ้นอยู่กับเงื่อนไข</span></span>
+    <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legendF.yes_html"><b>ได้</b> — ยินดี</span></span>
+    <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legendF.love_html"><b>ชอบมาก</b> — ชอบมาก ๆ</span></span>
+    <span><span class="new-dot"></span> <span data-i18n="legendF.new">รายการใหม่</span></span>
+    <span class="legend-skip" data-i18n-html="legendF.skip_html">ไม่เกี่ยวกับคุณ? ข้ามไปได้เลย การข้ามไม่มีผลต่อความเข้ากัน แต่ «ไม่» มีผล</span>
   </div>
 
   <details class="about" id="aboutSection">
@@ -289,6 +298,6 @@
   </div>
 </div>
 
-<script src="../js/boot.js?v=650" data-page="form" data-v="650"></script>
+<script src="../js/boot.js?v=651" data-page="form" data-v="651"></script>
 </body>
 </html>

@@ -47,7 +47,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=650">
+<link rel="stylesheet" href="../css/style.css?v=651">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -143,6 +143,15 @@
     <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"><b>Обожаю</b> — очень люблю / фетиш</span></span>
     <span><span class="new-dot"></span> <span data-i18n="legend.new">новые пункты — их раньше не было в списке</span></span>
     <span class="legend-skip" data-i18n-html="legend.skip_html">Если пункт не про вас — не ваш пол, роль или ориентация — просто <b>пропустите</b> его. Пропуск не влияет на совпадение, а «Нет» влияет.</span>
+  </div>
+  <!-- v651: the short legend of the bot's form (embed=fill) — the full one above stays on the site -->
+  <div class="legend legend-fill">
+    <span><span class="swatch" style="background:var(--limit)"></span><span data-i18n-html="legendF.limit_html"><b>Нет</b> — стоп</span></span>
+    <span><span class="swatch" style="background:var(--maybe)"></span><span data-i18n-html="legendF.maybe_html"><b>Может</b> — при условиях</span></span>
+    <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legendF.yes_html"><b>Да</b> — с удовольствием</span></span>
+    <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legendF.love_html"><b>Обожаю</b> — очень люблю</span></span>
+    <span><span class="new-dot"></span> <span data-i18n="legendF.new">новые пункты</span></span>
+    <span class="legend-skip" data-i18n-html="legendF.skip_html">Не про вас — пропустите: пропуск не влияет на совпадение, «Нет» — влияет.</span>
   </div>
 
   <details class="about" id="aboutSection">
@@ -289,6 +298,6 @@
   </div>
 </div>
 
-<script src="../js/boot.js?v=650" data-page="form" data-v="650"></script>
+<script src="../js/boot.js?v=651" data-page="form" data-v="651"></script>
 </body>
 </html>

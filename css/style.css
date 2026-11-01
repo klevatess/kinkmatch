@@ -866,3 +866,8 @@ body.filters-off .subbar{display:none}
 /* v646: the Kinkoverse bot's «Заполнить анкету здесь» (?embed=fill): the form only */
 .kv-fill #compareBtn,.kv-fill #savedBtn,.kv-fill #mineBtn,.kv-fill #shareBtn,.kv-fill #pdfBtn,
 .kv-fill #sharedBanner,.kv-fill #noticeBar,.kv-fill #portraitSection,.kv-fill #aboutSection,.kv-fill .foot,.kv-fill .foot-legal{display:none!important}
+/* v651: the bot's form (embed=fill) — no template picker, no «Отметь, что тебе интересно» card with the name (the nick is
+   asked in the bot), no favourites ♥, the short legend; the site itself is unchanged */
+.legend.legend-fill{display:none}
+.kv-fill .legend.legend-fill{display:flex}
+.kv-fill .legend:not(.legend-fill),.kv-fill #tplSel,.kv-fill section.intro,.kv-fill .fav-toggle,.kv-fill button[data-act="fav"]{display:none!important}

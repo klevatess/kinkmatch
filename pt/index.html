@@ -47,7 +47,7 @@
      v629: the browser bar colour follows it too -->
 <meta name="color-scheme" content="light dark">
 <script>try{var t=localStorage.getItem("checklist-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);var c=t==="dark"?"#161114":"#f5f1ec";document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",c)})}}catch(e){}</script>
-<link rel="stylesheet" href="../css/style.css?v=650">
+<link rel="stylesheet" href="../css/style.css?v=651">
 </head>
 <body>
 <!-- v629: without JavaScript the site cannot work — say so instead of an empty page -->
@@ -143,6 +143,15 @@
     <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legend.love_html"><b>Adoro</b> — gosto muito / fetiche</span></span>
     <span><span class="new-dot"></span> <span data-i18n="legend.new">itens novos, que antes não estavam na lista</span></span>
     <span class="legend-skip" data-i18n-html="legend.skip_html">Se um item não tem a ver com você — não é seu gênero, papel ou orientação —, simplesmente <b>pule</b>. Pular não afeta a compatibilidade; «Não» afeta.</span>
+  </div>
+  <!-- v651: the short legend of the bot's form (embed=fill) — the full one above stays on the site -->
+  <div class="legend legend-fill">
+    <span><span class="swatch" style="background:var(--limit)"></span><span data-i18n-html="legendF.limit_html"><b>Não</b> — pare</span></span>
+    <span><span class="swatch" style="background:var(--maybe)"></span><span data-i18n-html="legendF.maybe_html"><b>Talvez</b> — com condições</span></span>
+    <span><span class="swatch" style="background:var(--yes)"></span><span data-i18n-html="legendF.yes_html"><b>Sim</b> — com prazer</span></span>
+    <span><span class="swatch" style="background:var(--love)"></span><span data-i18n-html="legendF.love_html"><b>Adoro</b> — gosto muito</span></span>
+    <span><span class="new-dot"></span> <span data-i18n="legendF.new">itens novos</span></span>
+    <span class="legend-skip" data-i18n-html="legendF.skip_html">Não tem a ver com você? Pule: pular não afeta a compatibilidade; «Não» afeta.</span>
   </div>
 
   <details class="about" id="aboutSection">
@@ -289,6 +298,6 @@
   </div>
 </div>
 
-<script src="../js/boot.js?v=650" data-page="form" data-v="650"></script>
+<script src="../js/boot.js?v=651" data-page="form" data-v="651"></script>
 </body>
 </html>
