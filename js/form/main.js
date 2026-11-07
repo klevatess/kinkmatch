@@ -35,6 +35,14 @@
      the page (plain ⇄ extended, a list from My lists) comes back into this mode with "&own=1" (the list just saved here). */
   F.embedFill = FILL && !!F.parentOrigin;
   if (F.embedFill) document.documentElement.classList.add("kv-fill");
+  /* v653 (owner, 2026-11-07): inside the Kinkoverse app the page takes the app's light / dark choice ("&kvtheme=" from the
+     app; kept for this tab only, so a step inside the frame keeps it) — nothing is saved, the site's own setting is untouched */
+  if (F.embed || F.embedFill) {
+    let th = null;
+    try { th = new URLSearchParams(hash).get("kvtheme"); } catch (e) {}
+    try { if (th === "dark" || th === "light") sessionStorage.setItem("kv-theme", th); else th = sessionStorage.getItem("kv-theme"); } catch (e) {}
+    if (th === "dark" || th === "light") document.documentElement.dataset.theme = th;
+  }
   /* only a list/template link counts; anything else after "#" (e.g. the counter's #toggle-goatcounter)
      opens my own list and is left alone */
   if (F.embedFill && !/(^|&)a=/.test(hash)) {

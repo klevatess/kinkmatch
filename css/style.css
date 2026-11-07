@@ -885,3 +885,29 @@ body.filters-off .subbar{display:none}
 .kv-fill .subbar .search{order:0!important;flex:1 1 auto!important;min-width:0!important}
 .kv-fill .subbar select.jump{order:0!important;flex:0 1 auto!important;width:auto;max-width:min(27%,200px)!important;min-width:0;padding:8px 6px!important;font-size:14px!important}
 .kv-fill .subbar .search input{padding-left:30px}
+
+/* v653 (owner, 2026-11-07): inside the Kinkoverse app — the form (embed=fill) and the portrait / constellation
+   (embed=1, embed=other) — the colours of the app («Туманность»: lilac, pink, soft rounded blocks). Only these
+   pages; the site itself is unchanged. Answer colours stay as they are (the app uses the same ones). */
+:root.kv-fill,:root.kv-embed{
+  --bg:#f6f2fc; --panel:#ffffff; --ink:#2a2340; --muted:#655d80;
+  --line:#e6ddf4; --line2:#efe9f8; --accent:#7a5bd6; --accent-soft:#ede5fb;
+  --chip:#f1ebfb; --chip-ink:#4f4670; --shadow:0 10px 30px -14px rgba(122,91,214,.45); --radius:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root.kv-fill:not([data-theme="light"]),:root.kv-embed:not([data-theme="light"]){
+    --bg:#0e0a1c; --panel:#1a1430; --ink:#f3eefc; --muted:#aea4c9; --line:#2b2346; --line2:#231c3c;
+    --accent:#b49cff; --accent-soft:rgba(180,156,255,.16); --chip:rgba(255,255,255,.07); --chip-ink:#d9cff5; --shadow:0 12px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root.kv-fill[data-theme="dark"],:root.kv-embed[data-theme="dark"]{
+  --bg:#0e0a1c; --panel:#1a1430; --ink:#f3eefc; --muted:#aea4c9; --line:#2b2346; --line2:#231c3c;
+  --accent:#b49cff; --accent-soft:rgba(180,156,255,.16); --chip:rgba(255,255,255,.07); --chip-ink:#d9cff5; --shadow:0 12px 30px -14px rgba(0,0,0,.7);
+}
+.kv-fill body,.kv-embed body{background:radial-gradient(60% 230px at 8% 0,rgba(255,156,203,.32),transparent 72%),radial-gradient(55% 260px at 96% 30px,rgba(155,123,232,.26),transparent 72%),var(--bg);background-repeat:no-repeat}
+:root.kv-fill[data-theme="dark"] body,:root.kv-embed[data-theme="dark"] body{background:radial-gradient(60% 230px at 8% 0,rgba(255,126,182,.14),transparent 72%),radial-gradient(55% 260px at 96% 30px,rgba(155,123,232,.16),transparent 72%),var(--bg);background-repeat:no-repeat}
+.kv-fill header.top{background:var(--bg);border-bottom-color:var(--line)}
+.kv-fill .btn,.kv-embed .btn{border-radius:22px;border-color:var(--line)}
+.kv-fill .btn.primary,.kv-embed .btn.primary,.kv-fill .btn.pri,.kv-embed .btn.pri{background:linear-gradient(135deg,#ff9ccb,#9b7be8);border-color:transparent;color:#fff}
+.kv-fill input,.kv-fill select,.kv-embed input,.kv-embed select{border-radius:16px}
+.kv-fill section,.kv-fill .card,.kv-embed section,.kv-embed .card{border-radius:var(--radius)}
