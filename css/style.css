@@ -911,3 +911,9 @@ body.filters-off .subbar{display:none}
 .kv-fill .btn.primary,.kv-embed .btn.primary,.kv-fill .btn.pri,.kv-embed .btn.pri{background:linear-gradient(135deg,#ff9ccb,#9b7be8);border-color:transparent;color:#fff}
 .kv-fill input,.kv-fill select,.kv-embed input,.kv-embed select{border-radius:16px}
 .kv-fill section,.kv-fill .card,.kv-embed section,.kv-embed .card{border-radius:var(--radius)}
+/* v655 (owner, 2026-11-08): inside the app «Обожаю» melted into the lilac background — the pink of women on the app's
+   map (#e0559a light / #ff8cc6 dark), see-through like the other answers (not filled: too bright). Only these pages. */
+:root.kv-fill,:root.kv-embed{--love:#e0559a;--love-bg:rgba(224,85,154,.16)}
+@media (prefers-color-scheme: dark){:root.kv-fill:not([data-theme="light"]),:root.kv-embed:not([data-theme="light"]){--love:#ff8cc6;--love-bg:rgba(255,140,198,.2)}}
+:root.kv-fill[data-theme="dark"],:root.kv-embed[data-theme="dark"]{--love:#ff8cc6;--love-bg:rgba(255,140,198,.2)}
+.kv-fill .scale button[data-v="love"].sel,.kv-embed .scale button[data-v="love"].sel{font-weight:700}
