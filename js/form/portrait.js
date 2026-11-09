@@ -305,12 +305,21 @@
     const SERIF = 'Fraunces, Georgia, "Noto Serif CJK JP", serif';
     const root = document.documentElement.dataset.theme;
     const night = root ? root === "dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
-    const C = night ? { bg: "#14101a", panel: "#221a27", ink: "#f3e9ee", muted: "#a898a8", line: "#3a2f3c", accent: "#f0a3bd", love: "#3b2233", loveInk: "#ff9fcf", lim: "#3a2224", limInk: "#f08c8c", bar: "#33283a", star: "#ff8cc6", grid: "rgba(240,163,189,.30)", dust: "rgba(255,240,248,.7)" }
+    /* v656 (owner, 2026-11-09): the picture the Kinkoverse bot asks for (o.bot) — the app's «Туманность» colours (as the
+       v653 pages inside the app) and only as tall as its content; the site's own picture is unchanged */
+    const NEB = o.bot ? (night ? { bg: "#0e0a1c", panel: "#1a1430", ink: "#f3eefc", muted: "#aea4c9", line: "#2b2346", accent: "#b49cff", love: "#3b2233", loveInk: "#ff9fcf", lim: "#3a2224", limInk: "#f08c8c", bar: "#2b2346", star: "#ff8cc6", grid: "rgba(180,156,255,.30)", dust: "rgba(243,238,252,.55)", glowA: "rgba(255,126,182,.16)", glowB: "rgba(155,123,232,.20)" }
+      : { bg: "#f6f2fc", panel: "#ffffff", ink: "#2a2340", muted: "#655d80", line: "#e6ddf4", accent: "#7a5bd6", love: "#f4e0ec", loveInk: "#9d2f68", lim: "#f6e2e0", limInk: "#b23b3b", bar: "#ede5fb", star: "#e0559a", grid: "rgba(122,91,214,.26)", dust: "rgba(122,91,214,.30)", glowA: "rgba(255,156,203,.34)", glowB: "rgba(155,123,232,.28)" }) : null;
+    const C = NEB ? NEB : night ? { bg: "#14101a", panel: "#221a27", ink: "#f3e9ee", muted: "#a898a8", line: "#3a2f3c", accent: "#f0a3bd", love: "#3b2233", loveInk: "#ff9fcf", lim: "#3a2224", limInk: "#f08c8c", bar: "#33283a", star: "#ff8cc6", grid: "rgba(240,163,189,.30)", dust: "rgba(255,240,248,.7)" }
       : { bg: "#f5f1ec", panel: "#fffdfb", ink: "#241c22", muted: "#8a7d84", line: "#e6ddd6", accent: "#8a2d47", love: "#f4e0ec", loveInk: "#9d2f68", lim: "#f6e2e0", limInk: "#b23b3b", bar: "#e9dfe3", star: "#e0559a", grid: "rgba(138,45,71,.24)", dust: "rgba(138,45,71,.28)" };
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+    if (NEB) {   /* the app's soft glows: pink top left, lilac top right */
+      const glow = (x, y, r, col) => { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, col.replace(/[\d.]+\)$/, "0)")); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); };   /* fades to the same colour, not to grey */
+      glow(90, 0, 620, C.glowA); glow(1040, 80, 640, C.glowB);
+    }
     /* star dust over the whole card */
     { const r = seeded(11); ctx.fillStyle = C.dust; for (let i = 0; i < 260; i++) { ctx.beginPath(); ctx.arc(r() * W, r() * H, r() * 1.8 + .5, 0, 7); ctx.fill(); } }
-    ctx.fillStyle = C.accent; ctx.fillRect(0, 0, W, 16);
+    if (NEB) { const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "#ff9ccb"); g.addColorStop(1, "#9b7be8"); ctx.fillStyle = g; } else ctx.fillStyle = C.accent;
+    ctx.fillRect(0, 0, W, 16);
     let y = 150;
     ctx.textBaseline = "alphabetic";
     if (o.name && st.name) {
@@ -332,7 +341,11 @@
         const ry = y + i * rh;
         ctx.fillStyle = C.ink; ctx.font = "500 31px " + SANS; ctx.fillText(fit(ctx, KC.portrait.label(s.id), nameW), M, ry + 34);
         ctx.fillStyle = C.bar; rr(ctx, barX, ry + 12, barW, 26, 13); ctx.fill();
-        if (s.pct) { ctx.fillStyle = C.accent; rr(ctx, barX, ry + 12, Math.max(26, barW * s.pct / 100), 26, 13); ctx.fill(); }
+        if (s.pct) {
+          const bw = Math.max(26, barW * s.pct / 100);
+          if (NEB) { const g = ctx.createLinearGradient(barX, 0, barX + bw, 0); g.addColorStop(0, "#ff9ccb"); g.addColorStop(1, "#9b7be8"); ctx.fillStyle = g; } else ctx.fillStyle = C.accent;
+          rr(ctx, barX, ry + 12, bw, 26, 13); ctx.fill();
+        }
         ctx.fillStyle = s.pct === null ? C.muted : C.ink; ctx.font = "600 31px " + SANS; ctx.textAlign = "right"; ctx.fillText(pctText(s.pct), W - M, ry + 34); ctx.textAlign = "left";
       });
       y += rows.length * rh + 40;
@@ -370,12 +383,19 @@
       });
       y += 24;
     });
-    if (sg && (sg.wod || KC.dnd.wrOf(sg))) {   /* "not official … material", small, above the footer */
-      ctx.fillStyle = C.muted; ctx.font = "500 22px " + SANS; ctx.textAlign = "center";
-      ctx.fillText(fit(ctx, t(sg.wod ? "wod.notOfficial" : "wr.notOfficial"), IW), W / 2, H - 130); ctx.textAlign = "left";
+    /* the bot's picture ends right under its content: at least a square, never taller than the site's (v656) */
+    let out = c, oc = ctx, OH = H;
+    if (NEB) {
+      OH = Math.min(H, Math.max(W, Math.ceil(y + ((sg && (sg.wod || KC.dnd.wrOf(sg))) ? 210 : 150))));
+      out = document.createElement("canvas"); out.width = W; out.height = OH;
+      oc = out.getContext("2d"); oc.drawImage(c, 0, 0);
     }
-    ctx.fillStyle = C.muted; ctx.font = "500 32px " + SANS; ctx.textAlign = "center"; ctx.fillText("✦ " + KC.BRAND + (SITE ? " · " + SITE : ""), W / 2, H - 70); ctx.textAlign = "left";
-    return c;
+    if (sg && (sg.wod || KC.dnd.wrOf(sg))) {   /* "not official … material", small, above the footer */
+      oc.fillStyle = C.muted; oc.font = "500 22px " + SANS; oc.textAlign = "center";
+      oc.fillText(fit(oc, t(sg.wod ? "wod.notOfficial" : "wr.notOfficial"), IW), W / 2, OH - 130); oc.textAlign = "left";
+    }
+    oc.fillStyle = C.muted; oc.font = "500 32px " + SANS; oc.textAlign = "center"; oc.fillText("✦ " + KC.BRAND + (SITE ? " · " + SITE : ""), W / 2, OH - 70); oc.textAlign = "left";
+    return out;
   };
   /* v613: the card of an extended list is drawn for the role whose button was pressed */
   { const draw = F.drawCard; F.drawCard = function (o) { const keep = PTR; PTR = CARD_R; try { return draw(o); } finally { PTR = keep; } }; }
@@ -433,7 +453,7 @@
      the usual picture window with all options. */
   {   /* defined always: form/main.js (loaded last) decides F.embed and only then listens for the bot's commands */
     const roleOf = () => { if (!KC.ext.isExt(whole())) return "t"; const n = r => Object.keys(KC.ext.view(whole(), r).items).length; return n("b") > n("t") ? "b" : "t"; };
-    F.embedShare = () => { CARD_R = roleOf(); toBot(F.drawCard({ sign: true, bars: true, role: true, love: false, exp: false, limits: false, name: false })); };
+    F.embedShare = () => { CARD_R = roleOf(); toBot(F.drawCard({ sign: true, bars: true, role: true, love: false, exp: false, limits: false, name: false, bot: true })); };
     F.embedCard = () => { CARD_R = roleOf(); openCard(); };
   }
 
